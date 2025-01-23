@@ -80,7 +80,7 @@ export default async (req: Request) => {
   return new Response(svgContent, {
     headers: {
       "Content-Type": "image/svg+xml",
-      // "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=31536000, immutable",
     },
   })
 }
