@@ -1,0 +1,15 @@
+{
+  "name": "svg.tscircuit.com",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@tscircuit/create-snippet-url": "0.0.3",
+    "@types/bun": "latest",
+    "get-port": "^7.1.0",
+    "next": "^15.1.6",
+    "winterspec": "^0.0.100"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
