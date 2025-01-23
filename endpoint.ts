@@ -1,17 +1,39 @@
-import { createCircuitWebWorker } from "@tscircuit/eval-webworker"
-import webWorkerBlobUrl from "@tscircuit/eval-webworker/blob-url"
+import { CircuitRunner } from "@tscircuit/eval-webworker/eval"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import {
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
 } from "circuit-to-svg"
+import { getIndexPageHtml } from "./get-index-page-html"
+import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 
 export default async (req: Request) => {
-  if (req.url.includes("/health")) {
+  const url = new URL(req.url.replace("/api", "/"))
+
+  const host = `${url.protocol}//${url.host}`
+
+  if (url.pathname === "/health") {
     return new Response(JSON.stringify({ ok: true }))
   }
 
-  const url = new URL(req.url)
+  if (url.pathname === "/generate_url") {
+    const code = url.searchParams.get("code")
+
+    return new Response(getHtmlForGeneratedUrlPage(code!, host), {
+      headers: {
+        "Content-Type": "text/html",
+      },
+    })
+  }
+
+  if (url.pathname === "/" && !url.searchParams.get("code")) {
+    return new Response(getIndexPageHtml(), {
+      headers: {
+        "Content-Type": "text/html",
+      },
+    })
+  }
+
   const compressedCode = url.searchParams.get("code")
   const svgType = url.searchParams.get("svg_type")
 
@@ -23,9 +45,7 @@ export default async (req: Request) => {
 
   const userCode = getUncompressedSnippetString(compressedCode)
 
-  const worker = await createCircuitWebWorker({
-    webWorkerBlobUrl,
-  })
+  const worker = new CircuitRunner()
 
   await worker.executeWithFsMap({
     fsMap: {
