@@ -2,11 +2,12 @@ import { test, expect } from "bun:test"
 import { getTestServer } from "./fixtures/get-test-server"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 
-test("basic tscircuit code to pcb svg conversion", async () => {
+test("basic tscircuit code to schematic svg conversion", async () => {
   const { serverUrl } = await getTestServer()
 
   const response = await fetch(
-    `${serverUrl}?svg_type=pcb&code=${getCompressedBase64SnippetString(`
+    `${serverUrl}?svg_type=schematic&code=${encodeURIComponent(
+      getCompressedBase64SnippetString(`
 export default () => (
   <board width="10mm" height="10mm">
     <resistor
@@ -26,9 +27,10 @@ export default () => (
     <trace from=".R1 > .pin1" to=".C1 > .pin1" />
   </board>
 )
-    `)}`,
+    `),
+    )}`,
   )
   const svgContent = await response.text()
 
-  expect(svgContent).toMatchInlineSnapshot(`"{"ok":false}"`)
+  expect(svgContent).toMatchSvgSnapshot(import.meta.path)
 })
