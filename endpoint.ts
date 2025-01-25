@@ -7,98 +7,124 @@ import {
 import { getIndexPageHtml } from "./get-index-page-html";
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page";
 
-export default async (req: Request) => {
+// Helper type for Go-style error handling
+type Result<T, E = Error> = [T, null] | [null, E];
+
+// Async error handler wrapper
+async function handleError<T>(promise: Promise<T>): Promise<Result<T>> {
+  return promise
+    .then<[T, null]>((data) => [data, null])
+    .catch<[null, Error]>((err) => [null, err]);
+}
+
+// Sync error handler wrapper
+function handleSyncError<T>(fn: () => T): Result<T> {
   try {
-    const url = new URL(req.url.replace("/api", "/"));
+    return [fn(), null];
+  } catch (err) {
+    return [null, err as Error];
+  }
+}
 
-    const host = `${url.protocol}//${url.host}`;
+export default async (req: Request) => {
+  const url = new URL(req.url.replace("/api", "/"));
+  const host = `${url.protocol}//${url.host}`;
 
-    if (url.pathname === "/health") {
-      return new Response(JSON.stringify({ ok: true }));
-    }
+  // Health check endpoint
+  if (url.pathname === "/health") {
+    return new Response(JSON.stringify({ ok: true }));
+  }
 
-    if (url.pathname === "/generate_url") {
-      const code = url.searchParams.get("code");
-
-      return new Response(getHtmlForGeneratedUrlPage(code!, host), {
-        headers: {
-          "Content-Type": "text/html",
-        },
-      });
-    }
-
-    if (url.pathname === "/" && !url.searchParams.get("code")) {
-      return new Response(getIndexPageHtml(), {
-        headers: {
-          "Content-Type": "text/html",
-        },
-      });
-    }
-
-    const compressedCode = url.searchParams.get("code");
-    const svgType = url.searchParams.get("svg_type");
-
-    if (!compressedCode) {
-      return new Response(
-        JSON.stringify({
-          ok: false,
-          error: "No code parameter provided",
-        }),
-      );
-    }
-
-    const userCode = getUncompressedSnippetString(compressedCode);
-
-    const worker = new CircuitRunner();
-
-    await worker.executeWithFsMap({
-      fsMap: {
-        "entrypoint.tsx": `
-      import UserCode from "./UserCode.tsx"
-
-      circuit.add(
-        <UserCode />
-      )
-      `,
-        "UserCode.tsx": userCode,
-      },
-      entrypoint: "entrypoint.tsx",
-    });
-
-    await worker.renderUntilSettled();
-
-    const circuitJson = await worker.getCircuitJson();
-
-    let svgContent: string;
-
-    if (svgType === "pcb") {
-      svgContent = convertCircuitJsonToPcbSvg(circuitJson);
-    } else if (svgType === "schematic") {
-      svgContent = convertCircuitJsonToSchematicSvg(circuitJson);
-    } else {
-      return new Response(
-        JSON.stringify({
-          ok: false,
-          error: { message: "Invalid svg_type" },
-        }),
-      );
-    }
-
-    return new Response(svgContent, {
-      headers: {
-        "Content-Type": "image/svg+xml",
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
-    });
-  } catch (e: any) {
-    return new Response(getErrorSvg(e.message.toString()), {
-      headers: {
-        "Content-Type": "image/svg+xml",
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
+  // URL generation endpoint
+  if (url.pathname === "/generate_url") {
+    const code = url.searchParams.get("code");
+    return new Response(getHtmlForGeneratedUrlPage(code!, host), {
+      headers: { "Content-Type": "text/html" },
     });
   }
+
+  // Main editor endpoint
+  if (url.pathname === "/" && !url.searchParams.get("code")) {
+    return new Response(getIndexPageHtml(), {
+      headers: { "Content-Type": "text/html" },
+    });
+  }
+
+  // Validate required parameters
+  const compressedCode = url.searchParams.get("code");
+  if (!compressedCode) {
+    return new Response(
+      JSON.stringify({ ok: false, error: "No code parameter provided" }),
+      { status: 400 },
+    );
+  }
+
+  // Process code and generate circuit
+  let circuitJson: any;
+  try {
+    const userCode = getUncompressedSnippetString(compressedCode);
+    const worker = new CircuitRunner();
+
+    // Execute circuit code with explicit error checks
+    const [, executeError] = await handleError(
+      worker.executeWithFsMap({
+        fsMap: {
+          "entrypoint.tsx": `
+            import UserCode from "./UserCode.tsx";
+            circuit.add(<UserCode />);
+          `,
+          "UserCode.tsx": userCode,
+        },
+        entrypoint: "entrypoint.tsx",
+      }),
+    );
+    if (executeError) return errorResponse(executeError);
+
+    const [, renderError] = await handleError(worker.renderUntilSettled());
+    if (renderError) return errorResponse(renderError);
+
+    const [json, jsonError] = await handleError(worker.getCircuitJson());
+    if (jsonError) return errorResponse(jsonError);
+    circuitJson = json;
+  } catch (err) {
+    return errorResponse(err as Error);
+  }
+
+  // Generate SVG output
+  const svgType = url.searchParams.get("svg_type");
+  if (!svgType || !["pcb", "schematic"].includes(svgType)) {
+    return new Response(
+      JSON.stringify({ ok: false, error: "Invalid svg_type" }),
+      { status: 400 },
+    );
+  }
+
+  const [svgContent, svgError] = handleSyncError(() =>
+    svgType === "pcb"
+      ? convertCircuitJsonToPcbSvg(circuitJson)
+      : convertCircuitJsonToSchematicSvg(circuitJson),
+  );
+
+  return svgError
+    ? errorResponse(svgError)
+    : new Response(svgContent, {
+        headers: {
+          "Content-Type": "image/svg+xml",
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
 };
+
+// Central error handler
+function errorResponse(err: Error) {
+  return new Response(getErrorSvg(err.message), {
+    headers: {
+      "Content-Type": "image/svg+xml",
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
+}
+
 const getErrorSvg = (err: string) => {
   const splitMessage = (msg: string): string[] => {
     const chunks: string[] = [];
