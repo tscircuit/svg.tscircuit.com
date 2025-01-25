@@ -105,7 +105,8 @@ const getErrorSvg = (err: string) => {
     let currentChunk = "";
 
     msg.split(" ").forEach((word) => {
-      if ((currentChunk + word).length > 24) {
+      if ((currentChunk + word).length > 32) {
+        // Increased character limit
         chunks.push(currentChunk.trim());
         currentChunk = "";
       }
@@ -118,37 +119,22 @@ const getErrorSvg = (err: string) => {
   const errorLines = splitMessage(err);
 
   return `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 220" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
 <style>
-  .error-primary { fill: #dc2626; }
-  .error-secondary { fill: #991b1b; }
-  .error-text { font: 600 16px 'Segoe UI', Arial, sans-serif; }
-  .error-subtext { font: 400 12px 'Segoe UI', Arial, sans-serif; }
-  .container { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1)); }
+  .error-subtext {
+    font: 400 16px/1.4 'Segoe UI', system-ui, sans-serif;
+    fill: #dc2626;
+  }
 </style>
 
-<!-- Container with padding -->
-<g class="container" transform="translate(30, 20)">
-  <rect x="0" y="0" width="240" height="180" rx="8" fill="#ffffff" stroke="#fecaca" stroke-width="2"/>
-  
-  <!-- Centered Icon -->
-  <g transform="translate(120, 60)">
-    <circle cx="0" cy="0" r="30" fill="#fee2e2"/>
-    <path class="error-primary" 
-          d="M -4,-18 L 4,-18 0,12 Z M 0,16 A 2 2 0 0 1 0,20 2 2 0 0 1 0,16 Z"
-          transform="translate(0 2)"/>
-  </g>
-
-  <!-- Text with padding -->
-  <text x="120" y="120" class="error-text error-primary" text-anchor="middle">
-    Error Occurred
-  </text>
-  
-  <text x="120" y="140" class="error-subtext error-secondary" text-anchor="middle">
+<!-- Vertical centering group -->
+<g transform="translate(0, 50)">
+  <!-- Error message with dynamic spacing -->
+  <text x="50%" y="0" class="error-subtext" text-anchor="middle">
     ${errorLines
       .map(
         (line, i) =>
-          `<tspan x="120" dy="${i === 0 ? 0 : "1.4em"}">${line}</tspan>`,
+          `<tspan x="50%" dy="${i === 0 ? 0 : "1.5em"}">${line}</tspan>`,
       )
       .join("")}
   </text>
