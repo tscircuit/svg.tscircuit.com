@@ -6,8 +6,9 @@
     "start": "next dev"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@tscircuit/create-snippet-url": "^0.0.4",
-    "@tscircuit/eval-webworker": "^0.0.81",
+    "@tscircuit/eval": "^0.0.83",
     "@types/bun": "latest",
     "@types/react": "19.0.8",
     "bun-match-svg": "^0.0.9",

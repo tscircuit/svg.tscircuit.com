@@ -1,4 +1,4 @@
-import { CircuitRunner } from "@tscircuit/eval-webworker/eval"
+import { CircuitRunner } from "@tscircuit/eval/eval"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import {
   convertCircuitJsonToPcbSvg,
