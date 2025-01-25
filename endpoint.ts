@@ -63,7 +63,7 @@ export default async (req: Request) => {
           <ComponentToRender />
         ) : (
           <board width="10mm" height="10mm">
-            <ComponentToRender />
+            <ComponentToRender name="U1" />
           </board>
         )
       )
