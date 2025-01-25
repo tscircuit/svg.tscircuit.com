@@ -132,7 +132,6 @@ const getErrorSvg = (err: string) => {
 
     msg.split(" ").forEach((word) => {
       if ((currentChunk + word).length > 32) {
-        // Increased character limit
         chunks.push(currentChunk.trim());
         currentChunk = "";
       }
@@ -146,24 +145,30 @@ const getErrorSvg = (err: string) => {
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-<style>
-  .error-subtext {
-    font: 400 16px/1.4 'Segoe UI', system-ui, sans-serif;
-    fill: #dc2626;
-  }
-</style>
+  <!-- Background color -->
+  <rect width="100%" height="100%" fill="#FEF2F2"/>
+  
+  <style>
+    .error-subtext {
+      font: 400 16px/1.4 'Segoe UI', system-ui, sans-serif;
+      fill: #dc2626;
+    }
+    * {
+      margin: 0;
+    }
+  </style>
 
-<!-- Vertical centering group -->
-<g transform="translate(0, 50)">
-  <!-- Error message with dynamic spacing -->
-  <text x="50%" y="0" class="error-subtext" text-anchor="middle">
-    ${errorLines
-      .map(
-        (line, i) =>
-          `<tspan x="50%" dy="${i === 0 ? 0 : "1.5em"}">${line}</tspan>`,
-      )
-      .join("")}
-  </text>
-</g>
+  <!-- Vertical centering group -->
+  <g transform="translate(0, 50)">
+    <!-- Error message with dynamic spacing -->
+    <text x="50%" y="0" class="error-subtext" text-anchor="middle">
+      ${errorLines
+        .map(
+          (line, i) =>
+            `<tspan x="50%" dy="${i === 0 ? 0 : "1.5em"}">${line}</tspan>`,
+        )
+        .join("")}
+    </text>
+  </g>
 </svg>`.trim();
 };
