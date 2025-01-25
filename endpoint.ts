@@ -50,10 +50,22 @@ export default async (req: Request) => {
   await worker.executeWithFsMap({
     fsMap: {
       "entrypoint.tsx": `
-      import UserCode from "./UserCode.tsx"
+      import * as UserComponents from "./UserCode.tsx"
+
+      const hasBoard = ${userCode.includes("<board").toString()}
+      
+      const ComponentToRender = Object.entries(UserComponents)
+        .filter(([name]) => !name.startsWith("use"))
+        .map(([_, component]) => component)[0] || (() => null)
 
       circuit.add(
-        <UserCode />
+        hasBoard ? (
+          <ComponentToRender />
+        ) : (
+          <board width="10mm" height="10mm">
+            <ComponentToRender />
+          </board>
+        )
       )
       `,
       "UserCode.tsx": userCode,
