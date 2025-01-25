@@ -52,8 +52,16 @@ export default async (req: Request) => {
       "entrypoint.tsx": `
       import UserCode from "./UserCode.tsx"
 
+      const hasBoard = UserCode.toString().includes("<board")
+
       circuit.add(
-        <UserCode />
+        hasBoard ? (
+          <UserCode />
+        ) : (
+          <board width="100mm" height="100mm">
+            <UserCode />
+          </board>
+        )
       )
       `,
       "UserCode.tsx": userCode,
