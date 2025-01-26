@@ -7,17 +7,14 @@ import {
 import { getIndexPageHtml } from "./get-index-page-html";
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page";
 
-// Helper type for Go-style error handling
 type Result<T, E = Error> = [T, null] | [null, E];
 
-// Async error handler wrapper
 async function handleError<T>(promise: Promise<T>): Promise<Result<T>> {
   return promise
     .then<[T, null]>((data) => [data, null])
     .catch<[null, Error]>((err) => [null, err]);
 }
 
-// Sync error handler wrapper
 function handleSyncError<T>(fn: () => T): Result<T> {
   try {
     return [fn(), null];
@@ -30,12 +27,10 @@ export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"));
   const host = `${url.protocol}//${url.host}`;
 
-  // Health check endpoint
   if (url.pathname === "/health") {
     return new Response(JSON.stringify({ ok: true }));
   }
 
-  // URL generation endpoint
   if (url.pathname === "/generate_url") {
     const code = url.searchParams.get("code");
     return new Response(getHtmlForGeneratedUrlPage(code!, host), {
@@ -43,14 +38,12 @@ export default async (req: Request) => {
     });
   }
 
-  // Main editor endpoint
   if (url.pathname === "/" && !url.searchParams.get("code")) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
     });
   }
 
-  // Validate required parameters
   const compressedCode = url.searchParams.get("code");
   if (!compressedCode) {
     return new Response(
@@ -59,19 +52,32 @@ export default async (req: Request) => {
     );
   }
 
-  // Process code and generate circuit
   let circuitJson: any;
   try {
     const userCode = getUncompressedSnippetString(compressedCode);
     const worker = new CircuitRunner();
 
-    // Execute circuit code with explicit error checks
+    // Execute with board wrapping logic
     const [, executeError] = await handleError(
       worker.executeWithFsMap({
         fsMap: {
           "entrypoint.tsx": `
-            import UserCode from "./UserCode.tsx";
-            circuit.add(<UserCode />);
+            import * as UserComponents from "./UserCode.tsx";
+            
+            const hasBoard = ${userCode.includes("<board").toString()};
+            const ComponentToRender = Object.entries(UserComponents)
+              .filter(([name]) => !name.startsWith("use"))
+              .map(([_, component]) => component)[0] || (() => null);
+
+            circuit.add(
+              hasBoard ? (
+                <ComponentToRender />
+              ) : (
+                <board width="10mm" height="10mm">
+                  <ComponentToRender name="U1" />
+                </board>
+              )
+            );
           `,
           "UserCode.tsx": userCode,
         },
@@ -90,7 +96,6 @@ export default async (req: Request) => {
     return errorResponse(err as Error);
   }
 
-  // Generate SVG output
   const svgType = url.searchParams.get("svg_type");
   if (!svgType || !["pcb", "schematic"].includes(svgType)) {
     return new Response(
@@ -115,7 +120,6 @@ export default async (req: Request) => {
       });
 };
 
-// Central error handler
 function errorResponse(err: Error) {
   return new Response(getErrorSvg(err.message), {
     headers: {
