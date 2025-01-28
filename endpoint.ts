@@ -9,13 +9,13 @@ import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 
 type Result<T, E = Error> = [T, null] | [null, E]
 
-async function handleError<T>(promise: Promise<T>): Promise<Result<T>> {
+async function unwrapPromise<T>(promise: Promise<T>): Promise<Result<T>> {
   return promise
     .then<[T, null]>((data) => [data, null])
     .catch<[null, Error]>((err) => [null, err])
 }
 
-function handleSyncError<T>(fn: () => T): Result<T> {
+function unwrapSyncError<T>(fn: () => T): Result<T> {
   try {
     return [fn(), null]
   } catch (err) {
@@ -52,49 +52,46 @@ export default async (req: Request) => {
     )
   }
 
-  let circuitJson: any
-  try {
-    const userCode = getUncompressedSnippetString(compressedCode)
-    const worker = new CircuitRunner()
+  const [userCode, userCodeErr] = unwrapSyncError(() =>
+    getUncompressedSnippetString(compressedCode),
+  )
+  if (userCodeErr) return errorResponse(userCodeErr)
+  const worker = new CircuitRunner()
 
-    // Execute with board wrapping logic
-    const [, executeError] = await handleError(
-      worker.executeWithFsMap({
-        fsMap: {
-          "entrypoint.tsx": `
-            import * as UserComponents from "./UserCode.tsx";
-            
-            const hasBoard = ${userCode.includes("<board").toString()};
-            const ComponentToRender = Object.entries(UserComponents)
-              .filter(([name]) => !name.startsWith("use"))
-              .map(([_, component]) => component)[0] || (() => null);
+  const [, executeError] = await unwrapPromise(
+    worker.executeWithFsMap({
+      fsMap: {
+        "entrypoint.tsx": `
+          import * as UserComponents from "./UserCode.tsx";
+          
+          const hasBoard = ${userCode.includes("<board").toString()};
+          const ComponentToRender = Object.entries(UserComponents)
+            .filter(([name]) => !name.startsWith("use"))
+            .map(([_, component]) => component)[0] || (() => null);
 
-            circuit.add(
-              hasBoard ? (
-                <ComponentToRender />
-              ) : (
-                <board width="10mm" height="10mm">
-                  <ComponentToRender name="U1" />
-                </board>
-              )
-            );
-          `,
-          "UserCode.tsx": userCode,
-        },
-        entrypoint: "entrypoint.tsx",
-      }),
-    )
-    if (executeError) return errorResponse(executeError)
+          circuit.add(
+            hasBoard ? (
+              <ComponentToRender />
+            ) : (
+              <board width="10mm" height="10mm">
+                <ComponentToRender name="U1" />
+              </board>
+            )
+          );
+        `,
+        "UserCode.tsx": userCode,
+      },
+      entrypoint: "entrypoint.tsx",
+    }),
+  )
 
-    const [, renderError] = await handleError(worker.renderUntilSettled())
-    if (renderError) return errorResponse(renderError)
+  if (executeError) return errorResponse(executeError)
 
-    const [json, jsonError] = await handleError(worker.getCircuitJson())
-    if (jsonError) return errorResponse(jsonError)
-    circuitJson = json
-  } catch (err) {
-    return errorResponse(err as Error)
-  }
+  const [, renderError] = await unwrapPromise(worker.renderUntilSettled())
+  if (renderError) return errorResponse(renderError)
+
+  const [circuitJson, jsonError] = await unwrapPromise(worker.getCircuitJson())
+  if (jsonError) return errorResponse(jsonError)
 
   const svgType = url.searchParams.get("svg_type")
   if (!svgType || !["pcb", "schematic"].includes(svgType)) {
@@ -104,7 +101,7 @@ export default async (req: Request) => {
     )
   }
 
-  const [svgContent, svgError] = handleSyncError(() =>
+  const [svgContent, svgError] = unwrapSyncError(() =>
     svgType === "pcb"
       ? convertCircuitJsonToPcbSvg(circuitJson)
       : convertCircuitJsonToSchematicSvg(circuitJson),
@@ -149,22 +146,14 @@ const getErrorSvg = (err: string) => {
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-  <!-- Background color -->
   <rect width="100%" height="100%" fill="#FEF2F2"/>
-  
   <style>
     .error-subtext {
       font: 400 16px/1.4 'Segoe UI', system-ui, sans-serif;
       fill: #dc2626;
     }
-    * {
-      margin: 0;
-    }
   </style>
-
-  <!-- Vertical centering group -->
   <g transform="translate(0, 50)">
-    <!-- Error message with dynamic spacing -->
     <text x="50%" y="0" class="error-subtext" text-anchor="middle">
       ${errorLines
         .map(
