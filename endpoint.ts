@@ -1,61 +1,61 @@
-import { CircuitRunner } from "@tscircuit/eval-webworker/eval";
-import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url";
+import { CircuitRunner } from "@tscircuit/eval/eval"
+import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import {
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
-} from "circuit-to-svg";
-import { getIndexPageHtml } from "./get-index-page-html";
-import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page";
+} from "circuit-to-svg"
+import { getIndexPageHtml } from "./get-index-page-html"
+import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 
-type Result<T, E = Error> = [T, null] | [null, E];
+type Result<T, E = Error> = [T, null] | [null, E]
 
 async function handleError<T>(promise: Promise<T>): Promise<Result<T>> {
   return promise
     .then<[T, null]>((data) => [data, null])
-    .catch<[null, Error]>((err) => [null, err]);
+    .catch<[null, Error]>((err) => [null, err])
 }
 
 function handleSyncError<T>(fn: () => T): Result<T> {
   try {
-    return [fn(), null];
+    return [fn(), null]
   } catch (err) {
-    return [null, err as Error];
+    return [null, err as Error]
   }
 }
 
 export default async (req: Request) => {
-  const url = new URL(req.url.replace("/api", "/"));
-  const host = `${url.protocol}//${url.host}`;
+  const url = new URL(req.url.replace("/api", "/"))
+  const host = `${url.protocol}//${url.host}`
 
   if (url.pathname === "/health") {
-    return new Response(JSON.stringify({ ok: true }));
+    return new Response(JSON.stringify({ ok: true }))
   }
 
   if (url.pathname === "/generate_url") {
-    const code = url.searchParams.get("code");
+    const code = url.searchParams.get("code")
     return new Response(getHtmlForGeneratedUrlPage(code!, host), {
       headers: { "Content-Type": "text/html" },
-    });
+    })
   }
 
   if (url.pathname === "/" && !url.searchParams.get("code")) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
-    });
+    })
   }
 
-  const compressedCode = url.searchParams.get("code");
+  const compressedCode = url.searchParams.get("code")
   if (!compressedCode) {
     return new Response(
       JSON.stringify({ ok: false, error: "No code parameter provided" }),
       { status: 400 },
-    );
+    )
   }
 
-  let circuitJson: any;
+  let circuitJson: any
   try {
-    const userCode = getUncompressedSnippetString(compressedCode);
-    const worker = new CircuitRunner();
+    const userCode = getUncompressedSnippetString(compressedCode)
+    const worker = new CircuitRunner()
 
     // Execute with board wrapping logic
     const [, executeError] = await handleError(
@@ -83,32 +83,32 @@ export default async (req: Request) => {
         },
         entrypoint: "entrypoint.tsx",
       }),
-    );
-    if (executeError) return errorResponse(executeError);
+    )
+    if (executeError) return errorResponse(executeError)
 
-    const [, renderError] = await handleError(worker.renderUntilSettled());
-    if (renderError) return errorResponse(renderError);
+    const [, renderError] = await handleError(worker.renderUntilSettled())
+    if (renderError) return errorResponse(renderError)
 
-    const [json, jsonError] = await handleError(worker.getCircuitJson());
-    if (jsonError) return errorResponse(jsonError);
-    circuitJson = json;
+    const [json, jsonError] = await handleError(worker.getCircuitJson())
+    if (jsonError) return errorResponse(jsonError)
+    circuitJson = json
   } catch (err) {
-    return errorResponse(err as Error);
+    return errorResponse(err as Error)
   }
 
-  const svgType = url.searchParams.get("svg_type");
+  const svgType = url.searchParams.get("svg_type")
   if (!svgType || !["pcb", "schematic"].includes(svgType)) {
     return new Response(
       JSON.stringify({ ok: false, error: "Invalid svg_type" }),
       { status: 400 },
-    );
+    )
   }
 
   const [svgContent, svgError] = handleSyncError(() =>
     svgType === "pcb"
       ? convertCircuitJsonToPcbSvg(circuitJson)
       : convertCircuitJsonToSchematicSvg(circuitJson),
-  );
+  )
 
   return svgError
     ? errorResponse(svgError)
@@ -117,8 +117,8 @@ export default async (req: Request) => {
           "Content-Type": "image/svg+xml",
           "Cache-Control": "public, max-age=31536000, immutable",
         },
-      });
-};
+      })
+}
 
 function errorResponse(err: Error) {
   return new Response(getErrorSvg(err.message), {
@@ -126,26 +126,26 @@ function errorResponse(err: Error) {
       "Content-Type": "image/svg+xml",
       "Cache-Control": "public, max-age=31536000, immutable",
     },
-  });
+  })
 }
 
 const getErrorSvg = (err: string) => {
   const splitMessage = (msg: string): string[] => {
-    const chunks: string[] = [];
-    let currentChunk = "";
+    const chunks: string[] = []
+    let currentChunk = ""
 
     msg.split(" ").forEach((word) => {
       if ((currentChunk + word).length > 32) {
-        chunks.push(currentChunk.trim());
-        currentChunk = "";
+        chunks.push(currentChunk.trim())
+        currentChunk = ""
       }
-      currentChunk += `${word} `;
-    });
-    chunks.push(currentChunk.trim());
-    return chunks.slice(0, 3); // Max 3 lines
-  };
+      currentChunk += `${word} `
+    })
+    chunks.push(currentChunk.trim())
+    return chunks.slice(0, 3) // Max 3 lines
+  }
 
-  const errorLines = splitMessage(err);
+  const errorLines = splitMessage(err)
 
   return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
@@ -174,5 +174,5 @@ const getErrorSvg = (err: string) => {
         .join("")}
     </text>
   </g>
-</svg>`.trim();
-};
+</svg>`.trim()
+}
