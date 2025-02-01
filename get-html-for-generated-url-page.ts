@@ -12,6 +12,7 @@ export const getHtmlForGeneratedUrlPage = (
 
   const pcbSvgUrl = `${urlPrefix}/?svg_type=pcb&code=${encodeURIComponent(compressedCode)}`
   const schSvgUrl = `${urlPrefix}/?svg_type=schematic&code=${encodeURIComponent(compressedCode)}`
+  const threeDSvgUrl = `${urlPrefix}/?svg_type=3d&code=${encodeURIComponent(compressedCode)}`
 
   return `
   <!DOCTYPE html>
@@ -34,6 +35,10 @@ export const getHtmlForGeneratedUrlPage = (
         <tr>
           <td>Schematic SVG URL</td>
           <td><a href="${schSvgUrl}">${schSvgUrl}</a></td>
+        </tr>
+        <tr>
+          <td>3D SVG URL</td>
+          <td><a href="${threeDSvgUrl}">${threeDSvgUrl}</a></td>
         </tr>
       </table>
     </body>

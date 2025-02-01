@@ -1,12 +1,13 @@
-import { CircuitRunner } from "@tscircuit/eval/eval"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
+import { CircuitRunner } from "@tscircuit/eval/eval"
 import {
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
 } from "circuit-to-svg"
-import { getIndexPageHtml } from "./get-index-page-html"
+import { JSDOM } from "jsdom"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getErrorSvg } from "./getErrorSvg"
+import { getIndexPageHtml } from "./get-index-page-html"
 
 type Result<T, E = Error> = [T, null] | [null, E]
 
@@ -95,18 +96,52 @@ export default async (req: Request) => {
   if (jsonError) return errorResponse(jsonError)
 
   const svgType = url.searchParams.get("svg_type")
-  if (!svgType || !["pcb", "schematic"].includes(svgType)) {
+  if (!svgType || !["pcb", "schematic", "3d"].includes(svgType)) {
     return new Response(
       JSON.stringify({ ok: false, error: "Invalid svg_type" }),
       { status: 400 },
     )
   }
 
-  const [svgContent, svgError] = unwrapSyncError(() =>
-    svgType === "pcb"
-      ? convertCircuitJsonToPcbSvg(circuitJson)
-      : convertCircuitJsonToSchematicSvg(circuitJson),
-  )
+  async function generateSvg() {
+    if (svgType === "pcb") {
+      return convertCircuitJsonToPcbSvg(circuitJson as any)
+    }
+    else if (svgType === "schematic") {
+      return convertCircuitJsonToSchematicSvg(circuitJson as any)
+    }
+    else if (svgType === "3d") {
+      const { convertCircuitJsonTo3dSvg, applyJsdomShim } = await import(
+        "@tscircuit/3d-viewer"
+      )
+
+      const dom = new JSDOM()
+      applyJsdomShim(dom)
+
+      return await convertCircuitJsonTo3dSvg(circuitJson as any, {
+        width: 800,
+        height: 600,
+        backgroundColor: "#ffffff",
+        padding: 20,
+        zoom: 9,
+        viewAngle: "top" as const,
+        camera: {
+          position: {
+            x: 0,
+            y: 0,
+            z: 100,
+          },
+          lookAt: {
+            x: 0,
+            y: 0,
+            z: 0,
+          },
+        },
+      })
+    }
+  }
+
+  const [svgContent, svgError] = await unwrapPromise(generateSvg())
 
   return svgError
     ? errorResponse(svgError)
