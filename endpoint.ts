@@ -6,6 +6,7 @@ import {
 } from "circuit-to-svg"
 import { getIndexPageHtml } from "./get-index-page-html"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
+import { getErrorSvg } from "./getErrorSvg"
 
 type Result<T, E = Error> = [T, null] | [null, E]
 
@@ -124,44 +125,4 @@ function errorResponse(err: Error) {
       "Cache-Control": "public, max-age=31536000, immutable",
     },
   })
-}
-
-const getErrorSvg = (err: string) => {
-  const splitMessage = (msg: string): string[] => {
-    const chunks: string[] = []
-    let currentChunk = ""
-
-    msg.split(" ").forEach((word) => {
-      if ((currentChunk + word).length > 32) {
-        chunks.push(currentChunk.trim())
-        currentChunk = ""
-      }
-      currentChunk += `${word} `
-    })
-    chunks.push(currentChunk.trim())
-    return chunks.slice(0, 3) // Max 3 lines
-  }
-
-  const errorLines = splitMessage(err)
-
-  return `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 150" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
-  <rect width="100%" height="100%" fill="#FEF2F2"/>
-  <style>
-    .error-subtext {
-      font: 400 16px/1.4 'Segoe UI', system-ui, sans-serif;
-      fill: #dc2626;
-    }
-  </style>
-  <g transform="translate(0, 50)">
-    <text x="50%" y="0" class="error-subtext" text-anchor="middle">
-      ${errorLines
-        .map(
-          (line, i) =>
-            `<tspan x="50%" dy="${i === 0 ? 0 : "1.5em"}">${line}</tspan>`,
-        )
-        .join("")}
-    </text>
-  </g>
-</svg>`.trim()
 }
