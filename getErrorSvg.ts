@@ -1,41 +1,41 @@
 export const getErrorSvg = (err: string) => {
   const splitMessage = (msg: string): string[] => {
-    msg = msg.includes(":") ? msg.replace(/[^:]+:/, "") : msg;
-    const chunks: string[] = [];
-    let currentChunk = "";
+    msg = msg.includes(":") ? msg.replace(/[^:]+:/, "") : msg
+    const chunks: string[] = []
+    let currentChunk = ""
     msg.split(" ").forEach((word) => {
       if ((currentChunk + word).length > 33) {
-        chunks.push(currentChunk.trim());
-        currentChunk = "";
+        chunks.push(currentChunk.trim())
+        currentChunk = ""
       }
-      currentChunk += `${word} `;
-    });
-    chunks.push(currentChunk.trim());
-    return chunks;
-  };
+      currentChunk += `${word} `
+    })
+    chunks.push(currentChunk.trim())
+    return chunks
+  }
 
-  const errorLines = splitMessage(err);
-  const lineHeight = 24;
-  const topMargin = 50;
-  const bottomMargin = 20;
-  const horizontalPadding = 40;
-  const estimatedCharWidth = 8;
+  const errorLines = splitMessage(err)
+  const lineHeight = 24
+  const topMargin = 50
+  const bottomMargin = 20
+  const horizontalPadding = 40
+  const estimatedCharWidth = 8
   const maxLineLength = errorLines.reduce(
     (max, line) => Math.max(max, line.length),
     0,
-  );
-  const dynamicWidth = maxLineLength * estimatedCharWidth + horizontalPadding;
+  )
+  const dynamicWidth = maxLineLength * estimatedCharWidth + horizontalPadding
   const dynamicHeight =
-    topMargin + errorLines.length * lineHeight + bottomMargin;
-  const desiredRatio = 16 / 9;
-  let finalWidth = dynamicWidth;
-  let finalHeight = dynamicHeight;
+    topMargin + errorLines.length * lineHeight + bottomMargin
+  const desiredRatio = 16 / 9
+  let finalWidth = dynamicWidth
+  let finalHeight = dynamicHeight
   if (dynamicWidth / dynamicHeight < desiredRatio) {
-    finalWidth = dynamicHeight * desiredRatio;
+    finalWidth = dynamicHeight * desiredRatio
   } else if (dynamicWidth / dynamicHeight > desiredRatio) {
-    finalHeight = dynamicWidth / desiredRatio;
+    finalHeight = dynamicWidth / desiredRatio
   }
-  const viewBox = `0 0 ${finalWidth} ${finalHeight}`;
+  const viewBox = `0 0 ${finalWidth} ${finalHeight}`
 
   return `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
@@ -51,5 +51,5 @@ export const getErrorSvg = (err: string) => {
         ${errorLines.map((line, i) => `<tspan x="50%" dy="${i === 0 ? 0 : lineHeight}">${line}</tspan>`).join("")}
       </text>
     </g>
-  </svg>`.trim();
-};
+  </svg>`.trim()
+}
