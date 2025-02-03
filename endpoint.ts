@@ -8,6 +8,7 @@ import { JSDOM } from "jsdom"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getErrorSvg } from "./getErrorSvg"
 import { getIndexPageHtml } from "./get-index-page-html"
+import { convertCircuitJsonTo3dSvg, applyJsdomShim } from "@tscircuit/3d-viewer"
 
 type Result<T, E = Error> = [T, null] | [null, E]
 
@@ -106,15 +107,9 @@ export default async (req: Request) => {
   async function generateSvg() {
     if (svgType === "pcb") {
       return convertCircuitJsonToPcbSvg(circuitJson as any)
-    }
-    else if (svgType === "schematic") {
+    } else if (svgType === "schematic") {
       return convertCircuitJsonToSchematicSvg(circuitJson as any)
-    }
-    else if (svgType === "3d") {
-      const { convertCircuitJsonTo3dSvg, applyJsdomShim } = await import(
-        "@tscircuit/3d-viewer"
-      )
-
+    } else if (svgType === "3d") {
       const dom = new JSDOM()
       applyJsdomShim(dom)
 
