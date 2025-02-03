@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tscircuit/create-snippet-url": "^0.0.6",
+    "@tscircuit/create-snippet-url": "^0.0.7",
     "@tscircuit/eval": "^0.0.87",
     "@types/bun": "latest",
     "@types/jsdom": "^21.1.7",
