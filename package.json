@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "@tscircuit/3d-viewer": "^0.0.117",
-    "@tscircuit/core": "^0.0.297",
     "@tscircuit/math-utils": "^0.0.10",
     "@tscircuit/prompt-benchmarks": "^0.0.30",
     "circuit-to-svg": "^0.0.101",
