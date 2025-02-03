@@ -24,7 +24,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@tscircuit/core": "^0.0.298",
+    "@tscircuit/core": "^0.0.299",
     "@tscircuit/math-utils": "^0.0.10",
     "@tscircuit/prompt-benchmarks": "^0.0.30",
     "circuit-to-svg": "^0.0.101",
