@@ -113,7 +113,7 @@ export default async (req: Request) => {
     : new Response(svgContent, {
         headers: {
           "Content-Type": "image/svg+xml",
-          "Cache-Control": "public, max-age=31536000, immutable",
+          "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
         },
       })
 }
@@ -122,7 +122,7 @@ function errorResponse(err: Error) {
   return new Response(getErrorSvg(err.message), {
     headers: {
       "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "public, max-age=86400, s-maxage=86400",
     },
   })
 }
