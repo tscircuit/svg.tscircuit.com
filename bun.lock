@@ -6,7 +6,7 @@
       "dependencies": {
         "@tscircuit/3d-viewer": "^0.0.122",
         "@tscircuit/math-utils": "^0.0.10",
-        "@tscircuit/prompt-benchmarks": "^0.0.31",
+        "@tscircuit/prompt-benchmarks": "^0.0.32",
         "circuit-to-svg": "^0.0.101",
         "jscad-fiber": "^0.0.77",
         "jsdom": "^26.0.0",
@@ -251,7 +251,7 @@
 
     "@tscircuit/mm": ["@tscircuit/mm@0.0.8", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-nl7nxE7AhARbKuobflI0LUzoir7+wJyvwfPw6bzA/O0Q3YTcH3vBkU/Of+V/fp6ht+AofiCXj7YAH9E446138Q=="],
 
-    "@tscircuit/prompt-benchmarks": ["@tscircuit/prompt-benchmarks@0.0.31", "", { "dependencies": { "@babel/standalone": "^7.25.7", "@tscircuit/featured-snippets": "^0.0.1", "@tscircuit/footprinter": "^0.0.102", "debug": "^4.3.7", "dotenv": "^16.4.7", "evalite": "^0.8.3", "extract-codefence": "^0.0.4", "toml": "^3.0.0" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-L0ZpdxMNiKFb1cq1V6wol2KEfW2YZtPqhphA/8awzRtpxXkhtpNMtI9bz9Ot+QiVF8NbnrLiC0AUwazSzH7j0w=="],
+    "@tscircuit/prompt-benchmarks": ["@tscircuit/prompt-benchmarks@0.0.32", "", { "dependencies": { "@babel/standalone": "^7.25.7", "@tscircuit/featured-snippets": "^0.0.1", "@tscircuit/footprinter": "^0.0.102", "debug": "^4.3.7", "dotenv": "^16.4.7", "evalite": "^0.8.4", "extract-codefence": "^0.0.4", "toml": "^3.0.0" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-zNFuSLIfQqqoAe1CEfXFDvtxErT92WSbglgfKO6TYrB6qksCAYbFOLj6QloKE/oqrYSFhjEK/6d7qX6fCM5oMg=="],
 
     "@tscircuit/props": ["@tscircuit/props@0.0.138", "", { "peerDependencies": { "@tscircuit/layout": "*", "circuit-json": "*", "react": "*", "zod": "*" } }, "sha512-5QosBu8v5QjuXGC4JioDibxz3MWRrBIfeoY4C3mdKCrnUkCu/uAeuSRY4p8nzt19scATU6bkxsJcDutFmivOdA=="],
 
@@ -503,7 +503,7 @@
 
     "escape-html": ["escape-html@1.0.3", "", {}, "sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow=="],
 
-    "evalite": ["evalite@0.8.3", "", { "dependencies": { "@evalite/core": "0.6.1", "@vitest/runner": "^2.1.8", "commander": "^12.1.0", "file-type": "^19.6.0", "table": "^6.8.2", "tinyrainbow": "^1.2.0" }, "bin": { "evalite": "dist/bin.js" } }, "sha512-Q9WVJBBsKiYFnx2yqQnLQR1xUblEoiBsghoGAiPZhYIJRZn3C90W4TYBkaT/+vP2+TiexM+I3HazKFldKm6oiw=="],
+    "evalite": ["evalite@0.8.4", "", { "dependencies": { "@evalite/core": "0.6.1", "@vitest/runner": "^2.1.8", "commander": "^12.1.0", "file-type": "^19.6.0", "table": "^6.8.2", "tinyrainbow": "^1.2.0" }, "bin": { "evalite": "dist/bin.js" } }, "sha512-ytwNB904riRwPo4fwrWEsvTu7daDGU/CbcW+hKXHdFK54D5aGVyGnWk66KTNFoZPRNCkqhNQhisWIE98QLME2w=="],
 
     "eventemitter3": ["eventemitter3@2.0.3", "", {}, "sha512-jLN68Dx5kyFHaePoXWPsCGW5qdyZQtLYHkxkg02/Mz6g0kYpDx4FyP6XfArhQdlOC4b8Mv+EMxPo/8La7Tzghg=="],
 

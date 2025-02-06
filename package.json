@@ -27,7 +27,7 @@
   "dependencies": {
     "@tscircuit/3d-viewer": "^0.0.122",
     "@tscircuit/math-utils": "^0.0.10",
-    "@tscircuit/prompt-benchmarks": "^0.0.31",
+    "@tscircuit/prompt-benchmarks": "^0.0.32",
     "circuit-to-svg": "^0.0.101",
     "jscad-fiber": "^0.0.77",
     "jsdom": "^26.0.0",
