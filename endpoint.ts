@@ -4,11 +4,9 @@ import {
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
 } from "circuit-to-svg"
-import { JSDOM } from "jsdom"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getErrorSvg } from "./getErrorSvg"
 import { getIndexPageHtml } from "./get-index-page-html"
-import { convertCircuitJsonTo3dSvg, applyJsdomShim } from "@tscircuit/3d-viewer"
 
 type Result<T, E = Error> = [T, null] | [null, E]
 
@@ -97,46 +95,18 @@ export default async (req: Request) => {
   if (jsonError) return errorResponse(jsonError)
 
   const svgType = url.searchParams.get("svg_type")
-  if (!svgType || !["pcb", "schematic", "3d"].includes(svgType)) {
+  if (!svgType || !["pcb", "schematic"].includes(svgType)) {
     return new Response(
       JSON.stringify({ ok: false, error: "Invalid svg_type" }),
       { status: 400 },
     )
   }
 
-  async function generateSvg() {
-    if (svgType === "pcb") {
-      return convertCircuitJsonToPcbSvg(circuitJson as any)
-    } else if (svgType === "schematic") {
-      return convertCircuitJsonToSchematicSvg(circuitJson as any)
-    } else if (svgType === "3d") {
-      const dom = new JSDOM()
-      applyJsdomShim(dom)
-
-      return await convertCircuitJsonTo3dSvg(circuitJson as any, {
-        width: 800,
-        height: 600,
-        backgroundColor: "#ffffff",
-        padding: 20,
-        zoom: 9,
-        viewAngle: "top" as const,
-        camera: {
-          position: {
-            x: 0,
-            y: 0,
-            z: 100,
-          },
-          lookAt: {
-            x: 0,
-            y: 0,
-            z: 0,
-          },
-        },
-      })
-    }
-  }
-
-  const [svgContent, svgError] = await unwrapPromise(generateSvg())
+  const [svgContent, svgError] = unwrapSyncError(() =>
+    svgType === "pcb"
+      ? convertCircuitJsonToPcbSvg(circuitJson)
+      : convertCircuitJsonToSchematicSvg(circuitJson),
+  )
 
   return svgError
     ? errorResponse(svgError)
