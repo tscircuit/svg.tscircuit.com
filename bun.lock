@@ -6,7 +6,7 @@
       "dependencies": {
         "@tscircuit/3d-viewer": "^0.0.126",
         "@tscircuit/math-utils": "^0.0.10",
-        "@tscircuit/prompt-benchmarks": "^0.0.34",
+        "@tscircuit/prompt-benchmarks": "^0.0.37",
         "circuit-to-svg": "^0.0.101",
         "jscad-fiber": "^0.0.77",
         "jsdom": "^26.0.0",
@@ -251,7 +251,7 @@
 
     "@tscircuit/mm": ["@tscircuit/mm@0.0.8", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-nl7nxE7AhARbKuobflI0LUzoir7+wJyvwfPw6bzA/O0Q3YTcH3vBkU/Of+V/fp6ht+AofiCXj7YAH9E446138Q=="],
 
-    "@tscircuit/prompt-benchmarks": ["@tscircuit/prompt-benchmarks@0.0.34", "", { "dependencies": { "@babel/standalone": "^7.25.7", "@tscircuit/featured-snippets": "^0.0.1", "@tscircuit/footprinter": "^0.0.102", "debug": "^4.3.7", "dotenv": "^16.4.7", "evalite": "^0.8.4", "extract-codefence": "^0.0.4", "toml": "^3.0.0" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-pgfNL+FdRjWV3V+SxAK9IZiuj2nBqzJkqnY64lCGeXEN+f/7UL7JpPqCLgLQ3EOCYuMY0445SEehjIG4mUsiHg=="],
+    "@tscircuit/prompt-benchmarks": ["@tscircuit/prompt-benchmarks@0.0.37", "", { "dependencies": { "@babel/standalone": "^7.25.7", "@tscircuit/featured-snippets": "^0.0.1", "@tscircuit/footprinter": "^0.0.102", "debug": "^4.3.7", "dotenv": "^16.4.7", "evalite": "^0.8.4", "extract-codefence": "^0.0.4", "toml": "^3.0.0" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-9YRHzOehR9OjjkjphLNPMJUY+gBufImoazDmJ59fa4EhjgZqfpfTYaG4OLtGUBnUerC6ZL/+FndXSnvs0K5mmA=="],
 
     "@tscircuit/props": ["@tscircuit/props@0.0.141", "", { "peerDependencies": { "@tscircuit/layout": "*", "circuit-json": "*", "react": "*", "zod": "*" } }, "sha512-mEznyhvgkyvVI9cjpjXC8CyJPkNEAHDTAqrZy8Og/5Uzt0Dm+oVzx5VD5glXX7T040NM/wtz+rd+yLwg9aR3CQ=="],
 
