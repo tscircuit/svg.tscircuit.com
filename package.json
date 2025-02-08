@@ -25,7 +25,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@tscircuit/3d-viewer": "^0.0.126",
+    "@tscircuit/3d-viewer": "^0.0.128",
     "@tscircuit/math-utils": "^0.0.10",
     "@tscircuit/prompt-benchmarks": "^0.0.37",
     "circuit-to-svg": "^0.0.101",
