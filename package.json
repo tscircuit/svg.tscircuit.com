@@ -10,7 +10,6 @@
     "@tscircuit/create-snippet-url": "^0.0.7",
     "@tscircuit/eval": "^0.0.87",
     "@types/bun": "latest",
-    "@types/jsdom": "^21.1.7",
     "@types/react": "19.0.8",
     "bun-match-svg": "^0.0.9",
     "comlink": "^4.4.2",
@@ -25,12 +24,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@tscircuit/3d-viewer": "^0.0.128",
     "@tscircuit/math-utils": "^0.0.10",
     "@tscircuit/prompt-benchmarks": "^0.0.37",
     "circuit-to-svg": "^0.0.101",
     "jscad-fiber": "^0.0.77",
-    "jsdom": "^26.0.0",
     "react-reconciler": "^0.31.0",
     "react-reconciler-18": "npm:react-reconciler@0.29.2"
   }
