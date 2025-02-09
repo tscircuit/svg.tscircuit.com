@@ -2,11 +2,11 @@ import { test, expect } from "bun:test"
 import { getTestServer } from "./fixtures/get-test-server"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 
-test("basic tscircuit code to pcb svg conversion", async () => {
+test("pcb svg conversion using view parameter", async () => {
   const { serverUrl } = await getTestServer()
 
   const response = await fetch(
-    `${serverUrl}?svg_type=pcb&code=${encodeURIComponent(
+    `${serverUrl}?view=pcb&code=${encodeURIComponent(
       getCompressedBase64SnippetString(`
 export default () => (
   <board width="10mm" height="10mm">
