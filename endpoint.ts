@@ -94,10 +94,11 @@ export default async (req: Request) => {
   const [circuitJson, jsonError] = await unwrapPromise(worker.getCircuitJson())
   if (jsonError) return errorResponse(jsonError)
 
-  const svgType = url.searchParams.get("svg_type")
+  // Check for both svg_type and view parameters, with svg_type taking precedence
+  const svgType = url.searchParams.get("svg_type") || url.searchParams.get("view")
   if (!svgType || !["pcb", "schematic"].includes(svgType)) {
     return new Response(
-      JSON.stringify({ ok: false, error: "Invalid svg_type" }),
+      JSON.stringify({ ok: false, error: "Invalid svg_type or view parameter" }),
       { status: 400 },
     )
   }
