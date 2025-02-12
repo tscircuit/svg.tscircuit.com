@@ -15,7 +15,7 @@
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@tscircuit/create-snippet-url": "^0.0.8",
-        "@tscircuit/eval": "^0.0.95",
+        "@tscircuit/eval": "^0.0.96",
         "@types/bun": "latest",
         "@types/react": "19.0.8",
         "bun-match-svg": "^0.0.9",
@@ -193,7 +193,7 @@
 
     "@tscircuit/create-snippet-url": ["@tscircuit/create-snippet-url@0.0.8", "", { "dependencies": { "fflate": "^0.8.2" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-VMixgwQRsOXlQGwVh2RZIFLLtsn8YWl2Bht61T26MHNM71A1Wzo5qGZtqcdbVkFnvlA42KmdVVjvxYDvEyWdJw=="],
 
-    "@tscircuit/eval": ["@tscircuit/eval@0.0.95", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-c0ahzjxRU5EjeaJvtLkSDxqiDfOboMB57WnlOhUVok4hKYvY8J2uqeVvPshVb/W/7bxSQVe0jmYbFA9gVjFeEA=="],
+    "@tscircuit/eval": ["@tscircuit/eval@0.0.96", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-lzyXdMVhtlrceSRYAgYFFFnZy8trSHt330Tc04scyHLbEeK0yLG/EhiqmPQ+pZXsfEwOoJW0leFfFQjiulhktw=="],
 
     "@tscircuit/featured-snippets": ["@tscircuit/featured-snippets@0.0.1", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-SNUbCQmyaAaWq7DqqDbYlZkYttbfaObtp5rOheZvlJ2TGYvooECFpB8SzNo06bqKGoIwNjgaAGUTB2DcxdX7ow=="],
 
