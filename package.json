@@ -26,7 +26,7 @@
   "dependencies": {
     "@tscircuit/core": "^0.0.315",
     "@tscircuit/math-utils": "^0.0.10",
-    "@tscircuit/prompt-benchmarks": "^0.0.37",
+    "@tscircuit/prompt-benchmarks": "^0.0.38",
     "circuit-to-svg": "^0.0.101",
     "jscad-fiber": "^0.0.77",
     "react-reconciler": "^0.31.0",
