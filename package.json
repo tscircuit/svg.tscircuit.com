@@ -8,7 +8,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@tscircuit/create-snippet-url": "^0.0.8",
-    "@tscircuit/eval": "^0.0.134",
+    "@tscircuit/eval": "^0.0.135",
     "@types/bun": "latest",
     "@types/react": "19.0.8",
     "bun-match-svg": "^0.0.9",
