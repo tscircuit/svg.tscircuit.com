@@ -5,7 +5,7 @@
       "name": "svg.tscircuit.com",
       "dependencies": {
         "@tscircuit/core": "^0.0.379",
-        "@tscircuit/math-utils": "^0.0.15",
+        "@tscircuit/math-utils": "^0.0.16",
         "@tscircuit/prompt-benchmarks": "^0.0.44",
         "circuit-to-svg": "^0.0.101",
         "jscad-fiber": "^0.0.77",
@@ -211,7 +211,7 @@
 
     "@tscircuit/manual-edit-events": ["@tscircuit/manual-edit-events@0.0.6", "", { "dependencies": { "zod": "^3.23.8" } }, "sha512-PLgy+/Dsw1YcnNVNqfieNGTNIaRKRJ70Jt2LcSMljwaBOtsiOwtdzj24xCYO9XzJUZc7opKytShMlx863PehTQ=="],
 
-    "@tscircuit/math-utils": ["@tscircuit/math-utils@0.0.15", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-mUSjt7ReU2eoU7CuL57RTtwL1GBwY+3Rl+mQxHlHzNnMkj6xRqNLIraZy1X8chlOHwoYyyaxxlOgxR/dkpEo6w=="],
+    "@tscircuit/math-utils": ["@tscircuit/math-utils@0.0.16", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-JDV5j4XItnglxQyT9gHJrIGqDdxhYGvm5kwSEMTaBfCxiTbi8tuI9UuCo8Uo9SIltSWBShkhGdOBM3eAYFkDZA=="],
 
     "@tscircuit/mm": ["@tscircuit/mm@0.0.8", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-nl7nxE7AhARbKuobflI0LUzoir7+wJyvwfPw6bzA/O0Q3YTcH3vBkU/Of+V/fp6ht+AofiCXj7YAH9E446138Q=="],
 
