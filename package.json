@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@tscircuit/core": "^0.0.381",
-    "@tscircuit/math-utils": "^0.0.16",
+    "@tscircuit/math-utils": "^0.0.18",
     "@tscircuit/prompt-benchmarks": "^0.0.44",
     "circuit-to-svg": "^0.0.101",
     "jscad-fiber": "^0.0.77",
