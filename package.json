@@ -3,7 +3,10 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "start": "next dev"
+    "start": "next dev",
+    "build": "next build",
+    "format": "biome format . --write",
+    "format:check": "biome format ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
