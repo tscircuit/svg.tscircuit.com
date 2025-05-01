@@ -95,10 +95,14 @@ export default async (req: Request) => {
   if (jsonError) return errorResponse(jsonError)
 
   // Check for both svg_type and view parameters, with svg_type taking precedence
-  const svgType = url.searchParams.get("svg_type") || url.searchParams.get("view")
+  const svgType =
+    url.searchParams.get("svg_type") || url.searchParams.get("view")
   if (!svgType || !["pcb", "schematic"].includes(svgType)) {
     return new Response(
-      JSON.stringify({ ok: false, error: "Invalid svg_type or view parameter" }),
+      JSON.stringify({
+        ok: false,
+        error: "Invalid svg_type or view parameter",
+      }),
       { status: 400 },
     )
   }
@@ -114,7 +118,8 @@ export default async (req: Request) => {
     : new Response(svgContent, {
         headers: {
           "Content-Type": "image/svg+xml",
-          "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
+          "Cache-Control":
+            "public, max-age=86400, s-maxage=31536000, immutable",
         },
       })
 }
