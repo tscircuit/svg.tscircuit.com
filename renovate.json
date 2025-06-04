@@ -4,7 +4,7 @@
   "packageRules": [
     {
       "packagePatterns": ["*"],
-      "excludePackagePatterns": ["@tscircuit/*"],
+      "excludePackagePatterns": ["@tscircuit/*", "circuit-to-svg"],
       "enabled": false
     },
     {
