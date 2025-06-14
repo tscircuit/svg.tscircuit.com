@@ -7,6 +7,8 @@
         "@tscircuit/core": "^0.0.386",
         "@tscircuit/math-utils": "^0.0.18",
         "@tscircuit/prompt-benchmarks": "^0.0.44",
+        "@tscircuit/simple-3d-svg": "^0.0.22",
+        "circuit-json-to-simple-3d": "^0.0.3",
         "circuit-to-svg": "^0.0.141",
         "jscad-fiber": "^0.0.77",
         "react-reconciler": "^0.31.0",
@@ -221,6 +223,8 @@
 
     "@tscircuit/schematic-autolayout": ["@tscircuit/schematic-autolayout@0.0.6", "", { "dependencies": { "@tscircuit/soup-util": "^0.0.38", "transformation-matrix": "^2.16.1" } }, "sha512-34cQxtlSylBKyHkzaMBCynaWJgN9c/mWm7cz63StTYIafKmfFs383K8Xoc4QX8HXCvVrHYl1aK15onZua9MxeA=="],
 
+    "@tscircuit/simple-3d-svg": ["@tscircuit/simple-3d-svg@0.0.22", "", {}, "sha512-VYV1DgXIJUgNcljaCUcDjh48tpCESzcdwz66DUd1AG5Pj4IGs8JEIG26ntuliwg+sLvxaNlkpAYFKmEBWyz30w=="],
+
     "@tscircuit/soup-util": ["@tscircuit/soup-util@0.0.38", "", { "dependencies": { "parsel-js": "^1.1.2" }, "peerDependencies": { "circuit-json": "*", "transformation-matrix": "*", "zod": "*" } }, "sha512-GdcuFxk+qnJZv+eI7ZoJ1MJEseFgRyaztMtQ/OXA2SUnxyPEH0UTy9vkhKTm+8GTePryEgdXcc65TgUyrr44ww=="],
 
     "@types/bun": ["@types/bun@1.2.2", "", { "dependencies": { "bun-types": "1.2.2" } }, "sha512-tr74gdku+AEDN5ergNiBnplr7hpDp3V1h7fqI2GcR/rsUaM39jpSeKH0TFibRvU0KwniRx5POgaYnaXbk0hU+w=="],
@@ -336,6 +340,8 @@
     "circuit-json": ["circuit-json@0.0.160", "", { "dependencies": { "nanoid": "^5.0.7", "zod": "^3.23.6" } }, "sha512-mCKydMDzzdio8KtsgJH6nEAmdL0T+fyPBN1DmpNBGAvPH/GZiWER5HpthXGq/JqO9mrb+1Q9OWHs2FKz0sTZMw=="],
 
     "circuit-json-to-connectivity-map": ["circuit-json-to-connectivity-map@0.0.20", "", { "dependencies": { "@tscircuit/math-utils": "^0.0.9" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-q8McyEomIZdprsSjGQv5puKLlMOM5w9EGRYA4TxaHPBLe03BoqVoN8wQxhdqmmbe4Tpa30KQFH9eISGVMs6HGg=="],
+
+    "circuit-json-to-simple-3d": ["circuit-json-to-simple-3d@0.0.3", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-2yWpbGKroN/xe17gtKqRfpaOIFiNJGfXsh0edkvENk/k+/CAjmwsj68CPQQsM7tOkSGlj9f/Pf64jS7HssfbHw=="],
 
     "circuit-to-svg": ["circuit-to-svg@0.0.141", "", { "dependencies": { "@types/node": "^22.5.5", "bun-types": "^1.1.40", "svgson": "^5.3.1", "transformation-matrix": "^2.16.1" }, "peerDependencies": { "@tscircuit/circuit-json-util": "*", "@tscircuit/footprinter": "*", "circuit-json": "*", "schematic-symbols": "*" } }, "sha512-JkcCfSXBTySR14zZk/2jrzya8QsUvs5xhbEOaG6sn6pXKJ4X++Dbay6rJIeQJNUqxFcwSko7GTLsxBRe5RRg7w=="],
 

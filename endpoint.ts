@@ -4,6 +4,7 @@ import {
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
 } from "circuit-to-svg"
+import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getErrorSvg } from "./getErrorSvg"
 import { getIndexPageHtml } from "./get-index-page-html"
@@ -97,7 +98,7 @@ export default async (req: Request) => {
   // Check for both svg_type and view parameters, with svg_type taking precedence
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
-  if (!svgType || !["pcb", "schematic"].includes(svgType)) {
+  if (!svgType || !["pcb", "schematic", "3d"].includes(svgType)) {
     return new Response(
       JSON.stringify({
         ok: false,
@@ -107,11 +108,21 @@ export default async (req: Request) => {
     )
   }
 
-  const [svgContent, svgError] = unwrapSyncError(() =>
-    svgType === "pcb"
-      ? convertCircuitJsonToPcbSvg(circuitJson)
-      : convertCircuitJsonToSchematicSvg(circuitJson),
-  )
+  let svgContent: string | null = null
+  let svgError: Error | null = null
+  if (svgType === "pcb") {
+    ;[svgContent, svgError] = unwrapSyncError(() =>
+      convertCircuitJsonToPcbSvg(circuitJson),
+    )
+  } else if (svgType === "schematic") {
+    ;[svgContent, svgError] = unwrapSyncError(() =>
+      convertCircuitJsonToSchematicSvg(circuitJson),
+    )
+  } else {
+    ;[svgContent, svgError] = await unwrapPromise(
+      convertCircuitJsonToSimple3dSvg(circuitJson),
+    )
+  }
 
   return svgError
     ? errorResponse(svgError)
