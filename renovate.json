@@ -4,7 +4,13 @@
   "packageRules": [
     {
       "packagePatterns": ["*"],
-      "excludePackagePatterns": ["@tscircuit/*", "circuit-to-svg"],
+      "excludePackagePatterns": [
+        "@tscircuit/*",
+        "circuit-to-svg",
+        "circuit-json-to-simple-3d",
+        "jscad-fiber",
+        "tscircuit"
+      ],
       "enabled": false
     },
     {
