@@ -10,6 +10,7 @@ export const getTestServer = async () => {
   const server = Bun.serve({
     port,
     fetch: endpoint,
+    idleTimeout: 20,
   })
 
   afterEach(() => {
