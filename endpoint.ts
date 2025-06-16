@@ -66,19 +66,12 @@ export default async (req: Request) => {
         "entrypoint.tsx": `
           import * as UserComponents from "./UserCode.tsx";
           
-          const hasBoard = ${userCode.includes("<board").toString()};
           const ComponentToRender = Object.entries(UserComponents)
             .filter(([name]) => !name.startsWith("use"))
             .map(([_, component]) => component)[0] || (() => null);
 
           circuit.add(
-            hasBoard ? (
-              <ComponentToRender />
-            ) : (
-              <board width="10mm" height="10mm">
-                <ComponentToRender name="U1" />
-              </board>
-            )
+            <ComponentToRender />
           );
         `,
         "UserCode.tsx": userCode,
