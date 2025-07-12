@@ -7,7 +7,7 @@
         "@tscircuit/simple-3d-svg": "^0.0.22",
         "circuit-json-to-simple-3d": "^0.0.4",
         "circuit-to-svg": "^0.0.158",
-        "jscad-fiber": "^0.0.80",
+        "jscad-fiber": "^0.0.81",
         "react-reconciler": "^0.31.0",
         "react-reconciler-18": "npm:react-reconciler@0.29.2",
       },
@@ -442,7 +442,7 @@
 
     "js-tokens": ["js-tokens@4.0.0", "", {}, "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ=="],
 
-    "jscad-fiber": ["jscad-fiber@0.0.80", "", { "dependencies": { "color": "^4.2.3" }, "peerDependencies": { "@jscad/modeling": "*", "@react-three/fiber": "*", "react": "*", "react-reconciler": "*", "three": "*" } }, "sha512-QQriSum5sYyT/B+p7gXV7RSXYU03tu9y+TC+owb1xrCutXTc+Dio/5ZqPfcKvmuZydTytjeE22x6/o7ZQ34wkw=="],
+    "jscad-fiber": ["jscad-fiber@0.0.81", "", { "dependencies": { "color": "^4.2.3" }, "peerDependencies": { "@jscad/modeling": "*", "@react-three/fiber": "*", "react": "*", "react-reconciler": "*", "three": "*" } }, "sha512-U7QOelx7zww0P17tqQ6lBBz1q+8d1IS1oiLjCuTnPt1k896WBgi/150JrfdSKbtj4NLyDbA5/felm7RQyllkSQ=="],
 
     "jsonfile": ["jsonfile@4.0.0", "", { "optionalDependencies": { "graceful-fs": "^4.1.6" } }, "sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg=="],
 
