@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@tscircuit/simple-3d-svg": "^0.0.22",
-    "circuit-json-to-simple-3d": "^0.0.4",
+    "circuit-json-to-simple-3d": "^0.0.5",
     "circuit-to-svg": "^0.0.158",
     "jscad-fiber": "^0.0.81",
     "react-reconciler": "^0.31.0",
