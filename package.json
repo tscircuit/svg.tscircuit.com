@@ -20,7 +20,7 @@
     "next": "14",
     "react": "18",
     "react-dom": "18",
-    "tscircuit": "^0.0.542",
+    "tscircuit": "^0.0.543",
     "web-worker": "^1.3.0",
     "winterspec": "^0.0.100"
   },
