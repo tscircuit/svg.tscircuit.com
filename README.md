@@ -10,15 +10,17 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 
 ### 1. SVG Generation (Main Endpoint)
 
-**URL:** `GET /?svg_type={type}&code={encoded_code}` or `GET /?svg_type={type}&circuit_json={base64_json}`
+**URL:** `GET /?svg_type={type}&code={encoded_code}` or `POST /?svg_type={type}` with circuit_json in body
 
 **Parameters:**
 - `svg_type` (required): The type of SVG to generate
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
   - `3d` - 3D visualization view
-- `code`: Base64-encoded and compressed TSCircuit code
-- `circuit_json`: Base64-encoded circuit JSON
+
+**Input Methods:**
+- `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
+- `circuit_json` (POST body only): Raw circuit JSON object - pass as `{"circuit_json": {...}}`
 
 Either `code` or `circuit_json` must be provided.
 

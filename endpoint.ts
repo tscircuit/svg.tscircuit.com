@@ -33,37 +33,53 @@ export default async (req: Request) => {
     })
   }
 
+  const compressedCode = url.searchParams.get("code")
+  let circuitJsonFromPost: any = null
+
+  // Handle POST request with circuit_json in body
+  if (req.method === "POST") {
+    try {
+      const body = await req.json()
+      if (body.circuit_json) {
+        circuitJsonFromPost = body.circuit_json
+      }
+    } catch (err) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "Invalid JSON in request body",
+        }),
+        { status: 400 },
+      )
+    }
+  }
+
+  // Show index page only for GET requests with no parameters
   if (
     url.pathname === "/" &&
-    !url.searchParams.get("code") &&
-    !url.searchParams.get("circuit_json")
+    req.method === "GET" &&
+    !compressedCode &&
+    !circuitJsonFromPost
   ) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
     })
   }
 
-  const compressedCode = url.searchParams.get("code")
-  const circuitJsonBase64 = url.searchParams.get("circuit_json")
-
-  if (!compressedCode && !circuitJsonBase64) {
+  if (!compressedCode && !circuitJsonFromPost) {
     return new Response(
       JSON.stringify({
         ok: false,
-        error: "No code or circuit_json parameter provided",
+        error:
+          "No code parameter (GET/POST) or circuit_json (POST only) provided",
       }),
       { status: 400 },
     )
   }
 
   let circuitJson: any
-  if (circuitJsonBase64) {
-    try {
-      const jsonStr = Buffer.from(circuitJsonBase64, "base64").toString("utf-8")
-      circuitJson = JSON.parse(jsonStr)
-    } catch (err) {
-      return errorResponse(err as Error)
-    }
+  if (circuitJsonFromPost) {
+    circuitJson = circuitJsonFromPost
   } else if (compressedCode) {
     let userCode: string
     try {
