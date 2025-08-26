@@ -34,4 +34,3 @@ export default () => (
 
   expect(svgContent).toMatchSvgSnapshot(import.meta.path)
 })
-

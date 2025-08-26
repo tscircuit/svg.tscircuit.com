@@ -35,7 +35,16 @@ export default async (req: Request) => {
 
   if (url.pathname === "/generate_url") {
     const code = url.searchParams.get("code")
-    return new Response(getHtmlForGeneratedUrlPage(code!, host), {
+    if (!code) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "No code parameter provided for URL generation",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
+    return new Response(getHtmlForGeneratedUrlPage(code, host), {
       headers: { "Content-Type": "text/html" },
     })
   }
@@ -52,6 +61,7 @@ export default async (req: Request) => {
 
   const compressedCode = url.searchParams.get("code")
   const circuitJsonBase64 = url.searchParams.get("circuit_json")
+
   if (!compressedCode && !circuitJsonBase64) {
     return new Response(
       JSON.stringify({
@@ -64,51 +74,11 @@ export default async (req: Request) => {
 
   let circuitJson: any
   if (circuitJsonBase64) {
-    const [jsonStr, base64Err] = unwrapSyncError(() =>
-      Buffer.from(circuitJsonBase64, "base64").toString("utf-8"),
-    )
-    if (base64Err) return errorResponse(base64Err)
-
-    const [parsedJson, parseErr] = unwrapSyncError(() => JSON.parse(jsonStr))
-    if (parseErr) return errorResponse(parseErr)
-    circuitJson = parsedJson
-  } else {
-    const [userCode, userCodeErr] = unwrapSyncError(() =>
-      getUncompressedSnippetString(compressedCode!),
-    )
-    if (userCodeErr) return errorResponse(userCodeErr)
-    const worker = new CircuitRunner()
-
-    const [, executeError] = await unwrapPromise(
-      worker.executeWithFsMap({
-        fsMap: {
-          "entrypoint.tsx": `
-          import * as UserComponents from "./UserCode.tsx";
-
-          const ComponentToRender = Object.entries(UserComponents)
-            .filter(([name]) => !name.startsWith("use"))
-            .map(([_, component]) => component)[0] || (() => null);
-
-          circuit.add(
-            <ComponentToRender />
-          );
-        `,
-          "UserCode.tsx": userCode,
-        },
-        entrypoint: "entrypoint.tsx",
-      }),
-    )
-
-    if (executeError) return errorResponse(executeError)
-
-    const [, renderError] = await unwrapPromise(worker.renderUntilSettled())
-    if (renderError) return errorResponse(renderError)
-
-    const [generatedCircuitJson, jsonError] = await unwrapPromise(
-      worker.getCircuitJson(),
-    )
-    if (jsonError) return errorResponse(jsonError)
-    circuitJson = generatedCircuitJson
+    circuitJson = await parseCircuitJsonFromBase64(circuitJsonBase64)
+    if (circuitJson instanceof Response) return circuitJson // Error response
+  } else if (compressedCode) {
+    circuitJson = await generateCircuitJsonFromCode(compressedCode)
+    if (circuitJson instanceof Response) return circuitJson // Error response
   }
 
   // Check for both svg_type and view parameters, with svg_type taking precedence
@@ -149,6 +119,63 @@ export default async (req: Request) => {
             "public, max-age=86400, s-maxage=31536000, immutable",
         },
       })
+}
+
+async function parseCircuitJsonFromBase64(
+  circuitJsonBase64: string,
+): Promise<any | Response> {
+  const [jsonStr, base64Err] = unwrapSyncError(() =>
+    Buffer.from(circuitJsonBase64, "base64").toString("utf-8"),
+  )
+  if (base64Err) return errorResponse(base64Err)
+
+  const [parsedJson, parseErr] = unwrapSyncError(() => JSON.parse(jsonStr))
+  if (parseErr) return errorResponse(parseErr)
+
+  return parsedJson
+}
+
+async function generateCircuitJsonFromCode(
+  compressedCode: string,
+): Promise<any | Response> {
+  const [userCode, userCodeErr] = unwrapSyncError(() =>
+    getUncompressedSnippetString(compressedCode),
+  )
+  if (userCodeErr) return errorResponse(userCodeErr)
+
+  const worker = new CircuitRunner()
+
+  const [, executeError] = await unwrapPromise(
+    worker.executeWithFsMap({
+      fsMap: {
+        "entrypoint.tsx": `
+          import * as UserComponents from "./UserCode.tsx";
+
+          const ComponentToRender = Object.entries(UserComponents)
+            .filter(([name]) => !name.startsWith("use"))
+            .map(([_, component]) => component)[0] || (() => null);
+
+          circuit.add(
+            <ComponentToRender />
+          );
+        `,
+        "UserCode.tsx": userCode,
+      },
+      entrypoint: "entrypoint.tsx",
+    }),
+  )
+
+  if (executeError) return errorResponse(executeError)
+
+  const [, renderError] = await unwrapPromise(worker.renderUntilSettled())
+  if (renderError) return errorResponse(renderError)
+
+  const [generatedCircuitJson, jsonError] = await unwrapPromise(
+    worker.getCircuitJson(),
+  )
+  if (jsonError) return errorResponse(jsonError)
+
+  return generatedCircuitJson
 }
 
 function errorResponse(err: Error) {
