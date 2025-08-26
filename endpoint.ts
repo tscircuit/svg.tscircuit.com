@@ -9,22 +9,6 @@ import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getErrorSvg } from "./getErrorSvg"
 import { getIndexPageHtml } from "./get-index-page-html"
 
-type Result<T, E = Error> = [T, null] | [null, E]
-
-async function unwrapPromise<T>(promise: Promise<T>): Promise<Result<T>> {
-  return promise
-    .then<[T, null]>((data) => [data, null])
-    .catch<[null, Error]>((err) => [null, err])
-}
-
-function unwrapSyncError<T>(fn: () => T): Result<T> {
-  try {
-    return [fn(), null]
-  } catch (err) {
-    return [null, err as Error]
-  }
-}
-
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
   const host = `${url.protocol}//${url.host}`
@@ -74,24 +58,24 @@ export default async (req: Request) => {
 
   let circuitJson: any
   if (circuitJsonBase64) {
-    const [jsonStr, base64Err] = unwrapSyncError(() =>
-      Buffer.from(circuitJsonBase64, "base64").toString("utf-8"),
-    )
-    if (base64Err) return errorResponse(base64Err)
-
-    const [parsedJson, parseErr] = unwrapSyncError(() => JSON.parse(jsonStr))
-    if (parseErr) return errorResponse(parseErr)
-    circuitJson = parsedJson
+    try {
+      const jsonStr = Buffer.from(circuitJsonBase64, "base64").toString("utf-8")
+      circuitJson = JSON.parse(jsonStr)
+    } catch (err) {
+      return errorResponse(err as Error)
+    }
   } else if (compressedCode) {
-    const [userCode, userCodeErr] = unwrapSyncError(() =>
-      getUncompressedSnippetString(compressedCode),
-    )
-    if (userCodeErr) return errorResponse(userCodeErr)
+    let userCode: string
+    try {
+      userCode = getUncompressedSnippetString(compressedCode)
+    } catch (err) {
+      return errorResponse(err as Error)
+    }
 
     const worker = new CircuitRunner()
 
-    const [, executeError] = await unwrapPromise(
-      worker.executeWithFsMap({
+    try {
+      await worker.executeWithFsMap({
         fsMap: {
           "entrypoint.tsx": `
             import * as UserComponents from "./UserCode.tsx";
@@ -107,19 +91,13 @@ export default async (req: Request) => {
           "UserCode.tsx": userCode,
         },
         entrypoint: "entrypoint.tsx",
-      }),
-    )
+      })
 
-    if (executeError) return errorResponse(executeError)
-
-    const [, renderError] = await unwrapPromise(worker.renderUntilSettled())
-    if (renderError) return errorResponse(renderError)
-
-    const [generatedCircuitJson, jsonError] = await unwrapPromise(
-      worker.getCircuitJson(),
-    )
-    if (jsonError) return errorResponse(jsonError)
-    circuitJson = generatedCircuitJson
+      await worker.renderUntilSettled()
+      circuitJson = await worker.getCircuitJson()
+    } catch (err) {
+      return errorResponse(err as Error)
+    }
   }
 
   // Check for both svg_type and view parameters, with svg_type taking precedence
@@ -135,31 +113,25 @@ export default async (req: Request) => {
     )
   }
 
-  let svgContent: string | null = null
-  let svgError: Error | null = null
-  if (svgType === "pcb") {
-    ;[svgContent, svgError] = unwrapSyncError(() =>
-      convertCircuitJsonToPcbSvg(circuitJson),
-    )
-  } else if (svgType === "schematic") {
-    ;[svgContent, svgError] = unwrapSyncError(() =>
-      convertCircuitJsonToSchematicSvg(circuitJson),
-    )
-  } else {
-    ;[svgContent, svgError] = await unwrapPromise(
-      convertCircuitJsonToSimple3dSvg(circuitJson),
-    )
+  let svgContent: string
+  try {
+    if (svgType === "pcb") {
+      svgContent = convertCircuitJsonToPcbSvg(circuitJson)
+    } else if (svgType === "schematic") {
+      svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
+    } else {
+      svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson)
+    }
+  } catch (err) {
+    return errorResponse(err as Error)
   }
 
-  return svgError
-    ? errorResponse(svgError)
-    : new Response(svgContent, {
-        headers: {
-          "Content-Type": "image/svg+xml",
-          "Cache-Control":
-            "public, max-age=86400, s-maxage=31536000, immutable",
-        },
-      })
+  return new Response(svgContent, {
+    headers: {
+      "Content-Type": "image/svg+xml",
+      "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
+    },
+  })
 }
 
 function errorResponse(err: Error) {
