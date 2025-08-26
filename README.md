@@ -1,29 +1,37 @@
 # svg.tscircuit.com
 
-A server that takes encoded tscircuit code and renders it into an SVG suitable for use in docs.
+A server that takes encoded tscircuit code or circuit JSON and renders it into an SVG suitable for use in docs.
 
 ## API Overview
 
-This service converts TSCircuit code into various SVG formats (PCB, schematic, and 3D views) via HTTP requests. It's designed to be used for generating circuit diagrams, PCB layouts, and 3D visualizations for documentation and web applications.
+This service converts TSCircuit code or pre-generated circuit JSON into various SVG formats (PCB, schematic, and 3D views) via HTTP requests. It's designed to be used for generating circuit diagrams, PCB layouts, and 3D visualizations for documentation and web applications.
 
 ## API Endpoints
 
 ### 1. SVG Generation (Main Endpoint)
 
-**URL:** `GET /?svg_type={type}&code={encoded_code}`
+**URL:** `GET /?svg_type={type}&code={encoded_code}` or `GET /?svg_type={type}&circuit_json={base64_json}`
 
 **Parameters:**
 - `svg_type` (required): The type of SVG to generate
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
   - `3d` - 3D visualization view
-- `code` (required): Base64-encoded and compressed TSCircuit code
+- `code`: Base64-encoded and compressed TSCircuit code
+- `circuit_json`: Base64-encoded circuit JSON
+
+Either `code` or `circuit_json` must be provided.
 
 **Response:** SVG content with `image/svg+xml` content type
 
-**Example Request:**
+**Example Request with Code:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=pcb&code=eyJjb2RlIjoiZXhwb3J0IGRlZmF1bHQgKCkgPT4gKFxuICA8Ym9hcmQgd2lkdGg9IjEwbW0iIGhlaWdodD0iMTBtbSI+XG4gICAgPHJlc2lzdG9yXG4gICAgICByZXNpc3RhbmNlPSIxayJcbiAgICAgIGZvb3RwcmludD0iMDQwMiJcbiAgICAgIG5hbWU9IlIxIlxuICAgICAgc2NoWD17M31cbiAgICAgIHBjYlg9ezN9XG4gICAgLz5cbiAgICA8Y2FwYWNpdG9yXG4gICAgICBjYXBhY2l0YW5jZT0iMTAwMHBGIiBcbiAgICAgIGZvb3RwcmludD0iMDQwMiJcbiAgICAgIG5hbWU9IkMxIlxuICAgICAgc2NoWD17LTN9XG4gICAgICBwY2JYPSstM31cbiAgICAvPlxuICAgIDx0cmFjZSBmcm9tPSIuUjEgPiAucGluMSIgdG89Ii5DNSA+IC5waW4xIiAvPlxuICA8L2JvYXJkPlxuKSJ9"
+```
+
+**Example Request with Circuit JSON:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=pcb&circuit_json=BASE64_ENCODED_JSON"
 ```
 
 ### 2. Health Check
@@ -107,6 +115,14 @@ export default () => (
 
 const encodedCode = getCompressedBase64SnippetString(tscircuitCode)
 const apiUrl = `https://svg.tscircuit.com/?svg_type=pcb&code=${encodeURIComponent(encodedCode)}`
+```
+
+To use `circuit_json`, base64 encode the circuit JSON:
+
+```typescript
+const circuitJson = { /* ... */ }
+const encodedJson = Buffer.from(JSON.stringify(circuitJson)).toString("base64")
+const apiUrl = `https://svg.tscircuit.com/?svg_type=pcb&circuit_json=${encodeURIComponent(encodedJson)}`
 ```
 
 ## Response Headers

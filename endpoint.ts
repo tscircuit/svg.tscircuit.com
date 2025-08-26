@@ -40,32 +40,51 @@ export default async (req: Request) => {
     })
   }
 
-  if (url.pathname === "/" && !url.searchParams.get("code")) {
+  if (
+    url.pathname === "/" &&
+    !url.searchParams.get("code") &&
+    !url.searchParams.get("circuit_json")
+  ) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
     })
   }
 
   const compressedCode = url.searchParams.get("code")
-  if (!compressedCode) {
+  const circuitJsonBase64 = url.searchParams.get("circuit_json")
+  if (!compressedCode && !circuitJsonBase64) {
     return new Response(
-      JSON.stringify({ ok: false, error: "No code parameter provided" }),
+      JSON.stringify({
+        ok: false,
+        error: "No code or circuit_json parameter provided",
+      }),
       { status: 400 },
     )
   }
 
-  const [userCode, userCodeErr] = unwrapSyncError(() =>
-    getUncompressedSnippetString(compressedCode),
-  )
-  if (userCodeErr) return errorResponse(userCodeErr)
-  const worker = new CircuitRunner()
+  let circuitJson: any
+  if (circuitJsonBase64) {
+    const [jsonStr, base64Err] = unwrapSyncError(() =>
+      Buffer.from(circuitJsonBase64, "base64").toString("utf-8"),
+    )
+    if (base64Err) return errorResponse(base64Err)
 
-  const [, executeError] = await unwrapPromise(
-    worker.executeWithFsMap({
-      fsMap: {
-        "entrypoint.tsx": `
+    const [parsedJson, parseErr] = unwrapSyncError(() => JSON.parse(jsonStr))
+    if (parseErr) return errorResponse(parseErr)
+    circuitJson = parsedJson
+  } else {
+    const [userCode, userCodeErr] = unwrapSyncError(() =>
+      getUncompressedSnippetString(compressedCode!),
+    )
+    if (userCodeErr) return errorResponse(userCodeErr)
+    const worker = new CircuitRunner()
+
+    const [, executeError] = await unwrapPromise(
+      worker.executeWithFsMap({
+        fsMap: {
+          "entrypoint.tsx": `
           import * as UserComponents from "./UserCode.tsx";
-          
+
           const ComponentToRender = Object.entries(UserComponents)
             .filter(([name]) => !name.startsWith("use"))
             .map(([_, component]) => component)[0] || (() => null);
@@ -74,19 +93,23 @@ export default async (req: Request) => {
             <ComponentToRender />
           );
         `,
-        "UserCode.tsx": userCode,
-      },
-      entrypoint: "entrypoint.tsx",
-    }),
-  )
+          "UserCode.tsx": userCode,
+        },
+        entrypoint: "entrypoint.tsx",
+      }),
+    )
 
-  if (executeError) return errorResponse(executeError)
+    if (executeError) return errorResponse(executeError)
 
-  const [, renderError] = await unwrapPromise(worker.renderUntilSettled())
-  if (renderError) return errorResponse(renderError)
+    const [, renderError] = await unwrapPromise(worker.renderUntilSettled())
+    if (renderError) return errorResponse(renderError)
 
-  const [circuitJson, jsonError] = await unwrapPromise(worker.getCircuitJson())
-  if (jsonError) return errorResponse(jsonError)
+    const [generatedCircuitJson, jsonError] = await unwrapPromise(
+      worker.getCircuitJson(),
+    )
+    if (jsonError) return errorResponse(jsonError)
+    circuitJson = generatedCircuitJson
+  }
 
   // Check for both svg_type and view parameters, with svg_type taking precedence
   const svgType =
