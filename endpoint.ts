@@ -136,7 +136,13 @@ export default async (req: Request) => {
     } else if (svgType === "schematic") {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
     } else {
-      svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson)
+      svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
+        background: {
+          color: "#fff",
+          opacity: 0.0,
+        },
+        defaultZoomMultiplier: 1.2,
+      })
     }
   } catch (err) {
     return errorResponse(err as Error)
