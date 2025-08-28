@@ -136,12 +136,21 @@ export default async (req: Request) => {
     } else if (svgType === "schematic") {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
     } else {
+      // Extract 3D SVG parameters from URL with defaults
+      const backgroundColor = url.searchParams.get("background_color") || "#fff"
+      const backgroundOpacity = parseFloat(
+        url.searchParams.get("background_opacity") || "0.0",
+      )
+      const zoomMultiplier = parseFloat(
+        url.searchParams.get("zoom_multiplier") || "1.2",
+      )
+
       svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
         background: {
-          color: "#fff",
-          opacity: 0.0,
+          color: backgroundColor,
+          opacity: backgroundOpacity,
         },
-        defaultZoomMultiplier: 1.2,
+        defaultZoomMultiplier: zoomMultiplier,
       })
     }
   } catch (err) {
