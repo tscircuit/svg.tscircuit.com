@@ -35,6 +35,7 @@ export default async (req: Request) => {
 
   const compressedCode = url.searchParams.get("code")
   let circuitJsonFromPost: any = null
+  let postBodyParams: any = {}
 
   // Handle POST request with circuit_json in body
   if (req.method === "POST") {
@@ -42,6 +43,12 @@ export default async (req: Request) => {
       const body = await req.json()
       if (body.circuit_json) {
         circuitJsonFromPost = body.circuit_json
+      }
+      // Extract 3D SVG parameters from POST body
+      postBodyParams = {
+        background_color: body.background_color,
+        background_opacity: body.background_opacity,
+        zoom_multiplier: body.zoom_multiplier,
       }
     } catch (err) {
       return new Response(
@@ -136,13 +143,20 @@ export default async (req: Request) => {
     } else if (svgType === "schematic") {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
     } else {
-      // Extract 3D SVG parameters from URL with defaults
-      const backgroundColor = url.searchParams.get("background_color") || "#fff"
+      // Extract 3D SVG parameters from URL and POST body (URL takes precedence)
+      const backgroundColor =
+        url.searchParams.get("background_color") ||
+        postBodyParams.background_color ||
+        "#fff"
       const backgroundOpacity = parseFloat(
-        url.searchParams.get("background_opacity") || "0.0",
+        url.searchParams.get("background_opacity") ||
+          postBodyParams.background_opacity ||
+          "0.0",
       )
       const zoomMultiplier = parseFloat(
-        url.searchParams.get("zoom_multiplier") || "1.2",
+        url.searchParams.get("zoom_multiplier") ||
+          postBodyParams.zoom_multiplier ||
+          "1.2",
       )
 
       svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {

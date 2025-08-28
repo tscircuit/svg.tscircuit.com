@@ -1,6 +1,7 @@
 import { test, expect } from "bun:test"
 import { getTestServer } from "./fixtures/get-test-server"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
+import testCircuitJson from "./fixtures/test-circuit.json"
 
 const testCircuitCode = `
 export default () => (
@@ -70,4 +71,20 @@ test("3d svg conversion with parameter variations", async () => {
   const invalidSvgContent = await invalidResponse.text()
   expect(invalidResponse.status).toBe(200)
   expect(invalidSvgContent).toContain("<svg")
+
+  // Test POST request with parameters in body
+  const postResponse = await fetch(`${serverUrl}?svg_type=3d`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      circuit_json: testCircuitJson,
+      background_color: "#00ff00",
+      background_opacity: 0.7,
+      zoom_multiplier: 1.8,
+    }),
+  })
+  const postSvgContent = await postResponse.text()
+  expect(postResponse.status).toBe(200)
+  expect(postSvgContent).toContain("<svg")
+  expect(postSvgContent).toMatchSvgSnapshot(import.meta.path, "3d-post")
 })
