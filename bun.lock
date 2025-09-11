@@ -6,7 +6,7 @@
       "dependencies": {
         "@tscircuit/simple-3d-svg": "^0.0.22",
         "circuit-json-to-simple-3d": "^0.0.8",
-        "circuit-to-svg": "^0.0.158",
+        "circuit-to-svg": "^0.0.189",
         "jscad-fiber": "^0.0.85",
       },
       "devDependencies": {
@@ -284,7 +284,7 @@
 
     "circuit-json-to-simple-3d": ["circuit-json-to-simple-3d@0.0.8", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-ZQJB625ntNUS0hC3dFZtyFS+t2oL4PVysHlNQdGqpJFefwRXLCOjiXj0qS4ihE1SSl8indv+FCoCzJS/Kp6JHw=="],
 
-    "circuit-to-svg": ["circuit-to-svg@0.0.158", "", { "dependencies": { "@types/node": "^22.5.5", "bun-types": "^1.1.40", "svgson": "^5.3.1", "transformation-matrix": "^2.16.1" }, "peerDependencies": { "@tscircuit/circuit-json-util": "*", "@tscircuit/footprinter": "*", "circuit-json": "*", "schematic-symbols": "*" } }, "sha512-TdKxfJ3x+5/cT8wbyXC++jvsEWacKS0KWRcKNZ8qvz73nPcs8y5+iUUH1c0k6YkkY1aZwrjiTqYNYVtTSuySyg=="],
+    "circuit-to-svg": ["circuit-to-svg@0.0.189", "", { "dependencies": { "@types/node": "^22.5.5", "bun-types": "^1.1.40", "svgson": "^5.3.1", "transformation-matrix": "^2.16.1" }, "peerDependencies": { "tscircuit": "*" } }, "sha512-DiALd+wEfOqoPPgsUCudRomGLmAh/P+ghmdYqRBEfFWxd1sasOA+CWuTyFlMpWzrBglymhKOCAHZk8tcvtaDag=="],
 
     "cli-cursor": ["cli-cursor@5.0.0", "", { "dependencies": { "restore-cursor": "^5.0.0" } }, "sha512-aCj4O5wKyszjMmDT4tZj93kxyydN/K5zPWSCe6/0AV/AA1pqe5ZBIw0a2ZfPQV7lL5/yb5HsUreJ6UFAF1tEQw=="],
 
@@ -759,8 +759,6 @@
     "tscircuit/@tscircuit/simple-3d-svg": ["@tscircuit/simple-3d-svg@0.0.38", "", {}, "sha512-Y+OpNlj6DvvN4jfkAoy15hdBYlleFuGU7jED2z3SwJ+CCKGpGC/AMYFpICl0rydFk0cXkmwfLJVaktH0/yHaqw=="],
 
     "tscircuit/circuit-json-to-simple-3d": ["circuit-json-to-simple-3d@0.0.6", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-9qtm6h1zLgeB+pMtH2f91xD6ldua3+kKxg/i9+HpaP98bTNYumARll56l4dHRHbiUMBSinawg7G6410P7sLVpg=="],
-
-    "tscircuit/circuit-to-svg": ["circuit-to-svg@0.0.189", "", { "dependencies": { "@types/node": "^22.5.5", "bun-types": "^1.1.40", "svgson": "^5.3.1", "transformation-matrix": "^2.16.1" }, "peerDependencies": { "tscircuit": "*" } }, "sha512-DiALd+wEfOqoPPgsUCudRomGLmAh/P+ghmdYqRBEfFWxd1sasOA+CWuTyFlMpWzrBglymhKOCAHZk8tcvtaDag=="],
 
     "use-mouse-matrix-transform/transformation-matrix": ["transformation-matrix@3.0.0", "", {}, "sha512-C6NlNnD6T8JqDeY4BpGznuve4d8/JlLDZLcJbnnx7gQKoyk01+uk2XYVFjBGqvNsVxJUpUwb3WZpjpdPr+05FQ=="],
 
