@@ -2,6 +2,7 @@ import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import { CircuitRunner } from "@tscircuit/eval/eval"
 import {
   convertCircuitJsonToPcbSvg,
+  convertCircuitJsonToPinoutSvg,
   convertCircuitJsonToSchematicSvg,
 } from "circuit-to-svg"
 import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
@@ -49,6 +50,9 @@ export default async (req: Request) => {
         background_color: body.background_color,
         background_opacity: body.background_opacity,
         zoom_multiplier: body.zoom_multiplier,
+        width: body.width,
+        height: body.height,
+        include_version: body.include_version,
       }
     } catch (err) {
       return new Response(
@@ -126,7 +130,7 @@ export default async (req: Request) => {
   // Check for both svg_type and view parameters, with svg_type taking precedence
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
-  if (!svgType || !["pcb", "schematic", "3d"].includes(svgType)) {
+  if (!svgType || !["pcb", "schematic", "3d", "pinout"].includes(svgType)) {
     return new Response(
       JSON.stringify({
         ok: false,
@@ -142,6 +146,39 @@ export default async (req: Request) => {
       svgContent = convertCircuitJsonToPcbSvg(circuitJson)
     } else if (svgType === "schematic") {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
+    } else if (svgType === "pinout") {
+      const widthParam =
+        url.searchParams.get("width") ??
+        (postBodyParams.width !== undefined
+          ? String(postBodyParams.width)
+          : undefined)
+      const heightParam =
+        url.searchParams.get("height") ??
+        (postBodyParams.height !== undefined
+          ? String(postBodyParams.height)
+          : undefined)
+      const options: {
+        width?: number
+        height?: number
+        includeVersion?: boolean
+      } = {}
+      if (widthParam) {
+        const parsedWidth = Number(widthParam)
+        if (!Number.isNaN(parsedWidth)) options.width = parsedWidth
+      }
+      if (heightParam) {
+        const parsedHeight = Number(heightParam)
+        if (!Number.isNaN(parsedHeight)) options.height = parsedHeight
+      }
+      const includeVersionParam =
+        url.searchParams.get("include_version") ??
+        (postBodyParams.include_version !== undefined
+          ? String(postBodyParams.include_version)
+          : undefined)
+      if (includeVersionParam) {
+        options.includeVersion = includeVersionParam !== "false"
+      }
+      svgContent = convertCircuitJsonToPinoutSvg(circuitJson, options)
     } else {
       // Extract 3D SVG parameters from URL and POST body (URL takes precedence)
       const backgroundColor =

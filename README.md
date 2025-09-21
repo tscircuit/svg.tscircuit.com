@@ -17,6 +17,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
   - `3d` - 3D visualization view
+  - `pinout` - Board pinout reference view
 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
@@ -98,6 +99,11 @@ curl "https://svg.tscircuit.com/?svg_type=schematic&code=YOUR_ENCODED_CODE"
 **3D Visualization:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=3d&code=YOUR_ENCODED_CODE"
+```
+
+**Pinout View:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=pinout&code=YOUR_ENCODED_CODE"
 ```
 
 ## Code Encoding
