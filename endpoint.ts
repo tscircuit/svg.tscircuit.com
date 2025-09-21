@@ -3,6 +3,7 @@ import { CircuitRunner } from "@tscircuit/eval/eval"
 import {
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
+  convertCircuitJsonToPinoutSvg,
 } from "circuit-to-svg"
 import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
@@ -126,7 +127,7 @@ export default async (req: Request) => {
   // Check for both svg_type and view parameters, with svg_type taking precedence
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
-  if (!svgType || !["pcb", "schematic", "3d"].includes(svgType)) {
+  if (!svgType || !["pcb", "schematic", "3d", "pinout"].includes(svgType)) {
     return new Response(
       JSON.stringify({
         ok: false,
@@ -142,6 +143,8 @@ export default async (req: Request) => {
       svgContent = convertCircuitJsonToPcbSvg(circuitJson)
     } else if (svgType === "schematic") {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
+    } else if (svgType === "pinout") {
+      svgContent = convertCircuitJsonToPinoutSvg(circuitJson)
     } else {
       // Extract 3D SVG parameters from URL and POST body (URL takes precedence)
       const backgroundColor =
