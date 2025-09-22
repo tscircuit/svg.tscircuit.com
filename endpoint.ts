@@ -1,4 +1,3 @@
-import { Buffer } from "node:buffer"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import { CircuitRunner } from "@tscircuit/eval/eval"
 import {
@@ -6,10 +5,12 @@ import {
   convertCircuitJsonToSchematicSvg,
 } from "circuit-to-svg"
 import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
-import sharp, { type SharpOptions } from "sharp"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
-import { getErrorSvg } from "./getErrorSvg"
 import { getIndexPageHtml } from "./get-index-page-html"
+import { errorResponse } from "./lib/errorResponse"
+import { getOutputFormat } from "./lib/getOutputFormat"
+import { parsePositiveInt } from "./lib/parsePositiveInt"
+import { svgToPng } from "./lib/svgToPng"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -220,111 +221,4 @@ export default async (req: Request) => {
       "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
     },
   })
-}
-
-async function errorResponse(err: Error, format: "svg" | "png") {
-  const errorSvg = getErrorSvg(err.message)
-
-  if (format === "png") {
-    try {
-      const pngBuffer = await svgToPng(errorSvg, {})
-
-      return new Response(pngBuffer, {
-        headers: {
-          "Content-Type": "image/png",
-          "Cache-Control": "public, max-age=86400, s-maxage=86400",
-        },
-      })
-    } catch (_) {
-      return new Response(
-        JSON.stringify({ ok: false, error: err.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      )
-    }
-  }
-
-  return new Response(errorSvg, {
-    headers: {
-      "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=86400, s-maxage=86400",
-    },
-  })
-}
-
-function getOutputFormat(
-  url: URL,
-  postBodyParams: Record<string, any>,
-): "svg" | "png" | null {
-  const rawFormat =
-    url.searchParams.get("format") ||
-    url.searchParams.get("output") ||
-    url.searchParams.get("response_format") ||
-    postBodyParams.output_format ||
-    "svg"
-
-  if (typeof rawFormat !== "string") {
-    return null
-  }
-
-  const normalized = rawFormat.toLowerCase()
-
-  if (normalized === "svg") {
-    return "svg"
-  }
-
-  if (normalized === "png") {
-    return "png"
-  }
-
-  return null
-}
-
-function parsePositiveInt(value: unknown) {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    const intValue = Math.trunc(value)
-    return intValue > 0 ? intValue : undefined
-  }
-
-  if (typeof value === "string" && value.trim().length > 0) {
-    const parsed = Number.parseInt(value, 10)
-    if (Number.isFinite(parsed) && parsed > 0) {
-      return parsed
-    }
-  }
-
-  return undefined
-}
-
-async function svgToPng(
-  svg: string,
-  options: { width?: number; height?: number; density?: number },
-): Promise<ArrayBuffer> {
-  const sharpOptions: SharpOptions = {}
-
-  if (options.density) {
-    sharpOptions.density = options.density
-  }
-
-  let image = sharp(Buffer.from(svg), sharpOptions)
-
-  if (options.width || options.height) {
-    image = image.resize({
-      width: options.width,
-      height: options.height,
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-  }
-
-  const nodeBuffer = await image
-    .png({
-      compressionLevel: 9,
-      adaptiveFiltering: true,
-    })
-    .toBuffer()
-
-  const arrayBuffer = new ArrayBuffer(nodeBuffer.byteLength)
-  new Uint8Array(arrayBuffer).set(nodeBuffer)
-
-  return arrayBuffer
 }
