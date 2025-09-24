@@ -7,8 +7,11 @@ import {
 } from "circuit-to-svg"
 import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
-import { getErrorSvg } from "./getErrorSvg"
 import { getIndexPageHtml } from "./get-index-page-html"
+import { errorResponse } from "./lib/errorResponse"
+import { getOutputFormat } from "./lib/getOutputFormat"
+import { parsePositiveInt } from "./lib/parsePositiveInt"
+import { svgToPng } from "./lib/svgToPng"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -50,6 +53,10 @@ export default async (req: Request) => {
         background_color: body.background_color,
         background_opacity: body.background_opacity,
         zoom_multiplier: body.zoom_multiplier,
+        output_format: body.output_format || body.format,
+        png_width: body.png_width,
+        png_height: body.png_height,
+        png_density: body.png_density,
       }
     } catch (err) {
       return new Response(
@@ -74,6 +81,17 @@ export default async (req: Request) => {
     })
   }
 
+  const outputFormat = getOutputFormat(url, postBodyParams)
+  if (!outputFormat) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "Invalid format parameter",
+      }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    )
+  }
+
   if (!compressedCode && !circuitJsonFromPost) {
     return new Response(
       JSON.stringify({
@@ -93,7 +111,7 @@ export default async (req: Request) => {
     try {
       userCode = getUncompressedSnippetString(compressedCode)
     } catch (err) {
-      return errorResponse(err as Error)
+      return await errorResponse(err as Error, outputFormat)
     }
 
     const worker = new CircuitRunner()
@@ -120,7 +138,7 @@ export default async (req: Request) => {
       await worker.renderUntilSettled()
       circuitJson = await worker.getCircuitJson()
     } catch (err) {
-      return errorResponse(err as Error)
+      return await errorResponse(err as Error, outputFormat)
     }
   }
 
@@ -171,22 +189,39 @@ export default async (req: Request) => {
       })
     }
   } catch (err) {
-    return errorResponse(err as Error)
+    return await errorResponse(err as Error, outputFormat)
+  }
+
+  if (outputFormat === "png") {
+    try {
+      const pngBuffer = await svgToPng(svgContent, {
+        density: parsePositiveInt(
+          url.searchParams.get("png_density") ?? postBodyParams.png_density,
+        ),
+        width: parsePositiveInt(
+          url.searchParams.get("png_width") ?? postBodyParams.png_width,
+        ),
+        height: parsePositiveInt(
+          url.searchParams.get("png_height") ?? postBodyParams.png_height,
+        ),
+      })
+
+      return new Response(pngBuffer, {
+        headers: {
+          "Content-Type": "image/png",
+          "Cache-Control":
+            "public, max-age=86400, s-maxage=31536000, immutable",
+        },
+      })
+    } catch (err) {
+      return await errorResponse(err as Error, outputFormat)
+    }
   }
 
   return new Response(svgContent, {
     headers: {
       "Content-Type": "image/svg+xml",
       "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
-    },
-  })
-}
-
-function errorResponse(err: Error) {
-  return new Response(getErrorSvg(err.message), {
-    headers: {
-      "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=86400, s-maxage=86400",
     },
   })
 }

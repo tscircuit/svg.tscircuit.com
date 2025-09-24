@@ -1,10 +1,10 @@
 # svg.tscircuit.com
 
-A server that takes encoded tscircuit code or circuit JSON and renders it into an SVG suitable for use in docs.
+A server that takes encoded tscircuit code or circuit JSON and renders it into SVG or PNG assets suitable for use in docs.
 
 ## API Overview
 
-This service converts TSCircuit code or pre-generated circuit JSON into various SVG formats (PCB, schematic, and 3D views) via HTTP requests. It's designed to be used for generating circuit diagrams, PCB layouts, and 3D visualizations for documentation and web applications.
+This service converts TSCircuit code or pre-generated circuit JSON into various visual formats (PCB, schematic, and 3D views) via HTTP requests. It's designed to be used for generating circuit diagrams, PCB layouts, and 3D visualizations for documentation and web applications.
 
 ## API Endpoints
 
@@ -18,6 +18,9 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `schematic` - Circuit schematic view
   - `pinout` - Pinout diagram view
   - `3d` - 3D visualization view
+- `format` (optional): Output format. Defaults to `svg`. Set `format=png` to receive a PNG rasterized version. PNG-specific query parameters:
+  - `png_width` / `png_height`
+  - `png_density`
 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
@@ -25,7 +28,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 
 Either `code` or `circuit_json` must be provided.
 
-**Response:** SVG content with `image/svg+xml` content type
+**Response:** SVG content with `image/svg+xml` content type (default) or PNG content with `image/png` when `format=png`
 
 **Example Request with Code:**
 ```bash
@@ -91,6 +94,11 @@ export default () => (
 curl "https://svg.tscircuit.com/?svg_type=pcb&code=YOUR_ENCODED_CODE"
 ```
 
+**PNG Output:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=pcb&format=png&code=YOUR_ENCODED_CODE"
+```
+
 **Schematic View:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=schematic&code=YOUR_ENCODED_CODE"
@@ -135,19 +143,19 @@ const apiUrl = `https://svg.tscircuit.com/?svg_type=pcb&circuit_json=${encodeURI
 
 ## Response Headers
 
-Successful SVG responses include:
-- `Content-Type: image/svg+xml`
+Successful responses include:
+- `Content-Type: image/svg+xml` (SVG) or `image/png` (PNG)
 - `Cache-Control: public, max-age=86400, s-maxage=31536000, immutable`
 
 ## Error Handling
 
-When errors occur, the API returns an SVG with error information instead of the requested circuit SVG. Error responses include:
-- `Content-Type: image/svg+xml`
+When errors occur, the API returns an image with error information instead of the requested circuit asset. Error responses include:
+- `Content-Type: image/svg+xml` (or `image/png` when `format=png`)
 - `Cache-Control: public, max-age=86400, s-maxage=86400`
 
 ## Caching
 
-The API implements aggressive caching for generated SVGs:
+The API implements aggressive caching for generated assets:
 - Browser cache: 24 hours (`max-age=86400`)
 - CDN cache: 1 year (`s-maxage=31536000`)
 - Error responses: 24 hours
