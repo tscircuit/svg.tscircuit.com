@@ -16,6 +16,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 - `svg_type` (required): The type of SVG to generate
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
+  - `pinout` - Pinout diagram view
   - `3d` - 3D visualization view
 - `format` (optional): Output format. Defaults to `svg`. Set `format=png` to receive a PNG rasterized version. PNG-specific query parameters:
   - `png_width` / `png_height`
@@ -101,6 +102,11 @@ curl "https://svg.tscircuit.com/?svg_type=pcb&format=png&code=YOUR_ENCODED_CODE"
 **Schematic View:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=schematic&code=YOUR_ENCODED_CODE"
+```
+
+**Pinout View:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=pinout&code=YOUR_ENCODED_CODE"
 ```
 
 **3D Visualization:**
