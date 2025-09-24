@@ -32,7 +32,9 @@ export default () => (
 test("returns png error image when conversion fails", async () => {
   const { serverUrl } = await getTestServer()
 
-  const response = await fetch(`${serverUrl}?svg_type=pcb&format=png&code=invalid`)
+  const response = await fetch(
+    `${serverUrl}?svg_type=pcb&format=png&code=invalid`,
+  )
 
   expect(response.status).toBe(200)
   expect(response.headers.get("content-type")).toContain("image/png")

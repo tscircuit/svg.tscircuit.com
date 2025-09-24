@@ -15,10 +15,10 @@ export async function errorResponse(err: Error, format: "svg" | "png") {
         },
       })
     } catch (_) {
-      return new Response(
-        JSON.stringify({ ok: false, error: err.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      )
+      return new Response(JSON.stringify({ ok: false, error: err.message }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      })
     }
   }
 
