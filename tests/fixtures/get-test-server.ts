@@ -2,6 +2,16 @@ import getPort from "get-port"
 import endpoint from "../../endpoint"
 import { afterEach } from "bun:test"
 
+const activeServers = new Set<ReturnType<typeof Bun.serve>>()
+
+afterEach(() => {
+  for (const server of activeServers) {
+    server.stop()
+  }
+
+  activeServers.clear()
+})
+
 export const getTestServer = async () => {
   const port = await getPort()
 
@@ -13,9 +23,7 @@ export const getTestServer = async () => {
     idleTimeout: 20,
   })
 
-  afterEach(() => {
-    server.stop()
-  })
+  activeServers.add(server)
 
   return {
     serverUrl,
