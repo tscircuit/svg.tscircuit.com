@@ -30,7 +30,7 @@
   "dependencies": {
     "@tscircuit/simple-3d-svg": "^0.0.22",
     "circuit-json-to-simple-3d": "^0.0.9",
-    "circuit-to-svg": "^0.0.205",
+    "circuit-to-svg": "^0.0.215",
     "jscad-fiber": "^0.0.85",
     "sharp": "^0.34.4"
   }
