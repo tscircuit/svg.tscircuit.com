@@ -1,6 +1,5 @@
 import getPort from "get-port"
 import endpoint from "../../endpoint"
-import { afterEach } from "bun:test"
 
 export const getTestServer = async () => {
   const port = await getPort()
@@ -12,9 +11,9 @@ export const getTestServer = async () => {
     fetch: endpoint,
     idleTimeout: 20,
   })
-
-  afterEach(() => {
-    server.stop()
+  ;(globalThis as any).servers?.push({
+    url: serverUrl,
+    close: () => server.stop(),
   })
 
   return {
