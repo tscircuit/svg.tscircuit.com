@@ -1,4 +1,7 @@
-import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
+import {
+  getUncompressedSnippetString,
+  getCompressedBase64SnippetString,
+} from "@tscircuit/create-snippet-url"
 import { CircuitRunner } from "@tscircuit/eval/eval"
 import {
   convertCircuitJsonToPcbSvg,
@@ -12,6 +15,7 @@ import { errorResponse } from "./lib/errorResponse"
 import { getOutputFormat } from "./lib/getOutputFormat"
 import { parsePositiveInt } from "./lib/parsePositiveInt"
 import { svgToPng } from "./lib/svgToPng"
+import { decodeUrlHashToFsMap } from "./lib/fsMap"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -37,18 +41,48 @@ export default async (req: Request) => {
     })
   }
 
+  if (url.pathname === "/generate_urls" && req.method === "POST") {
+    try {
+      const body = await req.json()
+      const { fsMap, entrypoint } = body
+
+      if (!fsMap) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "No fsMap provided" }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        )
+      }
+
+      return new Response(
+        getHtmlForGeneratedUrlPage({ fsMap, entrypoint }, host),
+        {
+          headers: { "Content-Type": "text/html" },
+        },
+      )
+    } catch (err) {
+      return new Response(
+        JSON.stringify({ ok: false, error: (err as Error).message }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
+  }
+
   const compressedCode = url.searchParams.get("code")
   let circuitJsonFromPost: any = null
+  let fsMapFromPost: any = null
+  let entrypointFromPost: string | null = null
   let postBodyParams: any = {}
 
-  // Handle POST request with circuit_json in body
   if (req.method === "POST") {
     try {
       const body = await req.json()
       if (body.circuit_json) {
         circuitJsonFromPost = body.circuit_json
       }
-      // Extract 3D SVG parameters from POST body
+      if (body.fsMap) {
+        fsMapFromPost = body.fsMap
+        entrypointFromPost = body.entrypoint || null
+      }
       postBodyParams = {
         background_color: body.background_color,
         background_opacity: body.background_opacity,
@@ -69,12 +103,12 @@ export default async (req: Request) => {
     }
   }
 
-  // Show index page only for GET requests with no parameters
   if (
     url.pathname === "/" &&
     req.method === "GET" &&
     !compressedCode &&
-    !circuitJsonFromPost
+    !circuitJsonFromPost &&
+    !fsMapFromPost
   ) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
@@ -92,12 +126,12 @@ export default async (req: Request) => {
     )
   }
 
-  if (!compressedCode && !circuitJsonFromPost) {
+  if (!compressedCode && !circuitJsonFromPost && !fsMapFromPost) {
     return new Response(
       JSON.stringify({
         ok: false,
         error:
-          "No code parameter (GET/POST) or circuit_json (POST only) provided",
+          "No code parameter (GET/POST), circuit_json (POST), or fsMap (POST) provided",
       }),
       { status: 400 },
     )
@@ -106,34 +140,35 @@ export default async (req: Request) => {
   let circuitJson: any
   if (circuitJsonFromPost) {
     circuitJson = circuitJsonFromPost
-  } else if (compressedCode) {
-    let userCode: string
+  } else if (fsMapFromPost) {
+    const worker = new CircuitRunner()
     try {
-      userCode = getUncompressedSnippetString(compressedCode)
+      await worker.executeWithFsMap({
+        fsMap: fsMapFromPost,
+        entrypoint: entrypointFromPost || "index.tsx",
+      })
+      await worker.renderUntilSettled()
+      circuitJson = await worker.getCircuitJson()
     } catch (err) {
       return await errorResponse(err as Error, outputFormat)
     }
-
+  } else if (compressedCode) {
     const worker = new CircuitRunner()
-
     try {
-      await worker.executeWithFsMap({
-        fsMap: {
-          "entrypoint.tsx": `
-            import * as UserComponents from "./UserCode.tsx";
+      const decodedFsMap = decodeUrlHashToFsMap(compressedCode)
 
-            const ComponentToRender = Object.entries(UserComponents)
-              .filter(([name]) => !name.startsWith("use"))
-              .map(([_, component]) => component)[0] || (() => null);
-
-            circuit.add(
-              <ComponentToRender />
-            );
-          `,
-          "UserCode.tsx": userCode,
-        },
-        entrypoint: "entrypoint.tsx",
-      })
+      if (decodedFsMap) {
+        await worker.executeWithFsMap({
+          fsMap: decodedFsMap,
+        })
+      } else {
+        const userCode = getUncompressedSnippetString(compressedCode)
+        await worker.executeWithFsMap({
+          fsMap: {
+            "index.tsx": userCode,
+          },
+        })
+      }
 
       await worker.renderUntilSettled()
       circuitJson = await worker.getCircuitJson()

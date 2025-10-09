@@ -20,7 +20,7 @@
     "next": "14",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tscircuit": "^0.0.666",
+    "tscircuit": "^0.0.720",
     "web-worker": "^1.3.0",
     "winterspec": "^0.0.100"
   },
@@ -28,9 +28,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@tscircuit/simple-3d-svg": "^0.0.22",
+    "@tscircuit/simple-3d-svg": "^0.0.41",
     "circuit-json-to-simple-3d": "^0.0.9",
-    "circuit-to-svg": "^0.0.215",
+    "circuit-to-svg": "^0.0.227",
     "jscad-fiber": "^0.0.85",
     "sharp": "^0.34.4"
   }
