@@ -166,7 +166,7 @@ export const getIndexPageHtml = () => {
         const res = await fetch('/generate_urls', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fsMap, entrypoint })
+          body: JSON.stringify({ fs_map: fsMap, entrypoint })
         });
         
         if (res.ok && res.headers.get('content-type')?.includes('text/html')) {

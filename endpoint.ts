@@ -44,9 +44,9 @@ export default async (req: Request) => {
   if (url.pathname === "/generate_urls" && req.method === "POST") {
     try {
       const body = await req.json()
-      const { fsMap, entrypoint } = body
+      const { fs_map, entrypoint } = body
 
-      if (!fsMap) {
+      if (!fs_map) {
         return new Response(
           JSON.stringify({ ok: false, error: "No fsMap provided" }),
           { status: 400, headers: { "Content-Type": "application/json" } },
@@ -54,7 +54,7 @@ export default async (req: Request) => {
       }
 
       return new Response(
-        getHtmlForGeneratedUrlPage({ fsMap, entrypoint }, host),
+        getHtmlForGeneratedUrlPage({ fsMap: fs_map, entrypoint }, host),
         {
           headers: { "Content-Type": "text/html" },
         },
