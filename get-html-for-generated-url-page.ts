@@ -2,13 +2,28 @@ import {
   getCompressedBase64SnippetString,
   createSnippetUrl,
 } from "@tscircuit/create-snippet-url"
+import { encodeFsMapToHash } from "./lib/fsMap"
 
 export const getHtmlForGeneratedUrlPage = (
-  code: string,
+  codeOrFsMap: string | { fsMap: Record<string, string>; entrypoint?: string },
   urlPrefix = "https://svg.tscircuit.com",
 ) => {
-  const snippetUrl = createSnippetUrl(code)
-  const compressedCode = getCompressedBase64SnippetString(code)
+  let code: string
+  let packgaeUrl: string
+  let compressedCode: string
+
+  if (typeof codeOrFsMap === "string") {
+    code = codeOrFsMap
+    packgaeUrl = createSnippetUrl(code)
+    compressedCode = getCompressedBase64SnippetString(code)
+  } else {
+    const { fsMap, entrypoint } = codeOrFsMap
+    const mainFile = entrypoint || Object.keys(fsMap)[0]
+    code = fsMap[mainFile]
+    const fsMapHash = encodeFsMapToHash(fsMap)
+    packgaeUrl = `https://tscircuit.com/editor?#data:application/gzip;base64,${fsMapHash}`
+    compressedCode = fsMapHash
+  }
 
   const pcbSvgUrl = `${urlPrefix}/?svg_type=pcb&code=${encodeURIComponent(compressedCode)}`
   const schSvgUrl = `${urlPrefix}/?svg_type=schematic&code=${encodeURIComponent(compressedCode)}`
@@ -16,38 +31,96 @@ export const getHtmlForGeneratedUrlPage = (
   const threeDSvgUrl = `${urlPrefix}/?svg_type=3d&code=${encodeURIComponent(compressedCode)}`
 
   return `
-  <!DOCTYPE html>
-  <html>
-    <body>
-      <h1>svg.tscircuit.com</h1>
-      <table>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>svg.tscircuit.com - Generated URLs</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f5;
+    }
+    .header {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    h1 { margin-bottom: 0.5rem; }
+    .container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .url-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .url-table th,
+    .url-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    .url-table th {
+      background: #f5f5f5;
+      font-weight: 600;
+    }
+    .url-table td a {
+      color: #0066cc;
+      word-break: break-all;
+    }
+    @media (max-width: 768px) {
+      body { padding: 0.5rem; }
+      .header, .container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>svg.tscircuit.com</h1>
+  </div>
+  <div class="container">
+    <table class="url-table">
+      <thead>
         <tr>
           <th>Type</th>
           <th>URL</th>
         </tr>
+      </thead>
+      <tbody>
         <tr>
-          <td>Snippet URL</td>
-          <td><a href="${snippetUrl}">${snippetUrl}</a></td>
+          <td>Package URL</td>
+          <td><a href="${packgaeUrl}" target="_blank">${packgaeUrl}</a></td>
         </tr>
         <tr>
           <td>PCB SVG URL</td>
-          <td><a href="${pcbSvgUrl}">${pcbSvgUrl}</a></td>
+          <td><a href="${pcbSvgUrl}" target="_blank">${pcbSvgUrl}</a></td>
         </tr>
         <tr>
           <td>Schematic SVG URL</td>
-          <td><a href="${schSvgUrl}">${schSvgUrl}</a></td>
+          <td><a href="${schSvgUrl}" target="_blank">${schSvgUrl}</a></td>
         </tr>
         <tr>
           <td>Pinout SVG URL</td>
-          <td><a href="${pinoutSvgUrl}">${pinoutSvgUrl}</a></td>
-        </tr>
-       <tr>
-          <td>3D SVG URL</td>
-          <td><a href="${threeDSvgUrl}">${threeDSvgUrl}</a></td>
+          <td><a href="${pinoutSvgUrl}" target="_blank">${pinoutSvgUrl}</a></td>
         </tr>
         <tr>
-      </table>
-    </body>
-  </html>
+          <td>3D SVG URL</td>
+          <td><a href="${threeDSvgUrl}" target="_blank">${threeDSvgUrl}</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
   `
 }
