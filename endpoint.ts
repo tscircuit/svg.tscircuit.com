@@ -1,6 +1,7 @@
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import { CircuitRunner } from "@tscircuit/eval/eval"
 import {
+  convertCircuitJsonToAssemblySvg,
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
   convertCircuitJsonToPinoutSvg,
@@ -145,7 +146,10 @@ export default async (req: Request) => {
   // Check for both svg_type and view parameters, with svg_type taking precedence
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
-  if (!svgType || !["pcb", "schematic", "3d", "pinout"].includes(svgType)) {
+  if (
+    !svgType ||
+    !["pcb", "schematic", "assembly", "3d", "pinout"].includes(svgType)
+  ) {
     return new Response(
       JSON.stringify({
         ok: false,
@@ -161,6 +165,8 @@ export default async (req: Request) => {
       svgContent = convertCircuitJsonToPcbSvg(circuitJson)
     } else if (svgType === "schematic") {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
+    } else if (svgType === "assembly") {
+      svgContent = convertCircuitJsonToAssemblySvg(circuitJson)
     } else if (svgType === "pinout") {
       svgContent = convertCircuitJsonToPinoutSvg(circuitJson)
     } else {

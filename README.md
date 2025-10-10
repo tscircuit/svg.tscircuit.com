@@ -4,7 +4,7 @@ A server that takes encoded tscircuit code or circuit JSON and renders it into S
 
 ## API Overview
 
-This service converts TSCircuit code or pre-generated circuit JSON into various visual formats (PCB, schematic, and 3D views) via HTTP requests. It's designed to be used for generating circuit diagrams, PCB layouts, and 3D visualizations for documentation and web applications.
+This service converts TSCircuit code or pre-generated circuit JSON into various visual formats (PCB, schematic, assembly, pinout, and 3D views) via HTTP requests. It's designed to be used for generating circuit diagrams, PCB layouts, and 3D visualizations for documentation and web applications.
 
 ## API Endpoints
 
@@ -16,6 +16,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 - `svg_type` (required): The type of SVG to generate
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
+  - `assembly` - Assembly view with labeled components
   - `pinout` - Pinout diagram view
   - `3d` - 3D visualization view
 - `format` (optional): Output format. Defaults to `svg`. Set `format=png` to receive a PNG rasterized version. PNG-specific query parameters:
@@ -102,6 +103,11 @@ curl "https://svg.tscircuit.com/?svg_type=pcb&format=png&code=YOUR_ENCODED_CODE"
 **Schematic View:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=schematic&code=YOUR_ENCODED_CODE"
+```
+
+**Assembly View:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=assembly&code=YOUR_ENCODED_CODE"
 ```
 
 **Pinout View:**

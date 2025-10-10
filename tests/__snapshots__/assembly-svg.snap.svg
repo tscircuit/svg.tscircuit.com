@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" data-software-used-string="@tscircuit/core@0.0.744"><style>
+              .assembly-component { 
+                fill: none; 
+                stroke: #000; 
+              }
+              .assembly-board { 
+                fill: #f2f2f2; 
+                stroke: rgb(0,0,0); 
+                stroke-opacity: 0.8;
+              }
+              .assembly-component-label { 
+                fill: #000; 
+                font-family: Arial, serif;
+                font-weight: bold;
+                dominant-baseline: middle;
+                text-anchor: middle;
+              }
+              .assembly-boundary { 
+                fill: none; 
+                stroke: #fff;
+                stroke-width: 0.2; 
+              }
+            </style><rect fill="#fff" x="0" y="0" width="800" height="600"/><rect class="assembly-boundary" x="150" y="50" width="500" height="500"/><path class="pcb-board" d="M 150 550 L 650 550 L 650 50 L 150 50 Z" fill="none" stroke="rgb(0,0,0)" stroke-opacity="0.8" stroke-width="10"/><rect class="assembly-pad" fill="rgb(210, 210, 210)" x="511" y="284" width="27" height="32" data-layer="top"/><rect class="assembly-pad" fill="rgb(210, 210, 210)" x="562" y="284" width="27" height="32" data-layer="top"/><rect class="assembly-pad" fill="rgb(210, 210, 210)" x="211" y="284" width="27" height="32" data-layer="top"/><rect class="assembly-pad" fill="rgb(210, 210, 210)" x="262" y="284" width="27" height="32" data-layer="top"/><g transform="translate(550, 300) scale(1, -1)"><path class="assembly-component" d="M-38.99999999999999,-16 L38.99999999999999,-16 L38.99999999999999,16 L-38.99999999999999,16 Z" stroke-width="0.80" transform="rotate(0)" stroke-dasharray=""/><text x="0" y="0" class="assembly-component-label" text-anchor="middle" dy=".10em" style="pointer-events: none" font-size="25.6px" transform="scale(1, -1)">R1</text></g><g transform="translate(250, 300) scale(1, -1)"><path class="assembly-component" d="M-38.99999999999999,-16 L38.99999999999999,-16 L38.99999999999999,16 L-38.99999999999999,16 Z" stroke-width="0.80" transform="rotate(0)" stroke-dasharray=""/><text x="0" y="0" class="assembly-component-label" text-anchor="middle" dy=".10em" style="pointer-events: none" font-size="25.6px" transform="scale(1, -1)">C1</text></g></svg>
