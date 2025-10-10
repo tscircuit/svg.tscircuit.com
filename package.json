@@ -17,7 +17,7 @@
     "bun-match-svg": "^0.0.9",
     "comlink": "^4.4.2",
     "get-port": "^7.1.0",
-    "next": "14",
+    "next": "^15.5.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tscircuit": "^0.0.722",
@@ -29,9 +29,12 @@
   },
   "dependencies": {
     "@tscircuit/simple-3d-svg": "^0.0.41",
+    "@types/potrace": "^2.1.5",
+    "circuit-json-to-gltf": "^0.0.22",
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.227",
     "jscad-fiber": "^0.0.85",
+    "potrace": "^2.1.8",
     "sharp": "^0.34.4"
   }
 }

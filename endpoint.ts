@@ -14,7 +14,10 @@ import { getIndexPageHtml } from "./get-index-page-html"
 import { errorResponse } from "./lib/errorResponse"
 import { getOutputFormat } from "./lib/getOutputFormat"
 import { parsePositiveInt } from "./lib/parsePositiveInt"
+import { circuitToVectorizedSvg } from "./lib/circuitToVectorizedSvg"
 import { svgToPng } from "./lib/svgToPng"
+
+
 import { decodeUrlHashToFsMap } from "./lib/fsMap"
 
 export default async (req: Request) => {
@@ -180,7 +183,12 @@ export default async (req: Request) => {
   // Check for both svg_type and view parameters, with svg_type taking precedence
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
-  if (!svgType || !["pcb", "schematic", "3d", "pinout"].includes(svgType)) {
+  const browser3d = url.searchParams.get("browser3d")
+
+  if (
+    !svgType ||
+    !["pcb", "schematic", "3d", "pinout"].includes(svgType)
+  ) {
     return new Response(
       JSON.stringify({
         ok: false,
@@ -198,8 +206,8 @@ export default async (req: Request) => {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
     } else if (svgType === "pinout") {
       svgContent = convertCircuitJsonToPinoutSvg(circuitJson)
-    } else {
-      // Extract 3D SVG parameters from URL and POST body (URL takes precedence)
+    } else if (svgType === "3d" && browser3d) {
+      svgContent = await circuitToVectorizedSvg(circuitJson)
       const backgroundColor =
         url.searchParams.get("background_color") ||
         postBodyParams.background_color ||
@@ -226,6 +234,10 @@ export default async (req: Request) => {
   } catch (err) {
     return await errorResponse(err as Error, outputFormat)
   }
+
+
+
+
 
   if (outputFormat === "png") {
     try {
