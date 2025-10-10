@@ -12,7 +12,7 @@ test("renders pcb view to png when requested", async () => {
       getCompressedBase64SnippetString(`
 export default () => (
   <board width="10mm" height="10mm">
-    <led name="LED1" />
+    <led name="LED1" footprint="0603" />
   </board>
 )
       `),
@@ -27,6 +27,9 @@ export default () => (
 
   const buffer = new Uint8Array(await response.arrayBuffer())
   expect(Array.from(buffer.slice(0, pngSignature.length))).toEqual(pngSignature)
+
+  // PNG snapshot test
+  await expect(Buffer.from(buffer)).toMatchPngSnapshot(import.meta.path)
 })
 
 test("returns png error image when conversion fails", async () => {
@@ -41,4 +44,10 @@ test("returns png error image when conversion fails", async () => {
 
   const buffer = new Uint8Array(await response.arrayBuffer())
   expect(Array.from(buffer.slice(0, pngSignature.length))).toEqual(pngSignature)
+
+  // PNG snapshot test for error image
+  await expect(Buffer.from(buffer)).toMatchPngSnapshot(
+    import.meta.path,
+    "png-error",
+  )
 })
