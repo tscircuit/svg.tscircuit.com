@@ -17,7 +17,16 @@ export default async function handler(
   const response = await endpoint(request)
 
   // Convert response back to NextJS format
-  const body = await response.text()
+  const contentType = response.headers.get("Content-Type") || ""
+
+  // Handle binary data (PNG images) differently from text responses
+  let body: string | Buffer
+  if (contentType.includes("image/png")) {
+    const arrayBuffer = await response.arrayBuffer()
+    body = Buffer.from(arrayBuffer)
+  } else {
+    body = await response.text()
+  }
 
   // @ts-ignore
   const headers = Object.fromEntries(response.headers.entries())

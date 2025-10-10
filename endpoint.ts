@@ -1,4 +1,7 @@
-import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
+import {
+  getUncompressedSnippetString,
+  getCompressedBase64SnippetString,
+} from "@tscircuit/create-snippet-url"
 import { CircuitRunner } from "@tscircuit/eval/eval"
 import {
   convertCircuitJsonToAssemblySvg,
@@ -7,12 +10,19 @@ import {
   convertCircuitJsonToPinoutSvg,
 } from "circuit-to-svg"
 import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
+import { convertCircuitJsonToGltf } from "circuit-json-to-gltf"
+import {
+  renderGLTFToPNGBufferFromGLBBuffer,
+  createSceneFromGLTF,
+  computeWorldAABB,
+} from "poppygl"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getIndexPageHtml } from "./get-index-page-html"
 import { errorResponse } from "./lib/errorResponse"
 import { getOutputFormat } from "./lib/getOutputFormat"
 import { parsePositiveInt } from "./lib/parsePositiveInt"
 import { svgToPng } from "./lib/svgToPng"
+import { decodeUrlHashToFsMap } from "./lib/fsMap"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -38,18 +48,48 @@ export default async (req: Request) => {
     })
   }
 
+  if (url.pathname === "/generate_urls" && req.method === "POST") {
+    try {
+      const body = await req.json()
+      const { fs_map, entrypoint } = body
+
+      if (!fs_map) {
+        return new Response(
+          JSON.stringify({ ok: false, error: "No fsMap provided" }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        )
+      }
+
+      return new Response(
+        getHtmlForGeneratedUrlPage({ fsMap: fs_map, entrypoint }, host),
+        {
+          headers: { "Content-Type": "text/html" },
+        },
+      )
+    } catch (err) {
+      return new Response(
+        JSON.stringify({ ok: false, error: (err as Error).message }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
+  }
+
   const compressedCode = url.searchParams.get("code")
   let circuitJsonFromPost: any = null
+  let fsMapFromPost: any = null
+  let entrypointFromPost: string | null = null
   let postBodyParams: any = {}
 
-  // Handle POST request with circuit_json in body
   if (req.method === "POST") {
     try {
       const body = await req.json()
       if (body.circuit_json) {
         circuitJsonFromPost = body.circuit_json
       }
-      // Extract 3D SVG parameters from POST body
+      if (body.fsMap) {
+        fsMapFromPost = body.fsMap
+        entrypointFromPost = body.entrypoint || null
+      }
       postBodyParams = {
         background_color: body.background_color,
         background_opacity: body.background_opacity,
@@ -70,12 +110,12 @@ export default async (req: Request) => {
     }
   }
 
-  // Show index page only for GET requests with no parameters
   if (
     url.pathname === "/" &&
     req.method === "GET" &&
     !compressedCode &&
-    !circuitJsonFromPost
+    !circuitJsonFromPost &&
+    !fsMapFromPost
   ) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
@@ -93,12 +133,12 @@ export default async (req: Request) => {
     )
   }
 
-  if (!compressedCode && !circuitJsonFromPost) {
+  if (!compressedCode && !circuitJsonFromPost && !fsMapFromPost) {
     return new Response(
       JSON.stringify({
         ok: false,
         error:
-          "No code parameter (GET/POST) or circuit_json (POST only) provided",
+          "No code parameter (GET/POST), circuit_json (POST), or fsMap (POST) provided",
       }),
       { status: 400 },
     )
@@ -107,34 +147,35 @@ export default async (req: Request) => {
   let circuitJson: any
   if (circuitJsonFromPost) {
     circuitJson = circuitJsonFromPost
-  } else if (compressedCode) {
-    let userCode: string
+  } else if (fsMapFromPost) {
+    const worker = new CircuitRunner()
     try {
-      userCode = getUncompressedSnippetString(compressedCode)
+      await worker.executeWithFsMap({
+        fsMap: fsMapFromPost,
+        entrypoint: entrypointFromPost || "index.tsx",
+      })
+      await worker.renderUntilSettled()
+      circuitJson = await worker.getCircuitJson()
     } catch (err) {
       return await errorResponse(err as Error, outputFormat)
     }
-
+  } else if (compressedCode) {
     const worker = new CircuitRunner()
-
     try {
-      await worker.executeWithFsMap({
-        fsMap: {
-          "entrypoint.tsx": `
-            import * as UserComponents from "./UserCode.tsx";
+      const decodedFsMap = decodeUrlHashToFsMap(compressedCode)
 
-            const ComponentToRender = Object.entries(UserComponents)
-              .filter(([name]) => !name.startsWith("use"))
-              .map(([_, component]) => component)[0] || (() => null);
-
-            circuit.add(
-              <ComponentToRender />
-            );
-          `,
-          "UserCode.tsx": userCode,
-        },
-        entrypoint: "entrypoint.tsx",
-      })
+      if (decodedFsMap) {
+        await worker.executeWithFsMap({
+          fsMap: decodedFsMap,
+        })
+      } else {
+        const userCode = getUncompressedSnippetString(compressedCode)
+        await worker.executeWithFsMap({
+          fsMap: {
+            "index.tsx": userCode,
+          },
+        })
+      }
 
       await worker.renderUntilSettled()
       circuitJson = await worker.getCircuitJson()
@@ -159,7 +200,18 @@ export default async (req: Request) => {
     )
   }
 
-  let svgContent: string
+  const pngDensityParam = parsePositiveInt(
+    url.searchParams.get("png_density") ?? postBodyParams.png_density,
+  )
+  const pngWidthParam = parsePositiveInt(
+    url.searchParams.get("png_width") ?? postBodyParams.png_width,
+  )
+  const pngHeightParam = parsePositiveInt(
+    url.searchParams.get("png_height") ?? postBodyParams.png_height,
+  )
+
+  let svgContent: string | null = null
+  let preRenderedPngBuffer: Uint8Array | null = null
   try {
     if (svgType === "pcb") {
       svgContent = convertCircuitJsonToPcbSvg(circuitJson)
@@ -186,13 +238,81 @@ export default async (req: Request) => {
           "1.2",
       )
 
-      svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
-        background: {
-          color: backgroundColor,
-          opacity: backgroundOpacity,
-        },
-        defaultZoomMultiplier: zoomMultiplier,
-      })
+      if (outputFormat === "png") {
+        const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
+          format: "glb",
+        })) as unknown
+
+        let glbBinary: Uint8Array
+        if (glbResult instanceof Uint8Array) {
+          glbBinary = glbResult
+        } else if (glbResult instanceof ArrayBuffer) {
+          glbBinary = new Uint8Array(glbResult)
+        } else if (ArrayBuffer.isView(glbResult)) {
+          const view = glbResult as ArrayBufferView
+          glbBinary = new Uint8Array(
+            view.buffer.slice(
+              view.byteOffset,
+              view.byteOffset + view.byteLength,
+            ),
+          )
+        } else {
+          throw new Error("GLB conversion did not return binary data")
+        }
+
+        const pngWidth = pngWidthParam ?? 1024
+        const pngHeight = pngHeightParam ?? pngWidth
+
+        // Compute camera position relative to board size for overhead view
+        // Y is "up" axis in poppygl's coordinate system
+        let maxDim = 10 // Default size
+
+        // Find board dimensions from circuit JSON
+        const pcbBoard = circuitJson.find((el: any) => el.type === "pcb_board")
+        if (pcbBoard?.width && pcbBoard?.height) {
+          // Use PCB board dimensions
+          maxDim = Math.max(pcbBoard.width, pcbBoard.height)
+        } else {
+          // No board found, try to find first pcb_component with size
+          const pcbComponent = circuitJson.find(
+            (el: any) =>
+              el.type === "pcb_component" && (el.width || el.size?.width),
+          )
+          if (pcbComponent) {
+            const width = pcbComponent.width || pcbComponent.size?.width || 0
+            const height = pcbComponent.height || pcbComponent.size?.height || 0
+            maxDim = Math.max(width, height, 5) // Minimum of 5mm
+          }
+        }
+
+        // Position camera for overhead view with slight angle
+        // Y is up, so make Y height proportionally larger for more overhead
+        // X and Z give us the angled perspective
+        const yHeight = maxDim * 1.4 // High on Y axis for overhead perspective
+        const xzOffset = maxDim * 0.75 // Slight angle for 3D depth
+
+        const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
+        const lookAt: [number, number, number] = [0, 0, 0]
+
+        preRenderedPngBuffer = await renderGLTFToPNGBufferFromGLBBuffer(
+          glbBinary,
+          {
+            width: pngWidth,
+            height: pngHeight,
+            backgroundColor: null, // null = transparent background
+            camPos,
+            lookAt,
+          },
+        )
+      } else {
+        svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
+          background: {
+            color: backgroundColor,
+            opacity: backgroundOpacity,
+          },
+          defaultZoomMultiplier: zoomMultiplier,
+        })
+      }
     }
   } catch (err) {
     return await errorResponse(err as Error, outputFormat)
@@ -200,17 +320,20 @@ export default async (req: Request) => {
 
   if (outputFormat === "png") {
     try {
-      const pngBuffer = await svgToPng(svgContent, {
-        density: parsePositiveInt(
-          url.searchParams.get("png_density") ?? postBodyParams.png_density,
-        ),
-        width: parsePositiveInt(
-          url.searchParams.get("png_width") ?? postBodyParams.png_width,
-        ),
-        height: parsePositiveInt(
-          url.searchParams.get("png_height") ?? postBodyParams.png_height,
-        ),
-      })
+      let pngBuffer: Uint8Array | ArrayBuffer
+      if (preRenderedPngBuffer) {
+        pngBuffer = preRenderedPngBuffer
+      } else {
+        if (svgContent == null) {
+          throw new Error("No SVG content available for PNG conversion")
+        }
+
+        pngBuffer = await svgToPng(svgContent, {
+          density: pngDensityParam,
+          width: pngWidthParam,
+          height: pngHeightParam,
+        })
+      }
 
       return new Response(pngBuffer, {
         headers: {
@@ -222,6 +345,10 @@ export default async (req: Request) => {
     } catch (err) {
       return await errorResponse(err as Error, outputFormat)
     }
+  }
+
+  if (svgContent == null) {
+    throw new Error("No SVG content generated")
   }
 
   return new Response(svgContent, {
