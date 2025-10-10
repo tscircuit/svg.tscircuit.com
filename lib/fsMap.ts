@@ -19,3 +19,15 @@ export const encodeFsMapToHash = (fsMap: Record<string, string>): string => {
   const compressedData = gzipSync(strToU8(text))
   return bytesToBase64(compressedData)
 }
+
+export const isFsMapRecord = (
+  value: unknown,
+): value is Record<string, string> => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false
+  }
+
+  return Object.values(value as Record<string, unknown>).every(
+    (val) => typeof val === "string",
+  )
+}

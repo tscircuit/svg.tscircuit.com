@@ -21,7 +21,8 @@ import { errorResponse } from "./lib/errorResponse"
 import { getOutputFormat } from "./lib/getOutputFormat"
 import { parsePositiveInt } from "./lib/parsePositiveInt"
 import { svgToPng } from "./lib/svgToPng"
-import { decodeUrlHashToFsMap } from "./lib/fsMap"
+import { decodeUrlHashToFsMap, isFsMapRecord } from "./lib/fsMap"
+import { parseFsMapParam } from "./lib/parseFsMapParam"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -74,30 +75,32 @@ export default async (req: Request) => {
   }
 
   const compressedCode = url.searchParams.get("code")
+  const fsMapParam = url.searchParams.get("fs_map")
+  const entrypointFromQuery = url.searchParams.get("entrypoint")
   let circuitJsonFromPost: any = null
   let fsMapFromPost: any = null
+  let fsMapFromQuery: Record<string, string> | null = null
   let entrypointFromPost: string | null = null
   let postBodyParams: any = {}
 
+  if (fsMapParam) {
+    const parsedFsMap = parseFsMapParam(fsMapParam)
+    if (!parsedFsMap) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "Invalid fs_map parameter",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
+    fsMapFromQuery = parsedFsMap
+  }
+
   if (req.method === "POST") {
+    let body: any
     try {
-      const body = await req.json()
-      if (body.circuit_json) {
-        circuitJsonFromPost = body.circuit_json
-      }
-      if (body.fsMap) {
-        fsMapFromPost = body.fsMap
-        entrypointFromPost = body.entrypoint || null
-      }
-      postBodyParams = {
-        background_color: body.background_color,
-        background_opacity: body.background_opacity,
-        zoom_multiplier: body.zoom_multiplier,
-        output_format: body.output_format || body.format,
-        png_width: body.png_width,
-        png_height: body.png_height,
-        png_density: body.png_density,
-      }
+      body = await req.json()
     } catch (err) {
       return new Response(
         JSON.stringify({
@@ -107,6 +110,58 @@ export default async (req: Request) => {
         { status: 400 },
       )
     }
+
+    if (body.circuit_json) {
+      circuitJsonFromPost = body.circuit_json
+    }
+
+    const fsMapCandidate = body.fsMap ?? body.fs_map
+    if (fsMapCandidate != null) {
+      if (typeof fsMapCandidate === "string") {
+        const parsedFsMap = parseFsMapParam(fsMapCandidate)
+        if (!parsedFsMap) {
+          return new Response(
+            JSON.stringify({
+              ok: false,
+              error: "Invalid fs_map provided in request body",
+            }),
+            {
+              status: 400,
+              headers: { "Content-Type": "application/json" },
+            },
+          )
+        }
+        fsMapFromPost = parsedFsMap
+      } else if (isFsMapRecord(fsMapCandidate)) {
+        fsMapFromPost = fsMapCandidate
+      } else {
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            error: "Invalid fs_map provided in request body",
+          }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          },
+        )
+      }
+      if (typeof body.entrypoint === "string" && body.entrypoint.trim()) {
+        entrypointFromPost = body.entrypoint
+      }
+    } else if (typeof body.entrypoint === "string" && body.entrypoint.trim()) {
+      entrypointFromPost = body.entrypoint
+    }
+
+    postBodyParams = {
+      background_color: body.background_color,
+      background_opacity: body.background_opacity,
+      zoom_multiplier: body.zoom_multiplier,
+      output_format: body.output_format || body.format,
+      png_width: body.png_width,
+      png_height: body.png_height,
+      png_density: body.png_density,
+    }
   }
 
   if (
@@ -114,7 +169,8 @@ export default async (req: Request) => {
     req.method === "GET" &&
     !compressedCode &&
     !circuitJsonFromPost &&
-    !fsMapFromPost
+    !fsMapFromPost &&
+    !fsMapFromQuery
   ) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
@@ -132,12 +188,17 @@ export default async (req: Request) => {
     )
   }
 
-  if (!compressedCode && !circuitJsonFromPost && !fsMapFromPost) {
+  if (
+    !compressedCode &&
+    !circuitJsonFromPost &&
+    !fsMapFromPost &&
+    !fsMapFromQuery
+  ) {
     return new Response(
       JSON.stringify({
         ok: false,
         error:
-          "No code parameter (GET/POST), circuit_json (POST), or fsMap (POST) provided",
+          "No code parameter (GET/POST), circuit_json (POST), or fs_map (GET/POST) provided",
       }),
       { status: 400 },
     )
@@ -152,6 +213,18 @@ export default async (req: Request) => {
       await worker.executeWithFsMap({
         fsMap: fsMapFromPost,
         entrypoint: entrypointFromPost || "index.tsx",
+      })
+      await worker.renderUntilSettled()
+      circuitJson = await worker.getCircuitJson()
+    } catch (err) {
+      return await errorResponse(err as Error, outputFormat)
+    }
+  } else if (fsMapFromQuery) {
+    const worker = new CircuitRunner()
+    try {
+      await worker.executeWithFsMap({
+        fsMap: fsMapFromQuery,
+        entrypoint: entrypointFromQuery || "index.tsx",
       })
       await worker.renderUntilSettled()
       circuitJson = await worker.getCircuitJson()
