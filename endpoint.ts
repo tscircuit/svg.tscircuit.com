@@ -9,6 +9,12 @@ import {
   convertCircuitJsonToPinoutSvg,
 } from "circuit-to-svg"
 import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
+import { convertCircuitJsonToGltf } from "circuit-json-to-gltf"
+import {
+  renderGLTFToPNGBufferFromGLBBuffer,
+  createSceneFromGLTF,
+  computeWorldAABB,
+} from "poppygl"
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getIndexPageHtml } from "./get-index-page-html"
 import { errorResponse } from "./lib/errorResponse"
@@ -190,7 +196,18 @@ export default async (req: Request) => {
     )
   }
 
-  let svgContent: string
+  const pngDensityParam = parsePositiveInt(
+    url.searchParams.get("png_density") ?? postBodyParams.png_density,
+  )
+  const pngWidthParam = parsePositiveInt(
+    url.searchParams.get("png_width") ?? postBodyParams.png_width,
+  )
+  const pngHeightParam = parsePositiveInt(
+    url.searchParams.get("png_height") ?? postBodyParams.png_height,
+  )
+
+  let svgContent: string | null = null
+  let preRenderedPngBuffer: Uint8Array | null = null
   try {
     if (svgType === "pcb") {
       svgContent = convertCircuitJsonToPcbSvg(circuitJson)
@@ -215,13 +232,81 @@ export default async (req: Request) => {
           "1.2",
       )
 
-      svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
-        background: {
-          color: backgroundColor,
-          opacity: backgroundOpacity,
-        },
-        defaultZoomMultiplier: zoomMultiplier,
-      })
+      if (outputFormat === "png") {
+        const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
+          format: "glb",
+        })) as unknown
+
+        let glbBinary: Uint8Array
+        if (glbResult instanceof Uint8Array) {
+          glbBinary = glbResult
+        } else if (glbResult instanceof ArrayBuffer) {
+          glbBinary = new Uint8Array(glbResult)
+        } else if (ArrayBuffer.isView(glbResult)) {
+          const view = glbResult as ArrayBufferView
+          glbBinary = new Uint8Array(
+            view.buffer.slice(
+              view.byteOffset,
+              view.byteOffset + view.byteLength,
+            ),
+          )
+        } else {
+          throw new Error("GLB conversion did not return binary data")
+        }
+
+        const pngWidth = pngWidthParam ?? 1024
+        const pngHeight = pngHeightParam ?? pngWidth
+
+        // Compute camera position relative to board size for overhead view
+        // Y is "up" axis in poppygl's coordinate system
+        let maxDim = 10 // Default size
+
+        // Find board dimensions from circuit JSON
+        const pcbBoard = circuitJson.find((el: any) => el.type === "pcb_board")
+        if (pcbBoard?.width && pcbBoard?.height) {
+          // Use PCB board dimensions
+          maxDim = Math.max(pcbBoard.width, pcbBoard.height)
+        } else {
+          // No board found, try to find first pcb_component with size
+          const pcbComponent = circuitJson.find(
+            (el: any) =>
+              el.type === "pcb_component" && (el.width || el.size?.width),
+          )
+          if (pcbComponent) {
+            const width = pcbComponent.width || pcbComponent.size?.width || 0
+            const height = pcbComponent.height || pcbComponent.size?.height || 0
+            maxDim = Math.max(width, height, 5) // Minimum of 5mm
+          }
+        }
+
+        // Position camera for overhead view with slight angle
+        // Y is up, so make Y height proportionally larger for more overhead
+        // X and Z give us the angled perspective
+        const yHeight = maxDim * 1.4 // High on Y axis for overhead perspective
+        const xzOffset = maxDim * 0.75 // Slight angle for 3D depth
+
+        const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
+        const lookAt: [number, number, number] = [0, 0, 0]
+
+        preRenderedPngBuffer = await renderGLTFToPNGBufferFromGLBBuffer(
+          glbBinary,
+          {
+            width: pngWidth,
+            height: pngHeight,
+            backgroundColor: null, // null = transparent background
+            camPos,
+            lookAt,
+          },
+        )
+      } else {
+        svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
+          background: {
+            color: backgroundColor,
+            opacity: backgroundOpacity,
+          },
+          defaultZoomMultiplier: zoomMultiplier,
+        })
+      }
     }
   } catch (err) {
     return await errorResponse(err as Error, outputFormat)
@@ -229,17 +314,20 @@ export default async (req: Request) => {
 
   if (outputFormat === "png") {
     try {
-      const pngBuffer = await svgToPng(svgContent, {
-        density: parsePositiveInt(
-          url.searchParams.get("png_density") ?? postBodyParams.png_density,
-        ),
-        width: parsePositiveInt(
-          url.searchParams.get("png_width") ?? postBodyParams.png_width,
-        ),
-        height: parsePositiveInt(
-          url.searchParams.get("png_height") ?? postBodyParams.png_height,
-        ),
-      })
+      let pngBuffer: Uint8Array | ArrayBuffer
+      if (preRenderedPngBuffer) {
+        pngBuffer = preRenderedPngBuffer
+      } else {
+        if (svgContent == null) {
+          throw new Error("No SVG content available for PNG conversion")
+        }
+
+        pngBuffer = await svgToPng(svgContent, {
+          density: pngDensityParam,
+          width: pngWidthParam,
+          height: pngHeightParam,
+        })
+      }
 
       return new Response(pngBuffer, {
         headers: {
@@ -251,6 +339,10 @@ export default async (req: Request) => {
     } catch (err) {
       return await errorResponse(err as Error, outputFormat)
     }
+  }
+
+  if (svgContent == null) {
+    throw new Error("No SVG content generated")
   }
 
   return new Response(svgContent, {
