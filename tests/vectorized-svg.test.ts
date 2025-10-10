@@ -15,11 +15,11 @@ export default () => (
 test("vectorized svg conversion", async () => {
   const { serverUrl } = await getTestServer()
   const encodedCode = encodeURIComponent(
-    getCompressedBase64SnippetString(testCircuitCode)
+    getCompressedBase64SnippetString(testCircuitCode),
   )
 
   const response = await fetch(
-    `${serverUrl}?svg_type=3d&browser3d=true&code=${encodedCode}`
+    `${serverUrl}?svg_type=3d&browser3d=true&code=${encodedCode}`,
   )
   const svgContent = await response.text()
 

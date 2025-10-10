@@ -6,7 +6,7 @@ export const svgToPng = async (
     width?: number
     height?: number
     density?: number
-  }
+  },
 ) => {
   let chain = sharp(Buffer.from(svg), {
     density: options.density,

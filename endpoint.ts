@@ -17,7 +17,6 @@ import { parsePositiveInt } from "./lib/parsePositiveInt"
 import { circuitToVectorizedSvg } from "./lib/circuitToVectorizedSvg"
 import { svgToPng } from "./lib/svgToPng"
 
-
 import { decodeUrlHashToFsMap } from "./lib/fsMap"
 
 export default async (req: Request) => {
@@ -185,10 +184,7 @@ export default async (req: Request) => {
     url.searchParams.get("svg_type") || url.searchParams.get("view")
   const browser3d = url.searchParams.get("browser3d")
 
-  if (
-    !svgType ||
-    !["pcb", "schematic", "3d", "pinout"].includes(svgType)
-  ) {
+  if (!svgType || !["pcb", "schematic", "3d", "pinout"].includes(svgType)) {
     return new Response(
       JSON.stringify({
         ok: false,
@@ -234,10 +230,6 @@ export default async (req: Request) => {
   } catch (err) {
     return await errorResponse(err as Error, outputFormat)
   }
-
-
-
-
 
   if (outputFormat === "png") {
     try {

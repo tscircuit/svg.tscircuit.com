@@ -29,5 +29,3 @@ export async function errorResponse(err: Error, format: "svg" | "png") {
     },
   })
 }
-
-
