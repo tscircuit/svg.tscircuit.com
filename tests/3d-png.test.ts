@@ -10,9 +10,6 @@ export default () => (
     <chip
       name="U1"
       footprint="soic8"
-      cadModel={{
-        glbUrl: "https://modelcdn.tscircuit.com/jscad_models/soic8.glb",
-      }}
     />
   </board>
 )
@@ -37,4 +34,7 @@ test("renders 3d view with cad model to png", async () => {
   const buffer = new Uint8Array(await response.arrayBuffer())
   expect(Array.from(buffer.slice(0, pngSignature.length))).toEqual(pngSignature)
   expect(buffer.byteLength).toBeGreaterThan(1000)
+
+  // PNG snapshot test
+  await expect(Buffer.from(buffer)).toMatchPngSnapshot(import.meta.path)
 })

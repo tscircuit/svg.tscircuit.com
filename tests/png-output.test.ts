@@ -1,7 +1,6 @@
 import { test, expect } from "bun:test"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 import { getTestServer } from "./fixtures/get-test-server"
-import "./fixtures/png-matcher"
 
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
 
