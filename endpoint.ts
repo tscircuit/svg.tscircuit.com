@@ -77,10 +77,14 @@ export default async (req: Request) => {
   const compressedCode = url.searchParams.get("code")
   const fsMapParam = url.searchParams.get("fs_map")
   const entrypointFromQuery = url.searchParams.get("entrypoint")
+  const projectBaseUrlFromQuery = url.searchParams.get("project_base_url")
+  const mainComponentPathFromQuery = url.searchParams.get("main_component_path")
   let circuitJsonFromPost: any = null
   let fsMapFromPost: any = null
   let fsMapFromQuery: Record<string, string> | null = null
   let entrypointFromPost: string | null = null
+  let projectBaseUrlFromPost: string | null = null
+  let mainComponentPathFromPost: string | null = null
   let postBodyParams: any = {}
 
   if (fsMapParam) {
@@ -153,6 +157,20 @@ export default async (req: Request) => {
       entrypointFromPost = body.entrypoint
     }
 
+    // Extract project configuration parameters from POST body
+    if (
+      typeof body.project_base_url === "string" &&
+      body.project_base_url.trim()
+    ) {
+      projectBaseUrlFromPost = body.project_base_url
+    }
+    if (
+      typeof body.main_component_path === "string" &&
+      body.main_component_path.trim()
+    ) {
+      mainComponentPathFromPost = body.main_component_path
+    }
+
     postBodyParams = {
       background_color: body.background_color,
       background_opacity: body.background_opacity,
@@ -209,10 +227,21 @@ export default async (req: Request) => {
     circuitJson = circuitJsonFromPost
   } else if (fsMapFromPost) {
     const worker = new CircuitRunner()
+
+    // Apply project configuration if provided
+    const projectConfig: any = {}
+    if (projectBaseUrlFromPost) {
+      projectConfig.projectBaseUrl = projectBaseUrlFromPost
+    }
+    if (Object.keys(projectConfig).length > 0) {
+      worker.setProjectConfig(projectConfig)
+    }
+
     try {
       await worker.executeWithFsMap({
         fsMap: fsMapFromPost,
         entrypoint: entrypointFromPost || "index.tsx",
+        mainComponentPath: mainComponentPathFromPost || undefined,
       })
       await worker.renderUntilSettled()
       circuitJson = await worker.getCircuitJson()
@@ -221,10 +250,20 @@ export default async (req: Request) => {
     }
   } else if (fsMapFromQuery) {
     const worker = new CircuitRunner()
+
+    // Apply project configuration if provided
+    const projectConfig: any = {}
+    if (projectBaseUrlFromQuery) {
+      projectConfig.projectBaseUrl = projectBaseUrlFromQuery
+    }
+    if (Object.keys(projectConfig).length > 0) {
+      worker.setProjectConfig(projectConfig)
+    }
+
     try {
       await worker.executeWithFsMap({
         fsMap: fsMapFromQuery,
-        // mainComponentPath: mainComponentPathFromQuery ?? undefined,
+        mainComponentPath: mainComponentPathFromQuery ?? undefined,
         entrypoint: entrypointFromQuery ?? undefined,
       })
       await worker.renderUntilSettled()
@@ -234,12 +273,24 @@ export default async (req: Request) => {
     }
   } else if (compressedCode) {
     const worker = new CircuitRunner()
+
+    // Apply project configuration if provided
+    const projectConfig: any = {}
+    if (projectBaseUrlFromQuery) {
+      projectConfig.projectBaseUrl = projectBaseUrlFromQuery
+    }
+    if (Object.keys(projectConfig).length > 0) {
+      worker.setProjectConfig(projectConfig)
+    }
+
     try {
       const decodedFsMap = decodeUrlHashToFsMap(compressedCode)
 
       if (decodedFsMap) {
         await worker.executeWithFsMap({
           fsMap: decodedFsMap,
+          mainComponentPath: mainComponentPathFromQuery ?? undefined,
+          entrypoint: entrypointFromQuery ?? undefined,
         })
       } else {
         const userCode = getUncompressedSnippetString(compressedCode)
@@ -247,6 +298,8 @@ export default async (req: Request) => {
           fsMap: {
             "index.tsx": userCode,
           },
+          mainComponentPath: mainComponentPathFromQuery ?? undefined,
+          entrypoint: entrypointFromQuery ?? undefined,
         })
       }
 
@@ -403,7 +456,7 @@ export default async (req: Request) => {
         })
       }
 
-      return new Response(pngBuffer, {
+      return new Response(pngBuffer as ArrayBuffer, {
         headers: {
           "Content-Type": "image/png",
           "Cache-Control":
