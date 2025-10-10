@@ -170,12 +170,6 @@ export default async (req: Request) => {
     ) {
       mainComponentPathFromPost = body.main_component_path
     }
-    if (
-      typeof body.platform_config_project === "string" &&
-      body.platform_config_project.trim()
-    ) {
-      platformConfigProjectFromPost = body.platform_config_project
-    }
 
     postBodyParams = {
       background_color: body.background_color,
