@@ -25,8 +25,9 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
 - `circuit_json` (POST body only): Raw circuit JSON object - pass as `{"circuit_json": {...}}`
+- `fs_map` (GET query parameter or POST body): Map of filenames to file contents. For GET requests, provide the map as a gzip-compressed, base64-encoded JSON string (e.g. using `encodeFsMapToHash` from `lib/fsMap`) or as a JSON stringified object. For POST requests, send `{ "fs_map": { "index.tsx": "export default () => ..." } }`. Optionally include an `entrypoint` value to specify which file should be executed (defaults to `index.tsx`).
 
-Either `code` or `circuit_json` must be provided.
+Either `code`, `fs_map`, or `circuit_json` must be provided.
 
 **Response:** SVG content with `image/svg+xml` content type (default) or PNG content with `image/png` when `format=png`
 
@@ -38,6 +39,23 @@ curl "https://svg.tscircuit.com/?svg_type=pcb&code=eyJjb2RlIjoiZXhwb3J0IGRlZmF1b
 **Example Request with Circuit JSON:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=pcb&circuit_json=BASE64_ENCODED_JSON"
+```
+
+**Example Request with `fs_map` (GET):**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=pcb&fs_map=ENCODED_FS_MAP"
+```
+
+**Example Request with `fs_map` (POST):**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=pcb" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fs_map": {
+      "index.tsx": "export default () => <board>...</board>"
+    },
+    "entrypoint": "index.tsx"
+  }'
 ```
 
 ### 2. Health Check
