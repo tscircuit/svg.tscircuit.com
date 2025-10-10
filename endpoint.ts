@@ -219,8 +219,10 @@ export default async (req: Request) => {
       svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
     } else if (svgType === "pinout") {
       svgContent = convertCircuitJsonToPinoutSvg(circuitJson)
-    } else if (svgType === "3d" && browser3d) {
-      svgContent = await circuitToVectorizedSvg(circuitJson)
+    } else if (svgType === "3d") {
+      if (browser3d) {
+        svgContent = await circuitToVectorizedSvg(circuitJson)
+      }
       const backgroundColor =
         url.searchParams.get("background_color") ||
         postBodyParams.background_color ||
