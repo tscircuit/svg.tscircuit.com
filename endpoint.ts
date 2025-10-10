@@ -224,7 +224,8 @@ export default async (req: Request) => {
     try {
       await worker.executeWithFsMap({
         fsMap: fsMapFromQuery,
-        entrypoint: entrypointFromQuery || "index.tsx",
+        // mainComponentPath: mainComponentPathFromQuery ?? undefined,
+        entrypoint: entrypointFromQuery ?? undefined,
       })
       await worker.renderUntilSettled()
       circuitJson = await worker.getCircuitJson()
