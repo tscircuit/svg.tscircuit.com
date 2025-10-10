@@ -221,6 +221,9 @@ export default async (req: Request) => {
     }
   } else if (fsMapFromQuery) {
     const worker = new CircuitRunner()
+    // worker.setProjectConfig({
+    // projectBaseUrl:
+    // })
     try {
       await worker.executeWithFsMap({
         fsMap: fsMapFromQuery,
