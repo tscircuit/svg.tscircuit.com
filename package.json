@@ -31,16 +31,15 @@
   },
   "dependencies": {
     "@tscircuit/simple-3d-svg": "^0.0.41",
-
     "@types/potrace": "^2.1.5",
-
     "circuit-json-to-gltf": "^0.0.22",
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.227",
     "jscad-fiber": "^0.0.85",
-
-    "potrace": "^2.1.8",
     "poppygl": "^0.0.14",
+    "potrace": "^2.1.8"
+  },
+  "optionalDependencies": {
     "sharp": "^0.34.4"
   }
 }

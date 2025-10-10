@@ -1,6 +1,8 @@
 import { test, expect } from "bun:test"
 import { getTestServer } from "./fixtures/get-test-server"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
+import fs from "fs"
+import path from "path"
 
 const testCircuitCode = `
 export default () => (
@@ -25,4 +27,13 @@ test("vectorized svg conversion", async () => {
 
   expect(response.status).toBe(200)
   expect(svgContent).toContain("<svg")
+
+  const snapshotDir = path.join(__dirname, "__snapshots__")
+  if (!fs.existsSync(snapshotDir)) {
+    fs.mkdirSync(snapshotDir)
+  }
+  fs.writeFileSync(
+    path.join(snapshotDir, "vectorized-svg.snap.svg"),
+    svgContent,
+  )
 }, 30000)
