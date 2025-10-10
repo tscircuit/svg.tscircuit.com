@@ -26,9 +26,13 @@ export const getHtmlForGeneratedUrlPage = (
   }
 
   const pcbSvgUrl = `${urlPrefix}/?svg_type=pcb&code=${encodeURIComponent(compressedCode)}`
+  const pcbPngUrl = `${urlPrefix}/?svg_type=pcb&format=png&code=${encodeURIComponent(compressedCode)}`
   const schSvgUrl = `${urlPrefix}/?svg_type=schematic&code=${encodeURIComponent(compressedCode)}`
+  const schPngUrl = `${urlPrefix}/?svg_type=schematic&format=png&code=${encodeURIComponent(compressedCode)}`
   const pinoutSvgUrl = `${urlPrefix}/?svg_type=pinout&code=${encodeURIComponent(compressedCode)}`
+  const pinoutPngUrl = `${urlPrefix}/?svg_type=pinout&format=png&code=${encodeURIComponent(compressedCode)}`
   const threeDSvgUrl = `${urlPrefix}/?svg_type=3d&code=${encodeURIComponent(compressedCode)}`
+  const threeDPngUrl = `${urlPrefix}/?svg_type=3d&format=png&code=${encodeURIComponent(compressedCode)}`
 
   return `
 <!DOCTYPE html>
@@ -106,16 +110,32 @@ export const getHtmlForGeneratedUrlPage = (
           <td><a href="${pcbSvgUrl}" target="_blank">${pcbSvgUrl}</a></td>
         </tr>
         <tr>
+          <td>PCB PNG URL</td>
+          <td><a href="${pcbPngUrl}" target="_blank">${pcbPngUrl}</a></td>
+        </tr>
+        <tr>
           <td>Schematic SVG URL</td>
           <td><a href="${schSvgUrl}" target="_blank">${schSvgUrl}</a></td>
+        </tr>
+        <tr>
+          <td>Schematic PNG URL</td>
+          <td><a href="${schPngUrl}" target="_blank">${schPngUrl}</a></td>
         </tr>
         <tr>
           <td>Pinout SVG URL</td>
           <td><a href="${pinoutSvgUrl}" target="_blank">${pinoutSvgUrl}</a></td>
         </tr>
         <tr>
+          <td>Pinout PNG URL</td>
+          <td><a href="${pinoutPngUrl}" target="_blank">${pinoutPngUrl}</a></td>
+        </tr>
+        <tr>
           <td>3D SVG URL</td>
           <td><a href="${threeDSvgUrl}" target="_blank">${threeDSvgUrl}</a></td>
+        </tr>
+        <tr>
+          <td>3D PNG URL</td>
+          <td><a href="${threeDPngUrl}" target="_blank">${threeDPngUrl}</a></td>
         </tr>
       </tbody>
     </table>
