@@ -282,8 +282,8 @@ export default async (req: Request) => {
         // Position camera for overhead view with slight angle
         // Y is up, so make Y height proportionally larger for more overhead
         // X and Z give us the angled perspective
-        const yHeight = maxDim * 2.5 // High on Y axis for overhead perspective
-        const xzOffset = maxDim * 0.8 // Slight angle for 3D depth
+        const yHeight = maxDim * 1.4 // High on Y axis for overhead perspective
+        const xzOffset = maxDim * 0.75 // Slight angle for 3D depth
 
         const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
         const lookAt: [number, number, number] = [0, 0, 0]
