@@ -222,23 +222,7 @@ export default async (req: Request) => {
     } else if (svgType === "3d") {
       if (browser3d) {
         svgContent = await circuitToVectorizedSvg(circuitJson)
-      }
-      const backgroundColor =
-        url.searchParams.get("background_color") ||
-        postBodyParams.background_color ||
-        "#fff"
-      const backgroundOpacity = parseFloat(
-        url.searchParams.get("background_opacity") ||
-          postBodyParams.background_opacity ||
-          "0.0",
-      )
-      const zoomMultiplier = parseFloat(
-        url.searchParams.get("zoom_multiplier") ||
-          postBodyParams.zoom_multiplier ||
-          "1.2",
-      )
-
-      if (outputFormat === "png") {
+      } else if (outputFormat === "png") {
         const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
           format: "glb",
         })) as unknown
@@ -305,6 +289,20 @@ export default async (req: Request) => {
           },
         )
       } else {
+        const backgroundColor =
+          url.searchParams.get("background_color") ||
+          postBodyParams.background_color ||
+          "#fff"
+        const backgroundOpacity = parseFloat(
+          url.searchParams.get("background_opacity") ||
+            postBodyParams.background_opacity ||
+            "0.0",
+        )
+        const zoomMultiplier = parseFloat(
+          url.searchParams.get("zoom_multiplier") ||
+            postBodyParams.zoom_multiplier ||
+            "1.2",
+        )
         svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
           background: {
             color: backgroundColor,
