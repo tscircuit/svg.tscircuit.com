@@ -8,13 +8,35 @@ import {
   convertCircuitJsonToSchematicSvg,
   convertCircuitJsonToPinoutSvg,
 } from "circuit-to-svg"
-import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
 import { convertCircuitJsonToGltf } from "circuit-json-to-gltf"
-import {
-  renderGLTFToPNGBufferFromGLBBuffer,
-  createSceneFromGLTF,
-  computeWorldAABB,
-} from "poppygl"
+import { renderGLTFToPNGBufferFromGLBBuffer } from "poppygl"
+import { vectorizePngToSvg } from "./lib/vectorizePngToSvg"
+
+const MAX_RENDER_CACHE_ENTRIES = 12
+const glbCache = new Map<string, Uint8Array>()
+const pngCache = new Map<string, Uint8Array>()
+
+const getCachedBuffer = (cache: Map<string, Uint8Array>, key: string) => {
+  const cached = cache.get(key)
+  if (!cached) {
+    return null
+  }
+  return new Uint8Array(cached)
+}
+
+const setCachedBuffer = (
+  cache: Map<string, Uint8Array>,
+  key: string,
+  value: Uint8Array,
+) => {
+  if (cache.size >= MAX_RENDER_CACHE_ENTRIES) {
+    const firstKey = cache.keys().next().value
+    if (firstKey) {
+      cache.delete(firstKey)
+    }
+  }
+  cache.set(key, new Uint8Array(value))
+}
 import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getIndexPageHtml } from "./get-index-page-html"
 import { errorResponse } from "./lib/errorResponse"
@@ -232,19 +254,39 @@ export default async (req: Request) => {
           "1.2",
       )
 
-      if (outputFormat === "png") {
+      const normalizeColor = (
+        color: string,
+      ): [number, number, number] | null => {
+        const hexMatch = color.match(/^#([\da-f]{3}|[\da-f]{6})$/i)
+        if (!hexMatch) {
+          return null
+        }
+
+        const hex = hexMatch[1]
+        const expand = hex.length === 3
+        const r = parseInt(expand ? hex[0].repeat(2) : hex.slice(0, 2), 16)
+        const g = parseInt(expand ? hex[1].repeat(2) : hex.slice(2, 4), 16)
+        const b = parseInt(expand ? hex[2].repeat(2) : hex.slice(4, 6), 16)
+        return [r / 255, g / 255, b / 255]
+      }
+
+      const circuitCacheKey = JSON.stringify(circuitJson)
+      const glbCacheKey = `${circuitCacheKey}|glb`
+      let glbBinary: Uint8Array | null = getCachedBuffer(glbCache, glbCacheKey)
+
+      if (!glbBinary) {
         const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
           format: "glb",
         })) as unknown
 
-        let glbBinary: Uint8Array
+        let computedBinary: Uint8Array
         if (glbResult instanceof Uint8Array) {
-          glbBinary = glbResult
+          computedBinary = new Uint8Array(glbResult)
         } else if (glbResult instanceof ArrayBuffer) {
-          glbBinary = new Uint8Array(glbResult)
+          computedBinary = new Uint8Array(glbResult)
         } else if (ArrayBuffer.isView(glbResult)) {
           const view = glbResult as ArrayBufferView
-          glbBinary = new Uint8Array(
+          computedBinary = new Uint8Array(
             view.buffer.slice(
               view.byteOffset,
               view.byteOffset + view.byteLength,
@@ -254,57 +296,87 @@ export default async (req: Request) => {
           throw new Error("GLB conversion did not return binary data")
         }
 
-        const pngWidth = pngWidthParam ?? 1024
-        const pngHeight = pngHeightParam ?? pngWidth
+        setCachedBuffer(glbCache, glbCacheKey, computedBinary)
+        glbBinary = computedBinary
+      }
 
-        // Compute camera position relative to board size for overhead view
-        // Y is "up" axis in poppygl's coordinate system
-        let maxDim = 10 // Default size
+      if (!glbBinary) {
+        throw new Error("Unable to prepare GLB binary for rendering")
+      }
 
-        // Find board dimensions from circuit JSON
-        const pcbBoard = circuitJson.find((el: any) => el.type === "pcb_board")
-        if (pcbBoard?.width && pcbBoard?.height) {
-          // Use PCB board dimensions
-          maxDim = Math.max(pcbBoard.width, pcbBoard.height)
-        } else {
-          // No board found, try to find first pcb_component with size
-          const pcbComponent = circuitJson.find(
-            (el: any) =>
-              el.type === "pcb_component" && (el.width || el.size?.width),
-          )
-          if (pcbComponent) {
-            const width = pcbComponent.width || pcbComponent.size?.width || 0
-            const height = pcbComponent.height || pcbComponent.size?.height || 0
-            maxDim = Math.max(width, height, 5) // Minimum of 5mm
-          }
+      const defaultPngSize = outputFormat === "png" ? 1024 : 512
+      const pngWidth = pngWidthParam ?? defaultPngSize
+      const pngHeight = pngHeightParam ?? pngWidth
+
+      // Compute camera position relative to board size for overhead view
+      // Y is "up" axis in poppygl's coordinate system
+      let maxDim = 10 // Default size
+
+      // Find board dimensions from circuit JSON
+      const pcbBoard = circuitJson.find((el: any) => el.type === "pcb_board")
+      if (pcbBoard?.width && pcbBoard?.height) {
+        // Use PCB board dimensions
+        maxDim = Math.max(pcbBoard.width, pcbBoard.height)
+      } else {
+        // No board found, try to find first pcb_component with size
+        const pcbComponent = circuitJson.find(
+          (el: any) =>
+            el.type === "pcb_component" && (el.width || el.size?.width),
+        )
+        if (pcbComponent) {
+          const width = pcbComponent.width || pcbComponent.size?.width || 0
+          const height = pcbComponent.height || pcbComponent.size?.height || 0
+          maxDim = Math.max(width, height, 5) // Minimum of 5mm
         }
+      }
 
-        // Position camera for overhead view with slight angle
-        // Y is up, so make Y height proportionally larger for more overhead
-        // X and Z give us the angled perspective
-        const yHeight = maxDim * 1.4 // High on Y axis for overhead perspective
-        const xzOffset = maxDim * 0.75 // Slight angle for 3D depth
+      const normalizedZoom = Number.isFinite(zoomMultiplier)
+        ? Math.max(0.1, zoomMultiplier)
+        : 1.2
+      const zoomScale = normalizedZoom <= 0 ? 1 : 1 / normalizedZoom
 
-        const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
-        const lookAt: [number, number, number] = [0, 0, 0]
+      // Position camera for overhead view with slight angle
+      // Y is up, so make Y height proportionally larger for overhead
+      // X and Z give us the angled perspective
+      const yHeight = maxDim * 1.4 * zoomScale
+      const xzOffset = maxDim * 0.75 * zoomScale
 
-        preRenderedPngBuffer = await renderGLTFToPNGBufferFromGLBBuffer(
+      const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
+      const lookAt: [number, number, number] = [0, 0, 0]
+
+      const poppyBackground =
+        backgroundOpacity >= 0.999
+          ? (normalizeColor(backgroundColor) ?? null)
+          : null
+
+      const pngCacheKey = `${circuitCacheKey}|${pngWidth}|${pngHeight}|${normalizedZoom.toFixed(
+        3,
+      )}`
+      const cachedPng = getCachedBuffer(pngCache, pngCacheKey)
+
+      if (cachedPng) {
+        preRenderedPngBuffer = cachedPng
+      } else {
+        const renderedPng = await renderGLTFToPNGBufferFromGLBBuffer(
           glbBinary,
           {
             width: pngWidth,
             height: pngHeight,
-            backgroundColor: null, // null = transparent background
+            backgroundColor: poppyBackground,
             camPos,
             lookAt,
           },
         )
-      } else {
-        svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
-          background: {
-            color: backgroundColor,
-            opacity: backgroundOpacity,
-          },
-          defaultZoomMultiplier: zoomMultiplier,
+
+        preRenderedPngBuffer = new Uint8Array(renderedPng)
+        setCachedBuffer(pngCache, pngCacheKey, preRenderedPngBuffer)
+      }
+
+      if (outputFormat !== "png") {
+        svgContent = await vectorizePngToSvg(preRenderedPngBuffer, {
+          backgroundColor,
+          backgroundOpacity,
+          paletteSize: 12,
         })
       }
     }

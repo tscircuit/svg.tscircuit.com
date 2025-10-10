@@ -22,8 +22,8 @@ async function toMatchPngSnapshot(
     .replace(/\.test\.ts$/, "")
   const snapshotDir = path.join(path.dirname(testPath), "__snapshots__")
   const snapshotName = pngName
-    ? `${pngName}.snap.png`
-    : `${path.basename(testPath)}.snap.png`
+    ? `${pngName}.snap.base64`
+    : `${path.basename(testPath)}.snap.base64`
   const filePath = path.join(snapshotDir, snapshotName)
 
   if (!fs.existsSync(snapshotDir)) {
@@ -40,14 +40,17 @@ async function toMatchPngSnapshot(
 
   if (!fileExists) {
     console.log("Writing PNG snapshot to", filePath)
-    fs.writeFileSync(filePath, received)
+    fs.writeFileSync(filePath, Buffer.from(received).toString("base64") + "\n")
     return {
       message: () => `PNG snapshot created at ${filePath}`,
       pass: true,
     }
   }
 
-  const existingSnapshot = fs.readFileSync(filePath)
+  const existingSnapshot = Buffer.from(
+    fs.readFileSync(filePath, "utf8").trim(),
+    "base64",
+  )
 
   const result: any = await looksSame(
     Buffer.from(received),
@@ -70,7 +73,7 @@ async function toMatchPngSnapshot(
       }
     }
     console.log("Updating PNG snapshot at", filePath)
-    fs.writeFileSync(filePath, received)
+    fs.writeFileSync(filePath, Buffer.from(received).toString("base64") + "\n")
     return {
       message: () => `PNG snapshot updated at ${filePath}`,
       pass: true,
@@ -111,7 +114,7 @@ async function toMatchPngSnapshot(
     }
 
     // If difference is too large, create diff image
-    const diffPath = filePath.replace(/\.snap\.png$/, ".diff.png")
+    const diffPath = filePath.replace(/\.snap.*$/, ".diff.png")
     await looksSame.createDiff({
       reference: Buffer.from(existingSnapshot),
       current: Buffer.from(received),
@@ -127,7 +130,7 @@ async function toMatchPngSnapshot(
   }
 
   // Fallback if diffBounds isn't available
-  const diffPath = filePath.replace(/\.snap\.png$/, ".diff.png")
+  const diffPath = filePath.replace(/\.snap.*$/, ".diff.png")
   await looksSame.createDiff({
     reference: Buffer.from(existingSnapshot),
     current: Buffer.from(received),

@@ -6,8 +6,8 @@
       "dependencies": {
         "@tscircuit/simple-3d-svg": "^0.0.41",
         "circuit-json-to-gltf": "^0.0.23",
-        "circuit-json-to-simple-3d": "^0.0.9",
         "circuit-to-svg": "^0.0.227",
+        "imagetracerjs": "^1.2.6",
         "jscad-fiber": "^0.0.85",
         "poppygl": "^0.0.14",
         "sharp": "^0.34.4",
@@ -560,6 +560,8 @@
     "ieee754": ["ieee754@1.2.1", "", {}, "sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA=="],
 
     "ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
+
+    "imagetracerjs": ["imagetracerjs@1.2.6", "", {}, "sha512-LKJlnKmXFzDdh6IZtXTyBxXcCLTAkwgKYS+NMiPXiXVnlTLjQC8fq7U89laUSgHtypJB3TdMMDK4ecG5NI/Cgw=="],
 
     "inherits": ["inherits@2.0.4", "", {}, "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ=="],
 

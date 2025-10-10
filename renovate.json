@@ -7,7 +7,6 @@
       "excludePackagePatterns": [
         "@tscircuit/*",
         "circuit-to-svg",
-        "circuit-json-to-simple-3d",
         "jscad-fiber",
         "tscircuit"
       ],
