@@ -42,7 +42,6 @@ export default async (req: Request) => {
 
   // Parse request parameters
   ctx.compressedCode = url.searchParams.get("code") || undefined
-  const fsMapParam = url.searchParams.get("fs_map") || undefined
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
   ctx.projectBaseUrl =
     url.searchParams.get("project_base_url") || undefined
@@ -50,8 +49,9 @@ export default async (req: Request) => {
     url.searchParams.get("main_component_path") || undefined
 
   // Parse fsMap from query parameter
-  if (fsMapParam) {
-    const parsedFsMap = parseFsMapParam(fsMapParam)
+  const fsMapQueryParam = url.searchParams.get("fs_map")
+  if (fsMapQueryParam) {
+    const parsedFsMap = parseFsMapParam(fsMapQueryParam)
     if (!parsedFsMap) {
       return new Response(
         JSON.stringify({
@@ -66,8 +66,9 @@ export default async (req: Request) => {
 
   // Parse POST body if present
   if (req.method === "POST") {
+    let body: any
     try {
-      ctx.body = await req.json()
+      body = await req.json()
     } catch (err) {
       return new Response(
         JSON.stringify({
@@ -78,11 +79,11 @@ export default async (req: Request) => {
       )
     }
 
-    if (ctx.body.circuit_json) {
-      ctx.circuitJson = ctx.body.circuit_json
+    if (body.circuit_json) {
+      ctx.circuitJson = body.circuit_json
     }
 
-    const fsMapCandidate = ctx.body.fsMap ?? ctx.body.fs_map
+    const fsMapCandidate = body.fsMap ?? body.fs_map
     if (fsMapCandidate != null) {
       if (typeof fsMapCandidate === "string") {
         const parsedFsMap = parseFsMapParam(fsMapCandidate)
@@ -114,42 +115,42 @@ export default async (req: Request) => {
         )
       }
       if (
-        typeof ctx.body.entrypoint === "string" &&
-        ctx.body.entrypoint.trim()
+        typeof body.entrypoint === "string" &&
+        body.entrypoint.trim()
       ) {
-        ctx.entrypoint = ctx.body.entrypoint
+        ctx.entrypoint = body.entrypoint
       }
     } else if (
-      typeof ctx.body.entrypoint === "string" &&
-      ctx.body.entrypoint.trim()
+      typeof body.entrypoint === "string" &&
+      body.entrypoint.trim()
     ) {
-      ctx.entrypoint = ctx.body.entrypoint
+      ctx.entrypoint = body.entrypoint
     }
 
     // Extract project configuration parameters from POST body
     if (
-      typeof ctx.body.project_base_url === "string" &&
-      ctx.body.project_base_url.trim()
+      typeof body.project_base_url === "string" &&
+      body.project_base_url.trim()
     ) {
-      ctx.projectBaseUrl = ctx.body.project_base_url
+      ctx.projectBaseUrl = body.project_base_url
     }
     if (
-      typeof ctx.body.main_component_path === "string" &&
-      ctx.body.main_component_path.trim()
+      typeof body.main_component_path === "string" &&
+      body.main_component_path.trim()
     ) {
-      ctx.mainComponentPath = ctx.body.main_component_path
+      ctx.mainComponentPath = body.main_component_path
     }
 
-    ctx.backgroundColor = ctx.body.background_color
-    ctx.backgroundOpacity = ctx.body.background_opacity
-    ctx.zoomMultiplier = ctx.body.zoom_multiplier
-    ctx.pngWidth = ctx.body.png_width
-    ctx.pngHeight = ctx.body.png_height
-    ctx.pngDensity = ctx.body.png_density
+    ctx.backgroundColor = body.background_color
+    ctx.backgroundOpacity = body.background_opacity
+    ctx.zoomMultiplier = body.zoom_multiplier
+    ctx.pngWidth = body.png_width
+    ctx.pngHeight = body.png_height
+    ctx.pngDensity = body.png_density
 
     // Handle output_format from POST body
-    if (ctx.body.output_format || ctx.body.format) {
-      ctx.outputFormat = ctx.body.output_format || ctx.body.format
+    if (body.output_format || body.format) {
+      ctx.outputFormat = body.output_format || body.format
     }
   }
 

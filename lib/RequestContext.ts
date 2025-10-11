@@ -2,7 +2,6 @@ export interface RequestContext {
   url: URL
   host: string
   method: string
-  body?: any
   compressedCode?: string
   fsMap?: Record<string, string>
   circuitJson?: any
