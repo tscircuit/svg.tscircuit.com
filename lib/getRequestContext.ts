@@ -120,6 +120,46 @@ export async function getRequestContext(
     ctx.pngHeight = body.png_height
     ctx.pngDensity = body.png_density
 
+    const simulationExperimentId =
+      body.simulation_experiment_id ?? body.simulationExperimentId
+    if (typeof simulationExperimentId === "string") {
+      ctx.simulationExperimentId = simulationExperimentId
+    }
+
+    const transientGraphIdsInput =
+      body.simulation_transient_voltage_graph_ids ??
+      body.simulationTransientVoltageGraphIds
+    if (transientGraphIdsInput != null) {
+      if (Array.isArray(transientGraphIdsInput)) {
+        ctx.simulationTransientVoltageGraphIds = transientGraphIdsInput
+          .map((value) => (typeof value === "string" ? value : String(value)))
+          .filter((value) => value.trim().length > 0)
+      } else if (typeof transientGraphIdsInput === "string") {
+        ctx.simulationTransientVoltageGraphIds = transientGraphIdsInput
+          .split(",")
+          .map((value) => value.trim())
+          .filter((value) => value.length > 0)
+      } else {
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            error:
+              "Invalid simulation_transient_voltage_graph_ids provided in request body",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        )
+      }
+    }
+
+    const schematicHeightRatioInput =
+      body.schematic_height_ratio ?? body.schematicHeightRatio
+    if (schematicHeightRatioInput != null) {
+      const parsedRatio = Number(schematicHeightRatioInput)
+      if (!Number.isNaN(parsedRatio)) {
+        ctx.schematicHeightRatio = parsedRatio
+      }
+    }
+
     // Handle output_format from POST body
     if (body.output_format || body.format) {
       ctx.outputFormat = body.output_format || body.format

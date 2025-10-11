@@ -16,4 +16,7 @@ export interface RequestContext {
   pngDensity?: number
   outputFormat?: string
   svgType?: string
+  simulationExperimentId?: string
+  simulationTransientVoltageGraphIds?: string[]
+  schematicHeightRatio?: number
 }
