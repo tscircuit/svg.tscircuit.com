@@ -12,16 +12,16 @@ export const threeDSvgHandler = async (
 
     const backgroundColor =
       ctx.url.searchParams.get("background_color") ||
-      ctx.postBodyParams?.background_color ||
+      ctx.backgroundColor ||
       "#fff"
     const backgroundOpacity = parseFloat(
       ctx.url.searchParams.get("background_opacity") ||
-        String(ctx.postBodyParams?.background_opacity) ||
+        String(ctx.backgroundOpacity) ||
         "0.0",
     )
     const zoomMultiplier = parseFloat(
       ctx.url.searchParams.get("zoom_multiplier") ||
-        String(ctx.postBodyParams?.zoom_multiplier) ||
+        String(ctx.zoomMultiplier) ||
         "1.2",
     )
 

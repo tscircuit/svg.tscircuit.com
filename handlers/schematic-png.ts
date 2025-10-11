@@ -15,14 +15,13 @@ export const schematicPngHandler = async (
     const svgContent = await renderCircuitToSvg(circuitJson, "schematic")
 
     const pngDensity = parsePositiveInt(
-      ctx.url.searchParams.get("png_density") ??
-        ctx.postBodyParams?.png_density,
+      ctx.url.searchParams.get("png_density") ?? ctx.pngDensity,
     )
     const pngWidth = parsePositiveInt(
-      ctx.url.searchParams.get("png_width") ?? ctx.postBodyParams?.png_width,
+      ctx.url.searchParams.get("png_width") ?? ctx.pngWidth,
     )
     const pngHeight = parsePositiveInt(
-      ctx.url.searchParams.get("png_height") ?? ctx.postBodyParams?.png_height,
+      ctx.url.searchParams.get("png_height") ?? ctx.pngHeight,
     )
 
     const pngBuffer = await svgToPng(svgContent, {

@@ -42,7 +42,7 @@ export default async (req: Request) => {
 
   // Parse request parameters
   ctx.compressedCode = url.searchParams.get("code") || undefined
-  ctx.fsMapParam = url.searchParams.get("fs_map") || undefined
+  const fsMapParam = url.searchParams.get("fs_map") || undefined
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
   ctx.projectBaseUrl =
     url.searchParams.get("project_base_url") || undefined
@@ -50,8 +50,8 @@ export default async (req: Request) => {
     url.searchParams.get("main_component_path") || undefined
 
   // Parse fsMap from query parameter
-  if (ctx.fsMapParam) {
-    const parsedFsMap = parseFsMapParam(ctx.fsMapParam)
+  if (fsMapParam) {
+    const parsedFsMap = parseFsMapParam(fsMapParam)
     if (!parsedFsMap) {
       return new Response(
         JSON.stringify({
@@ -140,14 +140,16 @@ export default async (req: Request) => {
       ctx.mainComponentPath = ctx.body.main_component_path
     }
 
-    ctx.postBodyParams = {
-      background_color: ctx.body.background_color,
-      background_opacity: ctx.body.background_opacity,
-      zoom_multiplier: ctx.body.zoom_multiplier,
-      output_format: ctx.body.output_format || ctx.body.format,
-      png_width: ctx.body.png_width,
-      png_height: ctx.body.png_height,
-      png_density: ctx.body.png_density,
+    ctx.backgroundColor = ctx.body.background_color
+    ctx.backgroundOpacity = ctx.body.background_opacity
+    ctx.zoomMultiplier = ctx.body.zoom_multiplier
+    ctx.pngWidth = ctx.body.png_width
+    ctx.pngHeight = ctx.body.png_height
+    ctx.pngDensity = ctx.body.png_density
+
+    // Handle output_format from POST body
+    if (ctx.body.output_format || ctx.body.format) {
+      ctx.outputFormat = ctx.body.output_format || ctx.body.format
     }
   }
 
@@ -165,7 +167,7 @@ export default async (req: Request) => {
   }
 
   // Validate output format
-  const outputFormat = getOutputFormat(url, ctx.postBodyParams ?? {})
+  const outputFormat = getOutputFormat(url, ctx)
   if (!outputFormat) {
     return new Response(
       JSON.stringify({

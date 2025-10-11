@@ -12,10 +12,10 @@ export const threeDPngHandler = async (
     const circuitJson = await getCircuitJsonFromContext(ctx)
 
     const pngWidth = parsePositiveInt(
-      ctx.url.searchParams.get("png_width") ?? ctx.postBodyParams?.png_width,
+      ctx.url.searchParams.get("png_width") ?? ctx.pngWidth,
     )
     const pngHeight = parsePositiveInt(
-      ctx.url.searchParams.get("png_height") ?? ctx.postBodyParams?.png_height,
+      ctx.url.searchParams.get("png_height") ?? ctx.pngHeight,
     )
 
     const pngBuffer = await render3dPng(circuitJson, {
