@@ -1,14 +1,16 @@
+import type { RequestContext } from "./RequestContext"
+
 export type OutputFormat = "svg" | "png"
 
 export function getOutputFormat(
   url: URL,
-  postBodyParams: Record<string, any>,
+  ctx: RequestContext,
 ): OutputFormat | null {
   const rawFormat =
     url.searchParams.get("format") ||
     url.searchParams.get("output") ||
     url.searchParams.get("response_format") ||
-    postBodyParams.output_format ||
+    ctx.outputFormat ||
     "svg"
 
   if (typeof rawFormat !== "string") {
