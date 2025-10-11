@@ -5,15 +5,11 @@ export interface RequestContext {
   body?: any
   compressedCode?: string
   fsMapParam?: string
-  fsMapFromPost?: Record<string, string>
-  fsMapFromQuery?: Record<string, string>
-  circuitJsonFromPost?: any
-  entrypointFromQuery?: string
-  entrypointFromPost?: string
-  projectBaseUrlFromQuery?: string
-  projectBaseUrlFromPost?: string
-  mainComponentPathFromQuery?: string
-  mainComponentPathFromPost?: string
+  fsMap?: Record<string, string>
+  circuitJson?: any
+  entrypoint?: string
+  projectBaseUrl?: string
+  mainComponentPath?: string
   postBodyParams?: {
     background_color?: string
     background_opacity?: number
@@ -25,5 +21,4 @@ export interface RequestContext {
   }
   outputFormat?: string
   svgType?: string
-  circuitJson?: any
 }

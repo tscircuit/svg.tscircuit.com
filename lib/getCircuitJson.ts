@@ -7,57 +7,33 @@ export async function getCircuitJsonFromContext(
   ctx: RequestContext,
 ): Promise<any> {
   const {
-    circuitJsonFromPost,
-    fsMapFromPost,
-    fsMapFromQuery,
+    circuitJson,
+    fsMap,
     compressedCode,
-    entrypointFromPost,
-    entrypointFromQuery,
-    projectBaseUrlFromPost,
-    projectBaseUrlFromQuery,
-    mainComponentPathFromPost,
-    mainComponentPathFromQuery,
+    entrypoint,
+    projectBaseUrl,
+    mainComponentPath,
   } = ctx
 
-  if (circuitJsonFromPost) {
-    return circuitJsonFromPost
+  if (circuitJson) {
+    return circuitJson
   }
 
-  if (fsMapFromPost) {
+  if (fsMap) {
     const worker = new CircuitRunner()
 
     const projectConfig: any = {}
-    if (projectBaseUrlFromPost) {
-      projectConfig.projectBaseUrl = projectBaseUrlFromPost
+    if (projectBaseUrl) {
+      projectConfig.projectBaseUrl = projectBaseUrl
     }
     if (Object.keys(projectConfig).length > 0) {
       worker.setProjectConfig(projectConfig)
     }
 
     await worker.executeWithFsMap({
-      fsMap: fsMapFromPost,
-      entrypoint: entrypointFromPost || "index.tsx",
-      mainComponentPath: mainComponentPathFromPost || undefined,
-    })
-    await worker.renderUntilSettled()
-    return await worker.getCircuitJson()
-  }
-
-  if (fsMapFromQuery) {
-    const worker = new CircuitRunner()
-
-    const projectConfig: any = {}
-    if (projectBaseUrlFromQuery) {
-      projectConfig.projectBaseUrl = projectBaseUrlFromQuery
-    }
-    if (Object.keys(projectConfig).length > 0) {
-      worker.setProjectConfig(projectConfig)
-    }
-
-    await worker.executeWithFsMap({
-      fsMap: fsMapFromQuery,
-      mainComponentPath: mainComponentPathFromQuery ?? undefined,
-      entrypoint: entrypointFromQuery ?? undefined,
+      fsMap,
+      entrypoint: entrypoint || "index.tsx",
+      mainComponentPath: mainComponentPath || undefined,
     })
     await worker.renderUntilSettled()
     return await worker.getCircuitJson()
@@ -67,8 +43,8 @@ export async function getCircuitJsonFromContext(
     const worker = new CircuitRunner()
 
     const projectConfig: any = {}
-    if (projectBaseUrlFromQuery) {
-      projectConfig.projectBaseUrl = projectBaseUrlFromQuery
+    if (projectBaseUrl) {
+      projectConfig.projectBaseUrl = projectBaseUrl
     }
     if (Object.keys(projectConfig).length > 0) {
       worker.setProjectConfig(projectConfig)
@@ -79,8 +55,8 @@ export async function getCircuitJsonFromContext(
     if (decodedFsMap) {
       await worker.executeWithFsMap({
         fsMap: decodedFsMap,
-        mainComponentPath: mainComponentPathFromQuery ?? undefined,
-        entrypoint: entrypointFromQuery ?? undefined,
+        mainComponentPath: mainComponentPath ?? undefined,
+        entrypoint: entrypoint ?? undefined,
       })
     } else {
       const userCode = getUncompressedSnippetString(compressedCode)
@@ -88,8 +64,8 @@ export async function getCircuitJsonFromContext(
         fsMap: {
           "index.tsx": userCode,
         },
-        mainComponentPath: mainComponentPathFromQuery ?? undefined,
-        entrypoint: entrypointFromQuery ?? undefined,
+        mainComponentPath: mainComponentPath ?? undefined,
+        entrypoint: entrypoint ?? undefined,
       })
     }
 

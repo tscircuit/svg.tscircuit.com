@@ -43,10 +43,10 @@ export default async (req: Request) => {
   // Parse request parameters
   ctx.compressedCode = url.searchParams.get("code") || undefined
   ctx.fsMapParam = url.searchParams.get("fs_map") || undefined
-  ctx.entrypointFromQuery = url.searchParams.get("entrypoint") || undefined
-  ctx.projectBaseUrlFromQuery =
+  ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
+  ctx.projectBaseUrl =
     url.searchParams.get("project_base_url") || undefined
-  ctx.mainComponentPathFromQuery =
+  ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
 
   // Parse fsMap from query parameter
@@ -61,7 +61,7 @@ export default async (req: Request) => {
         { status: 400, headers: { "Content-Type": "application/json" } },
       )
     }
-    ctx.fsMapFromQuery = parsedFsMap
+    ctx.fsMap = parsedFsMap
   }
 
   // Parse POST body if present
@@ -79,7 +79,7 @@ export default async (req: Request) => {
     }
 
     if (ctx.body.circuit_json) {
-      ctx.circuitJsonFromPost = ctx.body.circuit_json
+      ctx.circuitJson = ctx.body.circuit_json
     }
 
     const fsMapCandidate = ctx.body.fsMap ?? ctx.body.fs_map
@@ -98,9 +98,9 @@ export default async (req: Request) => {
             },
           )
         }
-        ctx.fsMapFromPost = parsedFsMap
+        ctx.fsMap = parsedFsMap
       } else if (isFsMapRecord(fsMapCandidate)) {
-        ctx.fsMapFromPost = fsMapCandidate
+        ctx.fsMap = fsMapCandidate
       } else {
         return new Response(
           JSON.stringify({
@@ -117,13 +117,13 @@ export default async (req: Request) => {
         typeof ctx.body.entrypoint === "string" &&
         ctx.body.entrypoint.trim()
       ) {
-        ctx.entrypointFromPost = ctx.body.entrypoint
+        ctx.entrypoint = ctx.body.entrypoint
       }
     } else if (
       typeof ctx.body.entrypoint === "string" &&
       ctx.body.entrypoint.trim()
     ) {
-      ctx.entrypointFromPost = ctx.body.entrypoint
+      ctx.entrypoint = ctx.body.entrypoint
     }
 
     // Extract project configuration parameters from POST body
@@ -131,13 +131,13 @@ export default async (req: Request) => {
       typeof ctx.body.project_base_url === "string" &&
       ctx.body.project_base_url.trim()
     ) {
-      ctx.projectBaseUrlFromPost = ctx.body.project_base_url
+      ctx.projectBaseUrl = ctx.body.project_base_url
     }
     if (
       typeof ctx.body.main_component_path === "string" &&
       ctx.body.main_component_path.trim()
     ) {
-      ctx.mainComponentPathFromPost = ctx.body.main_component_path
+      ctx.mainComponentPath = ctx.body.main_component_path
     }
 
     ctx.postBodyParams = {
@@ -156,9 +156,8 @@ export default async (req: Request) => {
     url.pathname === "/" &&
     req.method === "GET" &&
     !ctx.compressedCode &&
-    !ctx.circuitJsonFromPost &&
-    !ctx.fsMapFromPost &&
-    !ctx.fsMapFromQuery
+    !ctx.circuitJson &&
+    !ctx.fsMap
   ) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
@@ -181,9 +180,8 @@ export default async (req: Request) => {
   // Validate we have circuit data
   if (
     !ctx.compressedCode &&
-    !ctx.circuitJsonFromPost &&
-    !ctx.fsMapFromPost &&
-    !ctx.fsMapFromQuery
+    !ctx.circuitJson &&
+    !ctx.fsMap
   ) {
     return new Response(
       JSON.stringify({
