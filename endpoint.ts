@@ -113,7 +113,10 @@ export default async (req: Request) => {
           },
         )
       }
-      if (typeof ctx.body.entrypoint === "string" && ctx.body.entrypoint.trim()) {
+      if (
+        typeof ctx.body.entrypoint === "string" &&
+        ctx.body.entrypoint.trim()
+      ) {
         ctx.entrypointFromPost = ctx.body.entrypoint
       }
     } else if (
