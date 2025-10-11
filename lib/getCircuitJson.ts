@@ -1,22 +1,10 @@
 import { CircuitRunner } from "@tscircuit/eval/eval"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import { decodeUrlHashToFsMap } from "./fsMap"
+import type { RequestContext } from "./RequestContext"
 
-export interface CircuitJsonOptions {
-  circuitJsonFromPost?: any
-  fsMapFromPost?: Record<string, string>
-  fsMapFromQuery?: Record<string, string>
-  compressedCode?: string
-  entrypointFromPost?: string
-  entrypointFromQuery?: string
-  projectBaseUrlFromPost?: string
-  projectBaseUrlFromQuery?: string
-  mainComponentPathFromPost?: string
-  mainComponentPathFromQuery?: string
-}
-
-export async function getCircuitJson(
-  options: CircuitJsonOptions,
+export async function getCircuitJsonFromContext(
+  ctx: RequestContext,
 ): Promise<any> {
   const {
     circuitJsonFromPost,
@@ -29,7 +17,7 @@ export async function getCircuitJson(
     projectBaseUrlFromQuery,
     mainComponentPathFromPost,
     mainComponentPathFromQuery,
-  } = options
+  } = ctx
 
   if (circuitJsonFromPost) {
     return circuitJsonFromPost

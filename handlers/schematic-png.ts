@@ -1,5 +1,5 @@
 import type { RequestContext } from "../lib/RequestContext"
-import { getCircuitJson } from "../lib/getCircuitJson"
+import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
 import { svgToPng } from "../lib/svgToPng"
 import { parsePositiveInt } from "../lib/parsePositiveInt"
@@ -10,18 +10,7 @@ export const schematicPngHandler = async (
   ctx: RequestContext,
 ): Promise<Response> => {
   try {
-    const circuitJson = await getCircuitJson({
-      circuitJsonFromPost: ctx.circuitJsonFromPost,
-      fsMapFromPost: ctx.fsMapFromPost,
-      fsMapFromQuery: ctx.fsMapFromQuery,
-      compressedCode: ctx.compressedCode,
-      entrypointFromPost: ctx.entrypointFromPost,
-      entrypointFromQuery: ctx.entrypointFromQuery,
-      projectBaseUrlFromPost: ctx.projectBaseUrlFromPost,
-      projectBaseUrlFromQuery: ctx.projectBaseUrlFromQuery,
-      mainComponentPathFromPost: ctx.mainComponentPathFromPost,
-      mainComponentPathFromQuery: ctx.mainComponentPathFromQuery,
-    })
+    const circuitJson = await getCircuitJsonFromContext(ctx)
 
     const svgContent = await renderCircuitToSvg(circuitJson, "schematic")
 
