@@ -1,94 +1,57 @@
-import {
-  getUncompressedSnippetString,
-  getCompressedBase64SnippetString,
-} from "@tscircuit/create-snippet-url"
-import { CircuitRunner } from "@tscircuit/eval/eval"
-import {
-  convertCircuitJsonToPcbSvg,
-  convertCircuitJsonToSchematicSvg,
-  convertCircuitJsonToPinoutSvg,
-} from "circuit-to-svg"
-import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
-import { convertCircuitJsonToGltf } from "circuit-json-to-gltf"
-import {
-  renderGLTFToPNGBufferFromGLBBuffer,
-  createSceneFromGLTF,
-  computeWorldAABB,
-} from "poppygl"
-import { getHtmlForGeneratedUrlPage } from "./get-html-for-generated-url-page"
 import { getIndexPageHtml } from "./get-index-page-html"
-import { errorResponse } from "./lib/errorResponse"
 import { getOutputFormat } from "./lib/getOutputFormat"
-import { parsePositiveInt } from "./lib/parsePositiveInt"
-import { svgToPng } from "./lib/svgToPng"
-import { decodeUrlHashToFsMap, isFsMapRecord } from "./lib/fsMap"
 import { parseFsMapParam } from "./lib/parseFsMapParam"
+import { isFsMapRecord } from "./lib/fsMap"
+import type { RequestContext } from "./lib/RequestContext"
+import { healthHandler } from "./handlers/health"
+import { generateUrlHandler } from "./handlers/generate_url"
+import { generateUrlsHandler } from "./handlers/generate_urls"
+import { schematicSvgHandler } from "./handlers/schematic-svg"
+import { schematicPngHandler } from "./handlers/schematic-png"
+import { pcbSvgHandler } from "./handlers/pcb-svg"
+import { pcbPngHandler } from "./handlers/pcb-png"
+import { pinoutSvgHandler } from "./handlers/pinout-svg"
+import { pinoutPngHandler } from "./handlers/pinout-png"
+import { threeDSvgHandler } from "./handlers/three-d-svg"
+import { threeDPngHandler } from "./handlers/three-d-png"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
   const host = `${url.protocol}//${url.host}`
 
+  // Build initial context
+  const ctx: RequestContext = {
+    url,
+    host,
+    method: req.method,
+  }
+
+  // Handle health check
   if (url.pathname === "/health") {
-    return new Response(JSON.stringify({ ok: true }))
+    return healthHandler(req, ctx)
   }
 
+  // Handle URL generation endpoints
   if (url.pathname === "/generate_url") {
-    const code = url.searchParams.get("code")
-    if (!code) {
-      return new Response(
-        JSON.stringify({
-          ok: false,
-          error: "No code parameter provided for URL generation",
-        }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      )
-    }
-    return new Response(getHtmlForGeneratedUrlPage(code, host), {
-      headers: { "Content-Type": "text/html" },
-    })
+    return generateUrlHandler(req, ctx)
   }
 
-  if (url.pathname === "/generate_urls" && req.method === "POST") {
-    try {
-      const body = await req.json()
-      const { fs_map, entrypoint } = body
-
-      if (!fs_map) {
-        return new Response(
-          JSON.stringify({ ok: false, error: "No fsMap provided" }),
-          { status: 400, headers: { "Content-Type": "application/json" } },
-        )
-      }
-
-      return new Response(
-        getHtmlForGeneratedUrlPage({ fsMap: fs_map, entrypoint }, host),
-        {
-          headers: { "Content-Type": "text/html" },
-        },
-      )
-    } catch (err) {
-      return new Response(
-        JSON.stringify({ ok: false, error: (err as Error).message }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      )
-    }
+  if (url.pathname === "/generate_urls") {
+    return generateUrlsHandler(req, ctx)
   }
 
-  const compressedCode = url.searchParams.get("code")
-  const fsMapParam = url.searchParams.get("fs_map")
-  const entrypointFromQuery = url.searchParams.get("entrypoint")
-  const projectBaseUrlFromQuery = url.searchParams.get("project_base_url")
-  const mainComponentPathFromQuery = url.searchParams.get("main_component_path")
-  let circuitJsonFromPost: any = null
-  let fsMapFromPost: any = null
-  let fsMapFromQuery: Record<string, string> | null = null
-  let entrypointFromPost: string | null = null
-  let projectBaseUrlFromPost: string | null = null
-  let mainComponentPathFromPost: string | null = null
-  let postBodyParams: any = {}
+  // Parse request parameters
+  ctx.compressedCode = url.searchParams.get("code") || undefined
+  ctx.fsMapParam = url.searchParams.get("fs_map") || undefined
+  ctx.entrypointFromQuery = url.searchParams.get("entrypoint") || undefined
+  ctx.projectBaseUrlFromQuery =
+    url.searchParams.get("project_base_url") || undefined
+  ctx.mainComponentPathFromQuery =
+    url.searchParams.get("main_component_path") || undefined
 
-  if (fsMapParam) {
-    const parsedFsMap = parseFsMapParam(fsMapParam)
+  // Parse fsMap from query parameter
+  if (ctx.fsMapParam) {
+    const parsedFsMap = parseFsMapParam(ctx.fsMapParam)
     if (!parsedFsMap) {
       return new Response(
         JSON.stringify({
@@ -98,13 +61,13 @@ export default async (req: Request) => {
         { status: 400, headers: { "Content-Type": "application/json" } },
       )
     }
-    fsMapFromQuery = parsedFsMap
+    ctx.fsMapFromQuery = parsedFsMap
   }
 
+  // Parse POST body if present
   if (req.method === "POST") {
-    let body: any
     try {
-      body = await req.json()
+      ctx.body = await req.json()
     } catch (err) {
       return new Response(
         JSON.stringify({
@@ -115,11 +78,11 @@ export default async (req: Request) => {
       )
     }
 
-    if (body.circuit_json) {
-      circuitJsonFromPost = body.circuit_json
+    if (ctx.body.circuit_json) {
+      ctx.circuitJsonFromPost = ctx.body.circuit_json
     }
 
-    const fsMapCandidate = body.fsMap ?? body.fs_map
+    const fsMapCandidate = ctx.body.fsMap ?? ctx.body.fs_map
     if (fsMapCandidate != null) {
       if (typeof fsMapCandidate === "string") {
         const parsedFsMap = parseFsMapParam(fsMapCandidate)
@@ -135,9 +98,9 @@ export default async (req: Request) => {
             },
           )
         }
-        fsMapFromPost = parsedFsMap
+        ctx.fsMapFromPost = parsedFsMap
       } else if (isFsMapRecord(fsMapCandidate)) {
-        fsMapFromPost = fsMapCandidate
+        ctx.fsMapFromPost = fsMapCandidate
       } else {
         return new Response(
           JSON.stringify({
@@ -150,52 +113,57 @@ export default async (req: Request) => {
           },
         )
       }
-      if (typeof body.entrypoint === "string" && body.entrypoint.trim()) {
-        entrypointFromPost = body.entrypoint
+      if (typeof ctx.body.entrypoint === "string" && ctx.body.entrypoint.trim()) {
+        ctx.entrypointFromPost = ctx.body.entrypoint
       }
-    } else if (typeof body.entrypoint === "string" && body.entrypoint.trim()) {
-      entrypointFromPost = body.entrypoint
+    } else if (
+      typeof ctx.body.entrypoint === "string" &&
+      ctx.body.entrypoint.trim()
+    ) {
+      ctx.entrypointFromPost = ctx.body.entrypoint
     }
 
     // Extract project configuration parameters from POST body
     if (
-      typeof body.project_base_url === "string" &&
-      body.project_base_url.trim()
+      typeof ctx.body.project_base_url === "string" &&
+      ctx.body.project_base_url.trim()
     ) {
-      projectBaseUrlFromPost = body.project_base_url
+      ctx.projectBaseUrlFromPost = ctx.body.project_base_url
     }
     if (
-      typeof body.main_component_path === "string" &&
-      body.main_component_path.trim()
+      typeof ctx.body.main_component_path === "string" &&
+      ctx.body.main_component_path.trim()
     ) {
-      mainComponentPathFromPost = body.main_component_path
+      ctx.mainComponentPathFromPost = ctx.body.main_component_path
     }
 
-    postBodyParams = {
-      background_color: body.background_color,
-      background_opacity: body.background_opacity,
-      zoom_multiplier: body.zoom_multiplier,
-      output_format: body.output_format || body.format,
-      png_width: body.png_width,
-      png_height: body.png_height,
-      png_density: body.png_density,
+    ctx.postBodyParams = {
+      background_color: ctx.body.background_color,
+      background_opacity: ctx.body.background_opacity,
+      zoom_multiplier: ctx.body.zoom_multiplier,
+      output_format: ctx.body.output_format || ctx.body.format,
+      png_width: ctx.body.png_width,
+      png_height: ctx.body.png_height,
+      png_density: ctx.body.png_density,
     }
   }
 
+  // Handle index page
   if (
     url.pathname === "/" &&
     req.method === "GET" &&
-    !compressedCode &&
-    !circuitJsonFromPost &&
-    !fsMapFromPost &&
-    !fsMapFromQuery
+    !ctx.compressedCode &&
+    !ctx.circuitJsonFromPost &&
+    !ctx.fsMapFromPost &&
+    !ctx.fsMapFromQuery
   ) {
     return new Response(getIndexPageHtml(), {
       headers: { "Content-Type": "text/html" },
     })
   }
 
-  const outputFormat = getOutputFormat(url, postBodyParams)
+  // Validate output format
+  const outputFormat = getOutputFormat(url, ctx.postBodyParams ?? {})
   if (!outputFormat) {
     return new Response(
       JSON.stringify({
@@ -205,12 +173,14 @@ export default async (req: Request) => {
       { status: 400, headers: { "Content-Type": "application/json" } },
     )
   }
+  ctx.outputFormat = outputFormat
 
+  // Validate we have circuit data
   if (
-    !compressedCode &&
-    !circuitJsonFromPost &&
-    !fsMapFromPost &&
-    !fsMapFromQuery
+    !ctx.compressedCode &&
+    !ctx.circuitJsonFromPost &&
+    !ctx.fsMapFromPost &&
+    !ctx.fsMapFromQuery
   ) {
     return new Response(
       JSON.stringify({
@@ -222,95 +192,7 @@ export default async (req: Request) => {
     )
   }
 
-  let circuitJson: any
-  if (circuitJsonFromPost) {
-    circuitJson = circuitJsonFromPost
-  } else if (fsMapFromPost) {
-    const worker = new CircuitRunner()
-
-    // Apply project configuration if provided
-    const projectConfig: any = {}
-    if (projectBaseUrlFromPost) {
-      projectConfig.projectBaseUrl = projectBaseUrlFromPost
-    }
-    if (Object.keys(projectConfig).length > 0) {
-      worker.setProjectConfig(projectConfig)
-    }
-
-    try {
-      await worker.executeWithFsMap({
-        fsMap: fsMapFromPost,
-        entrypoint: entrypointFromPost || "index.tsx",
-        mainComponentPath: mainComponentPathFromPost || undefined,
-      })
-      await worker.renderUntilSettled()
-      circuitJson = await worker.getCircuitJson()
-    } catch (err) {
-      return await errorResponse(err as Error, outputFormat)
-    }
-  } else if (fsMapFromQuery) {
-    const worker = new CircuitRunner()
-
-    // Apply project configuration if provided
-    const projectConfig: any = {}
-    if (projectBaseUrlFromQuery) {
-      projectConfig.projectBaseUrl = projectBaseUrlFromQuery
-    }
-    if (Object.keys(projectConfig).length > 0) {
-      worker.setProjectConfig(projectConfig)
-    }
-
-    try {
-      await worker.executeWithFsMap({
-        fsMap: fsMapFromQuery,
-        mainComponentPath: mainComponentPathFromQuery ?? undefined,
-        entrypoint: entrypointFromQuery ?? undefined,
-      })
-      await worker.renderUntilSettled()
-      circuitJson = await worker.getCircuitJson()
-    } catch (err) {
-      return await errorResponse(err as Error, outputFormat)
-    }
-  } else if (compressedCode) {
-    const worker = new CircuitRunner()
-
-    // Apply project configuration if provided
-    const projectConfig: any = {}
-    if (projectBaseUrlFromQuery) {
-      projectConfig.projectBaseUrl = projectBaseUrlFromQuery
-    }
-    if (Object.keys(projectConfig).length > 0) {
-      worker.setProjectConfig(projectConfig)
-    }
-
-    try {
-      const decodedFsMap = decodeUrlHashToFsMap(compressedCode)
-
-      if (decodedFsMap) {
-        await worker.executeWithFsMap({
-          fsMap: decodedFsMap,
-          mainComponentPath: mainComponentPathFromQuery ?? undefined,
-          entrypoint: entrypointFromQuery ?? undefined,
-        })
-      } else {
-        const userCode = getUncompressedSnippetString(compressedCode)
-        await worker.executeWithFsMap({
-          fsMap: {
-            "index.tsx": userCode,
-          },
-          mainComponentPath: mainComponentPathFromQuery ?? undefined,
-          entrypoint: entrypointFromQuery ?? undefined,
-        })
-      }
-
-      await worker.renderUntilSettled()
-      circuitJson = await worker.getCircuitJson()
-    } catch (err) {
-      return await errorResponse(err as Error, outputFormat)
-    }
-  }
-
-  // Check for both svg_type and view parameters, with svg_type taking precedence
+  // Validate SVG type
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
   if (!svgType || !["pcb", "schematic", "3d", "pinout"].includes(svgType)) {
@@ -322,160 +204,40 @@ export default async (req: Request) => {
       { status: 400 },
     )
   }
+  ctx.svgType = svgType
 
-  const pngDensityParam = parsePositiveInt(
-    url.searchParams.get("png_density") ?? postBodyParams.png_density,
-  )
-  const pngWidthParam = parsePositiveInt(
-    url.searchParams.get("png_width") ?? postBodyParams.png_width,
-  )
-  const pngHeightParam = parsePositiveInt(
-    url.searchParams.get("png_height") ?? postBodyParams.png_height,
-  )
-
-  let svgContent: string | null = null
-  let preRenderedPngBuffer: Uint8Array | null = null
-  try {
-    if (svgType === "pcb") {
-      svgContent = convertCircuitJsonToPcbSvg(circuitJson)
-    } else if (svgType === "schematic") {
-      svgContent = convertCircuitJsonToSchematicSvg(circuitJson)
-    } else if (svgType === "pinout") {
-      svgContent = convertCircuitJsonToPinoutSvg(circuitJson)
-    } else {
-      // Extract 3D SVG parameters from URL and POST body (URL takes precedence)
-      const backgroundColor =
-        url.searchParams.get("background_color") ||
-        postBodyParams.background_color ||
-        "#fff"
-      const backgroundOpacity = parseFloat(
-        url.searchParams.get("background_opacity") ||
-          postBodyParams.background_opacity ||
-          "0.0",
-      )
-      const zoomMultiplier = parseFloat(
-        url.searchParams.get("zoom_multiplier") ||
-          postBodyParams.zoom_multiplier ||
-          "1.2",
-      )
-
-      if (outputFormat === "png") {
-        const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
-          format: "glb",
-        })) as unknown
-
-        let glbBinary: Uint8Array
-        if (glbResult instanceof Uint8Array) {
-          glbBinary = glbResult
-        } else if (glbResult instanceof ArrayBuffer) {
-          glbBinary = new Uint8Array(glbResult)
-        } else if (ArrayBuffer.isView(glbResult)) {
-          const view = glbResult as ArrayBufferView
-          glbBinary = new Uint8Array(
-            view.buffer.slice(
-              view.byteOffset,
-              view.byteOffset + view.byteLength,
-            ),
-          )
-        } else {
-          throw new Error("GLB conversion did not return binary data")
-        }
-
-        const pngWidth = pngWidthParam ?? 1024
-        const pngHeight = pngHeightParam ?? pngWidth
-
-        // Compute camera position relative to board size for overhead view
-        // Y is "up" axis in poppygl's coordinate system
-        let maxDim = 10 // Default size
-
-        // Find board dimensions from circuit JSON
-        const pcbBoard = circuitJson.find((el: any) => el.type === "pcb_board")
-        if (pcbBoard?.width && pcbBoard?.height) {
-          // Use PCB board dimensions
-          maxDim = Math.max(pcbBoard.width, pcbBoard.height)
-        } else {
-          // No board found, try to find first pcb_component with size
-          const pcbComponent = circuitJson.find(
-            (el: any) =>
-              el.type === "pcb_component" && (el.width || el.size?.width),
-          )
-          if (pcbComponent) {
-            const width = pcbComponent.width || pcbComponent.size?.width || 0
-            const height = pcbComponent.height || pcbComponent.size?.height || 0
-            maxDim = Math.max(width, height, 5) // Minimum of 5mm
-          }
-        }
-
-        // Position camera for overhead view with slight angle
-        // Y is up, so make Y height proportionally larger for more overhead
-        // X and Z give us the angled perspective
-        const yHeight = maxDim * 1.4 // High on Y axis for overhead perspective
-        const xzOffset = maxDim * 0.75 // Slight angle for 3D depth
-
-        const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
-        const lookAt: [number, number, number] = [0, 0, 0]
-
-        preRenderedPngBuffer = await renderGLTFToPNGBufferFromGLBBuffer(
-          glbBinary,
-          {
-            width: pngWidth,
-            height: pngHeight,
-            backgroundColor: null, // null = transparent background
-            camPos,
-            lookAt,
-          },
-        )
-      } else {
-        svgContent = await convertCircuitJsonToSimple3dSvg(circuitJson, {
-          background: {
-            color: backgroundColor,
-            opacity: backgroundOpacity,
-          },
-          defaultZoomMultiplier: zoomMultiplier,
-        })
-      }
-    }
-  } catch (err) {
-    return await errorResponse(err as Error, outputFormat)
+  // Route to appropriate handler based on SVG type and output format
+  if (svgType === "schematic" && outputFormat === "svg") {
+    return schematicSvgHandler(req, ctx)
+  }
+  if (svgType === "schematic" && outputFormat === "png") {
+    return schematicPngHandler(req, ctx)
+  }
+  if (svgType === "pcb" && outputFormat === "svg") {
+    return pcbSvgHandler(req, ctx)
+  }
+  if (svgType === "pcb" && outputFormat === "png") {
+    return pcbPngHandler(req, ctx)
+  }
+  if (svgType === "pinout" && outputFormat === "svg") {
+    return pinoutSvgHandler(req, ctx)
+  }
+  if (svgType === "pinout" && outputFormat === "png") {
+    return pinoutPngHandler(req, ctx)
+  }
+  if (svgType === "3d" && outputFormat === "svg") {
+    return threeDSvgHandler(req, ctx)
+  }
+  if (svgType === "3d" && outputFormat === "png") {
+    return threeDPngHandler(req, ctx)
   }
 
-  if (outputFormat === "png") {
-    try {
-      let pngBuffer: Uint8Array | ArrayBuffer
-      if (preRenderedPngBuffer) {
-        pngBuffer = preRenderedPngBuffer
-      } else {
-        if (svgContent == null) {
-          throw new Error("No SVG content available for PNG conversion")
-        }
-
-        pngBuffer = await svgToPng(svgContent, {
-          density: pngDensityParam,
-          width: pngWidthParam,
-          height: pngHeightParam,
-        })
-      }
-
-      return new Response(pngBuffer as ArrayBuffer, {
-        headers: {
-          "Content-Type": "image/png",
-          "Cache-Control":
-            "public, max-age=86400, s-maxage=31536000, immutable",
-        },
-      })
-    } catch (err) {
-      return await errorResponse(err as Error, outputFormat)
-    }
-  }
-
-  if (svgContent == null) {
-    throw new Error("No SVG content generated")
-  }
-
-  return new Response(svgContent, {
-    headers: {
-      "Content-Type": "image/svg+xml",
-      "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
-    },
-  })
+  // Fallback error
+  return new Response(
+    JSON.stringify({
+      ok: false,
+      error: "Invalid request configuration",
+    }),
+    { status: 400 },
+  )
 }
