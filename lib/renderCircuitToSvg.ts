@@ -3,6 +3,7 @@ import {
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
   convertCircuitJsonToPinoutSvg,
+  convertCircuitJsonToSchematicSimulationSvg,
 } from "circuit-to-svg"
 import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d/dist/index.js"
 
@@ -10,9 +11,18 @@ export interface RenderOptions {
   backgroundColor?: string
   backgroundOpacity?: number
   zoomMultiplier?: number
+  simulationExperimentId?: string
+  simulationTransientVoltageGraphIds?: string[]
+  schematicHeightRatio?: number
 }
 
-export type SvgRenderType = "pcb" | "schematic" | "pinout" | "assembly" | "3d"
+export type SvgRenderType =
+  | "pcb"
+  | "schematic"
+  | "pinout"
+  | "assembly"
+  | "3d"
+  | "schsim"
 
 export async function renderCircuitToSvg(
   circuitJson: any,
@@ -35,6 +45,22 @@ export async function renderCircuitToSvg(
 
   if (svgType === "schematic") {
     return convertCircuitJsonToSchematicSvg(circuitJson)
+  }
+
+  if (svgType === "schsim") {
+    if (!options.simulationExperimentId) {
+      throw new Error(
+        "simulation_experiment_id is required when rendering schsim SVG output",
+      )
+    }
+
+    return convertCircuitJsonToSchematicSimulationSvg({
+      circuitJson,
+      simulation_experiment_id: options.simulationExperimentId,
+      simulation_transient_voltage_graph_ids:
+        options.simulationTransientVoltageGraphIds,
+      schematicHeightRatio: options.schematicHeightRatio,
+    })
   }
 
   if (svgType === "pinout") {
