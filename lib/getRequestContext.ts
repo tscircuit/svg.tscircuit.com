@@ -7,7 +7,7 @@ import type { RequestContext } from "./RequestContext"
  * Returns either a RequestContext or an error Response if parsing fails.
  */
 export async function getRequestContext(
-  req: Request
+  req: Request,
 ): Promise<RequestContext | Response> {
   const url = new URL(req.url.replace("/api", "/"))
   const host = `${url.protocol}//${url.host}`
@@ -22,8 +22,7 @@ export async function getRequestContext(
   // Parse request parameters
   ctx.compressedCode = url.searchParams.get("code") || undefined
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
-  ctx.projectBaseUrl =
-    url.searchParams.get("project_base_url") || undefined
+  ctx.projectBaseUrl = url.searchParams.get("project_base_url") || undefined
   ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
 
@@ -93,16 +92,10 @@ export async function getRequestContext(
           },
         )
       }
-      if (
-        typeof body.entrypoint === "string" &&
-        body.entrypoint.trim()
-      ) {
+      if (typeof body.entrypoint === "string" && body.entrypoint.trim()) {
         ctx.entrypoint = body.entrypoint
       }
-    } else if (
-      typeof body.entrypoint === "string" &&
-      body.entrypoint.trim()
-    ) {
+    } else if (typeof body.entrypoint === "string" && body.entrypoint.trim()) {
       ctx.entrypoint = body.entrypoint
     }
 

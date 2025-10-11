@@ -72,11 +72,7 @@ export default async (req: Request) => {
   ctx.outputFormat = outputFormat
 
   // Validate we have circuit data
-  if (
-    !ctx.compressedCode &&
-    !ctx.circuitJson &&
-    !ctx.fsMap
-  ) {
+  if (!ctx.compressedCode && !ctx.circuitJson && !ctx.fsMap) {
     return new Response(
       JSON.stringify({
         ok: false,
