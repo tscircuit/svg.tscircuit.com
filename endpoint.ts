@@ -8,6 +8,8 @@ import { schematicSvgHandler } from "./handlers/schematic-svg"
 import { schematicPngHandler } from "./handlers/schematic-png"
 import { pcbSvgHandler } from "./handlers/pcb-svg"
 import { pcbPngHandler } from "./handlers/pcb-png"
+import { assemblySvgHandler } from "./handlers/assembly-svg"
+import { assemblyPngHandler } from "./handlers/assembly-png"
 import { pinoutSvgHandler } from "./handlers/pinout-svg"
 import { pinoutPngHandler } from "./handlers/pinout-png"
 import { threeDSvgHandler } from "./handlers/three-d-svg"
@@ -88,7 +90,10 @@ export default async (req: Request) => {
   // Validate SVG type
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
-  if (!svgType || !["pcb", "schematic", "3d", "pinout"].includes(svgType)) {
+  if (
+    !svgType ||
+    !["pcb", "schematic", "assembly", "3d", "pinout"].includes(svgType)
+  ) {
     return new Response(
       JSON.stringify({
         ok: false,
@@ -117,6 +122,12 @@ export default async (req: Request) => {
   }
   if (svgType === "pinout" && outputFormat === "png") {
     return pinoutPngHandler(req, ctx)
+  }
+  if (svgType === "assembly" && outputFormat === "svg") {
+    return assemblySvgHandler(req, ctx)
+  }
+  if (svgType === "assembly" && outputFormat === "png") {
+    return assemblyPngHandler(req, ctx)
   }
   if (svgType === "3d" && outputFormat === "svg") {
     return threeDSvgHandler(req, ctx)

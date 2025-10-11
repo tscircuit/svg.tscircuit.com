@@ -1,4 +1,5 @@
 import {
+  convertCircuitJsonToAssemblySvg,
   convertCircuitJsonToPcbSvg,
   convertCircuitJsonToSchematicSvg,
   convertCircuitJsonToPinoutSvg,
@@ -11,9 +12,11 @@ export interface RenderOptions {
   zoomMultiplier?: number
 }
 
+export type SvgRenderType = "pcb" | "schematic" | "pinout" | "assembly" | "3d"
+
 export async function renderCircuitToSvg(
   circuitJson: any,
-  svgType: "pcb" | "schematic" | "pinout" | "3d",
+  svgType: SvgRenderType,
   options: RenderOptions = {},
 ): Promise<string> {
   const {
@@ -21,6 +24,10 @@ export async function renderCircuitToSvg(
     backgroundOpacity = 0.0,
     zoomMultiplier = 1.2,
   } = options
+
+  if (svgType === "assembly") {
+    return convertCircuitJsonToAssemblySvg(circuitJson)
+  }
 
   if (svgType === "pcb") {
     return convertCircuitJsonToPcbSvg(circuitJson)
