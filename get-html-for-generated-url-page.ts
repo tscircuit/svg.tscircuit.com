@@ -29,8 +29,6 @@ export const getHtmlForGeneratedUrlPage = (
   const pcbPngUrl = `${urlPrefix}/?svg_type=pcb&format=png&code=${encodeURIComponent(compressedCode)}`
   const schSvgUrl = `${urlPrefix}/?svg_type=schematic&code=${encodeURIComponent(compressedCode)}`
   const schPngUrl = `${urlPrefix}/?svg_type=schematic&format=png&code=${encodeURIComponent(compressedCode)}`
-  const assemblySvgUrl = `${urlPrefix}/?svg_type=assembly&code=${encodeURIComponent(compressedCode)}`
-  const assemblyPngUrl = `${urlPrefix}/?svg_type=assembly&format=png&code=${encodeURIComponent(compressedCode)}`
   const pinoutSvgUrl = `${urlPrefix}/?svg_type=pinout&code=${encodeURIComponent(compressedCode)}`
   const pinoutPngUrl = `${urlPrefix}/?svg_type=pinout&format=png&code=${encodeURIComponent(compressedCode)}`
   const threeDSvgUrl = `${urlPrefix}/?svg_type=3d&code=${encodeURIComponent(compressedCode)}`
@@ -122,14 +120,6 @@ export const getHtmlForGeneratedUrlPage = (
         <tr>
           <td>Schematic PNG URL</td>
           <td><a href="${schPngUrl}" target="_blank">${schPngUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Assembly SVG URL</td>
-          <td><a href="${assemblySvgUrl}" target="_blank">${assemblySvgUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Assembly PNG URL</td>
-          <td><a href="${assemblyPngUrl}" target="_blank">${assemblyPngUrl}</a></td>
         </tr>
         <tr>
           <td>Pinout SVG URL</td>
