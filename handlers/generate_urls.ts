@@ -16,10 +16,26 @@ export const generateUrlsHandler = async (
   }
 
   try {
-    const body = await req.json()
-    const { fs_map, entrypoint } = body
+    const body = ctx.requestBody
+    if (!body || typeof body !== "object") {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "Invalid or missing JSON body",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
 
-    if (!fs_map) {
+    const { fs_map, entrypoint } = body as {
+      fs_map?: Record<string, string>
+      entrypoint?: string
+    }
+
+    const fsMap = fs_map ?? ctx.fsMap
+    const resolvedEntrypoint = entrypoint ?? ctx.entrypoint
+
+    if (!fsMap) {
       return new Response(
         JSON.stringify({ ok: false, error: "No fsMap provided" }),
         { status: 400, headers: { "Content-Type": "application/json" } },
@@ -27,7 +43,10 @@ export const generateUrlsHandler = async (
     }
 
     return new Response(
-      getHtmlForGeneratedUrlPage({ fsMap: fs_map, entrypoint }, ctx.host),
+      getHtmlForGeneratedUrlPage(
+        { fsMap, entrypoint: resolvedEntrypoint },
+        ctx.host,
+      ),
       {
         headers: { "Content-Type": "text/html" },
       },
