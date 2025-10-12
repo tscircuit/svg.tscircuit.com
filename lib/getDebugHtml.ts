@@ -10,6 +10,24 @@ const escapeHtml = (value: string): string =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;")
 
+const formatFsMapContent = (value: string): string => {
+  const newlineMatches = value.match(/\r\n|\n|\r/g) ?? []
+  const segments = value.split(/\r\n|\n|\r/)
+
+  return segments
+    .map((segment, index) => {
+      const newline = newlineMatches[index]
+      const newlineIndicator = newline
+        ? `<span class="newline-symbol">↵</span>`
+        : ""
+      const newlineCharacters =
+        newline === "\r\n" ? "\r\n" : newline ? "\n" : ""
+
+      return `${escapeHtml(segment)}${newlineIndicator}${newlineCharacters}`
+    })
+    .join("")
+}
+
 export function getDebugHtml(ctx: RequestContext): string {
   const queryParams = Array.from(ctx.url.searchParams.entries()).map(
     ([key, value]) => ({ key, value }),
@@ -56,18 +74,36 @@ export function getDebugHtml(ctx: RequestContext): string {
       ? JSON.stringify(ctx.requestBody, null, 2)
       : undefined
 
-  const fsMapString = ctx.fsMap
-    ? JSON.stringify(ctx.fsMap, null, 2)
-    : decodedFsMap
-      ? JSON.stringify(decodedFsMap, null, 2)
-      : null
+  const fsMapForDisplay = ctx.fsMap ?? decodedFsMap ?? null
 
   const decompressedCodeSection = decompressedCode
     ? `<h2>Decompressed Code</h2><pre>${escapeHtml(decompressedCode)}</pre>`
     : ""
 
-  const decodedFsMapSection = fsMapString
-    ? `<h2>Decoded fs_map</h2><pre>${escapeHtml(fsMapString)}</pre>`
+  const decodedFsMapSection = fsMapForDisplay
+    ? `<section>
+        <h2>Decoded fs_map</h2>
+        <table class="fs-map-table">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Contents</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${Object.entries(fsMapForDisplay)
+              .map(
+                ([filePath, content]) => `
+                  <tr>
+                    <td><code>${escapeHtml(filePath)}</code></td>
+                    <td><pre class="fs-content">${formatFsMapContent(content)}</pre></td>
+                  </tr>
+                `,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </section>`
     : ""
 
   const decompressionErrorSection = decompressionError
@@ -107,6 +143,14 @@ export function getDebugHtml(ctx: RequestContext): string {
         border-bottom: 1px solid #333;
         vertical-align: top;
       }
+      .fs-map-table {
+        margin-top: 12px;
+      }
+      .fs-map-table th:first-child,
+      .fs-map-table td:first-child {
+        width: 220px;
+        white-space: nowrap;
+      }
       pre {
         background: #1e1e1e;
         padding: 12px;
@@ -114,9 +158,16 @@ export function getDebugHtml(ctx: RequestContext): string {
         overflow-x: auto;
         max-height: 400px;
       }
+      .fs-content {
+        margin: 0;
+      }
       code {
         font-family: "Fira Code", "SFMono-Regular", "Consolas", monospace;
         font-size: 13px;
+      }
+      .newline-symbol {
+        color: #8b8b8b;
+        margin-left: 6px;
       }
     </style>
   </head>
