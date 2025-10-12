@@ -14,16 +14,26 @@ export const threeDSvgHandler = async (
       ctx.url.searchParams.get("background_color") ||
       ctx.backgroundColor ||
       "#fff"
-    const backgroundOpacity = parseFloat(
-      ctx.url.searchParams.get("background_opacity") ||
-        String(ctx.backgroundOpacity) ||
-        "0.0",
-    )
-    const zoomMultiplier = parseFloat(
-      ctx.url.searchParams.get("zoom_multiplier") ||
-        String(ctx.zoomMultiplier) ||
-        "1.2",
-    )
+
+    const rawBgOpacity = ctx.url.searchParams.get("background_opacity")
+    let backgroundOpacity =
+      rawBgOpacity != null
+        ? Number(rawBgOpacity)
+        : typeof ctx.backgroundOpacity === "number"
+          ? ctx.backgroundOpacity
+          : 0.0
+    if (!Number.isFinite(backgroundOpacity)) backgroundOpacity = 0.0
+    if (backgroundOpacity < 0) backgroundOpacity = 0
+    if (backgroundOpacity > 1) backgroundOpacity = 1
+
+    const rawZoom = ctx.url.searchParams.get("zoom_multiplier")
+    let zoomMultiplier =
+      rawZoom != null
+        ? Number(rawZoom)
+        : typeof ctx.zoomMultiplier === "number"
+          ? ctx.zoomMultiplier
+          : 1.2
+    if (!Number.isFinite(zoomMultiplier)) zoomMultiplier = 1.2
 
     const svgContent = await renderCircuitToSvg(circuitJson, "3d", {
       backgroundColor,

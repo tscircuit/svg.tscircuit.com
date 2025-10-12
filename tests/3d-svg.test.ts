@@ -78,7 +78,7 @@ test("3d svg conversion with parameter variations", async () => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       circuit_json: testCircuitJson,
-      background_color: "#00ff00",
+      background_color: "#0000ff",
       background_opacity: 0.7,
       zoom_multiplier: 1.8,
     }),

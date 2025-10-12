@@ -36,6 +36,7 @@
     "circuit-to-svg": "^0.0.229",
     "jscad-fiber": "^0.0.85",
     "poppygl": "^0.0.14",
-    "sharp": "^0.34.4"
+    "sharp": "^0.34.4",
+    "@neplex/vectorizer": "^0.0.5"
   }
 }
