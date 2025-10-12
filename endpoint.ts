@@ -15,6 +15,7 @@ import { pinoutSvgHandler } from "./handlers/pinout-svg"
 import { pinoutPngHandler } from "./handlers/pinout-png"
 import { threeDSvgHandler } from "./handlers/three-d-svg"
 import { threeDPngHandler } from "./handlers/three-d-png"
+import { getDebugHtml } from "./lib/getDebugHtml"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -45,6 +46,12 @@ export default async (req: Request) => {
     return ctxOrError
   }
   const ctx = ctxOrError
+
+  if (url.searchParams.has("debug")) {
+    return new Response(getDebugHtml(ctx), {
+      headers: { "Content-Type": "text/html" },
+    })
+  }
 
   // Handle index page
   if (

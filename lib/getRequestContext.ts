@@ -57,6 +57,8 @@ export async function getRequestContext(
       )
     }
 
+    ctx.requestBody = body
+
     if (body.circuit_json) {
       ctx.circuitJson = body.circuit_json
     }
