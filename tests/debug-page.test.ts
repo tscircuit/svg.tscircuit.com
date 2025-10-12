@@ -13,8 +13,15 @@ export default () => (
 )
   `)
 
+  const fsMap = {
+    "index.tsx":
+      "export const Example = () => {\n  return <div>Hello</div>\n}\n",
+  }
+
   const response = await fetch(
-    `${serverUrl}?svg_type=pcb&code=${encodeURIComponent(compressedCode)}&debug=1`,
+    `${serverUrl}?svg_type=pcb&code=${encodeURIComponent(
+      compressedCode,
+    )}&fs_map=${encodeURIComponent(JSON.stringify(fsMap))}&debug=1`,
   )
 
   expect(response.status).toBe(200)
@@ -25,4 +32,7 @@ export default () => (
   expect(html).toContain("debug")
   expect(html).toContain("Decompressed Code")
   expect(html).toContain("export default () =&gt; (")
+  expect(html).toContain("Decoded fs_map")
+  expect(html).toContain("index.tsx")
+  expect(html).toContain("newline-symbol")
 })
