@@ -14,8 +14,12 @@ export default () => (
   `)
 
   const fsMap = {
-    "index.tsx":
-      "export const Example = () => {\n  return <div>Hello</div>\n}\n",
+    "index.tsx": `export default () => (
+  <board width="10mm" height="10mm">
+    <resistor resistance="1k" footprint="0402" name="R1" />
+  </board>
+)
+`,
   }
 
   const response = await fetch(
@@ -35,4 +39,33 @@ export default () => (
   expect(html).toContain("Decoded fs_map")
   expect(html).toContain("index.tsx")
   expect(html).toContain("newline-symbol")
+  expect(html).toContain("Download Circuit JSON")
+
+  const downloadLinkMatch = html.match(
+    /href=\"([^\"]+)\"[^>]*>\s*Download Circuit JSON/,
+  )
+
+  expect(downloadLinkMatch).not.toBeNull()
+
+  const downloadHref = downloadLinkMatch![1].replace(/&amp;/g, "&")
+  const downloadUrl = new URL(downloadHref, serverUrl)
+  const circuitJsonResponse = await fetch(downloadUrl)
+
+  if (circuitJsonResponse.status !== 200) {
+    const errorBody = await circuitJsonResponse.text()
+    throw new Error(
+      `circuit_json download failed: ${circuitJsonResponse.status} ${errorBody}`,
+    )
+  }
+
+  expect(circuitJsonResponse.headers.get("content-type")).toBe(
+    "application/json",
+  )
+  expect(
+    circuitJsonResponse.headers.get("content-disposition") ?? "",
+  ).toContain("circuit.json")
+
+  const circuitJson = await circuitJsonResponse.json()
+  expect(Array.isArray(circuitJson)).toBe(true)
+  expect(circuitJson.length).toBeGreaterThan(0)
 })
