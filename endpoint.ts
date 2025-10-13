@@ -16,6 +16,7 @@ import { pinoutPngHandler } from "./handlers/pinout-png"
 import { threeDSvgHandler } from "./handlers/three-d-svg"
 import { threeDPngHandler } from "./handlers/three-d-png"
 import { getDebugHtml } from "./lib/getDebugHtml"
+import { getCircuitJsonFromContext } from "./lib/getCircuitJson"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -89,6 +90,16 @@ export default async (req: Request) => {
       }),
       { status: 400 },
     )
+  }
+
+  if (outputFormat === "circuit_json") {
+    const circuitJson = await getCircuitJsonFromContext(ctx)
+    return new Response(JSON.stringify(circuitJson, null, 2), {
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Disposition": 'attachment; filename="circuit.json"',
+      },
+    })
   }
 
   // Validate SVG type

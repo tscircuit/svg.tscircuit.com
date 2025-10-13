@@ -35,4 +35,6 @@ export default () => (
   expect(html).toContain("Decoded fs_map")
   expect(html).toContain("index.tsx")
   expect(html).toContain("newline-symbol")
+  expect(html).toContain("Download circuit.json")
+  expect(html).toContain("format=circuit_json")
 })

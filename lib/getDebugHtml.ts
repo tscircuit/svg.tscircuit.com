@@ -114,6 +114,22 @@ export function getDebugHtml(ctx: RequestContext): string {
     ? `<h2>Request Body</h2><pre>${escapeHtml(requestBodyString)}</pre>`
     : ""
 
+  const hasCircuitData = Boolean(
+    ctx.compressedCode || ctx.circuitJson || ctx.fsMap,
+  )
+  const circuitJsonDownloadLink = hasCircuitData
+    ? (() => {
+        const downloadUrl = new URL(ctx.url.toString())
+        downloadUrl.searchParams.delete("debug")
+        downloadUrl.searchParams.delete("response_format")
+        downloadUrl.searchParams.delete("output")
+        downloadUrl.searchParams.set("format", "circuit_json")
+        return `<a class="download-link" href="${escapeHtml(
+          downloadUrl.toString(),
+        )}" download="circuit.json">Download circuit.json</a>`
+      })()
+    : ""
+
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -169,10 +185,30 @@ export function getDebugHtml(ctx: RequestContext): string {
         color: #8b8b8b;
         margin-left: 6px;
       }
+      .download-container {
+        margin: 16px 0;
+      }
+      .download-link {
+        display: inline-block;
+        padding: 8px 12px;
+        background: #0ea5e9;
+        color: #111;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .download-link:hover {
+        background: #38bdf8;
+      }
     </style>
   </head>
   <body>
     <h1>Request Debug Information</h1>
+    ${
+      circuitJsonDownloadLink
+        ? `<div class="download-container">${circuitJsonDownloadLink}</div>`
+        : ""
+    }
     <section>
       <h2>Query Parameters</h2>
       <table>
