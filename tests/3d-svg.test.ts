@@ -33,7 +33,7 @@ test("3d svg conversion with parameter variations", async () => {
   const colorSvgContent = await colorResponse.text()
   expect(colorResponse.status).toBe(200)
   expect(colorSvgContent).toContain("<svg")
-  expect(colorSvgContent).toMatchSvgSnapshot(import.meta.path, "3d-bg-color")
+  expect(colorSvgContent).toMatchSvgSnapshot(import.meta.path, "bg-color")
 
   // Test custom background opacity
   const opacityResponse = await fetch(
@@ -50,7 +50,7 @@ test("3d svg conversion with parameter variations", async () => {
   const zoomSvgContent = await zoomResponse.text()
   expect(zoomResponse.status).toBe(200)
   expect(zoomSvgContent).toContain("<svg")
-  expect(zoomSvgContent).toMatchSvgSnapshot(import.meta.path, "3d-zoom")
+  expect(zoomSvgContent).toMatchSvgSnapshot(import.meta.path, "zoom")
 
   // Test all custom parameters combined
   const allParamsResponse = await fetch(
@@ -59,10 +59,7 @@ test("3d svg conversion with parameter variations", async () => {
   const allParamsSvgContent = await allParamsResponse.text()
   expect(allParamsResponse.status).toBe(200)
   expect(allParamsSvgContent).toContain("<svg")
-  expect(allParamsSvgContent).toMatchSvgSnapshot(
-    import.meta.path,
-    "3d-all-params",
-  )
+  expect(allParamsSvgContent).toMatchSvgSnapshot(import.meta.path, "all-params")
 
   // Test invalid parameter values fallback to defaults
   const invalidResponse = await fetch(
@@ -86,5 +83,5 @@ test("3d svg conversion with parameter variations", async () => {
   const postSvgContent = await postResponse.text()
   expect(postResponse.status).toBe(200)
   expect(postSvgContent).toContain("<svg")
-  expect(postSvgContent).toMatchSvgSnapshot(import.meta.path, "3d-post")
+  expect(postSvgContent).toMatchSvgSnapshot(import.meta.path, "post")
 })

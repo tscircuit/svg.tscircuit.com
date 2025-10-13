@@ -18,7 +18,7 @@
         "@tscircuit/create-snippet-url": "^0.0.9",
         "@types/bun": "latest",
         "@types/react": "19.0.8",
-        "bun-match-svg": "^0.0.9",
+        "bun-match-svg": "^0.0.14",
         "comlink": "^4.4.2",
         "get-port": "^7.1.0",
         "looks-same": "^10.0.1",
@@ -380,7 +380,7 @@
 
     "buffer-crc32": ["buffer-crc32@1.0.0", "", {}, "sha512-Db1SbgBS/fg/392AblrMJk97KggmvYhr4pB5ZIMTWtaivCPMWLkmb7m21cJvpvgK+J3nsU2CmmixNBZx4vFj/w=="],
 
-    "bun-match-svg": ["bun-match-svg@0.0.9", "", { "dependencies": { "looks-same": "^9.0.1" }, "peerDependencies": { "typescript": "^5.0.0" }, "bin": { "bun-match-svg": "cli.ts" } }, "sha512-WISE8cUd3ztIEbYRymuxs+l4qwRviHIhyRQHmDz26vnhKON9g+Ur+2L3pfJrffpGiYWGF/jtWoWmYRQiaimTxg=="],
+    "bun-match-svg": ["bun-match-svg@0.0.14", "", { "dependencies": { "looks-same": "^9.0.1" }, "peerDependencies": { "typescript": "^5.0.0" }, "bin": { "bun-match-svg": "cli.ts" } }, "sha512-6tiAOY70cwf0aptY/0etMa3/8W1JggJBk3odwPhLhcUABoS3gaEbfYe8hE2z3o/tcbZ/imcmKz94c3T/ht7M+Q=="],
 
     "bun-types": ["bun-types@1.2.16", "", { "dependencies": { "@types/node": "*" } }, "sha512-ciXLrHV4PXax9vHvUrkvun9VPVGOVwbbbBF/Ev1cXz12lyEZMoJpIJABOfPcN9gDJRaiKF9MVbSygLg4NXu3/A=="],
 
