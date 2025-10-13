@@ -26,7 +26,6 @@ test(
       `${serverUrl}?svg_type=3d&code=${encodedCode}`,
     )
     const basicSvgContent = await basicResponse.text()
-    console.log(import.meta.path)
     expect(basicSvgContent).toMatch3dSvgSnapshot(import.meta.path)
 
     // Test custom background color
