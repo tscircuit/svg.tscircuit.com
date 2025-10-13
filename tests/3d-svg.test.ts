@@ -26,7 +26,8 @@ test(
       `${serverUrl}?svg_type=3d&code=${encodedCode}`,
     )
     const basicSvgContent = await basicResponse.text()
-    expect(basicSvgContent).toMatchSvgSnapshot(import.meta.path)
+    console.log(import.meta.path)
+    expect(basicSvgContent).toMatch3dSvgSnapshot(import.meta.path)
 
     // Test custom background color
     const colorResponse = await fetch(
@@ -35,7 +36,7 @@ test(
     const colorSvgContent = await colorResponse.text()
     expect(colorResponse.status).toBe(200)
     expect(colorSvgContent).toContain("<svg")
-    expect(colorSvgContent).toMatchSvgSnapshot(import.meta.path, "bg-color")
+    expect(colorSvgContent).toMatch3dSvgSnapshot(import.meta.path, "bg-color")
 
     // Test custom background opacity
     const opacityResponse = await fetch(
@@ -52,7 +53,7 @@ test(
     const zoomSvgContent = await zoomResponse.text()
     expect(zoomResponse.status).toBe(200)
     expect(zoomSvgContent).toContain("<svg")
-    expect(zoomSvgContent).toMatchSvgSnapshot(import.meta.path, "zoom")
+    expect(zoomSvgContent).toMatch3dSvgSnapshot(import.meta.path, "zoom")
 
     // Test all custom parameters combined
     const allParamsResponse = await fetch(
@@ -61,7 +62,7 @@ test(
     const allParamsSvgContent = await allParamsResponse.text()
     expect(allParamsResponse.status).toBe(200)
     expect(allParamsSvgContent).toContain("<svg")
-    expect(allParamsSvgContent).toMatchSvgSnapshot(
+    expect(allParamsSvgContent).toMatch3dSvgSnapshot(
       import.meta.path,
       "all-params",
     )
@@ -88,7 +89,7 @@ test(
     const postSvgContent = await postResponse.text()
     expect(postResponse.status).toBe(200)
     expect(postSvgContent).toContain("<svg")
-    expect(postSvgContent).toMatchSvgSnapshot(import.meta.path, "post")
+    expect(postSvgContent).toMatch3dSvgSnapshot(import.meta.path, "post")
   },
   { timeout: 30000 },
 )
