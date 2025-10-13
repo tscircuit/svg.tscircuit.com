@@ -84,9 +84,9 @@ export async function renderCircuitToSvg(
 
       // Add missing required properties for vectorize config
       const svgResult = await vectorize(Buffer.from(pngBinary), {
-        mode: vectorizerMod.PathSimplifyMode.Polygon,
-        colorMode: vectorizerMod.ColorMode.Color,
-        hierarchical: vectorizerMod.Hierarchical.Stacked,
+        mode: 1,
+        colorMode: 0,
+        hierarchical: 0,
         filterSpeckle: 8,
         colorPrecision: 8,
         layerDifference: 8,
