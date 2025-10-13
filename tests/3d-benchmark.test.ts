@@ -2,7 +2,7 @@ import { expect, test } from "bun:test"
 import { Buffer } from "node:buffer"
 import testCircuitJson from "./fixtures/test-circuit.json"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
-import { convertCircuitJsonToSimple3dSvg } from "../lib/deprecated/convertCircuitJsonToSimple3dSvg"
+import { convertCircuitJsonToSimple3dSvg } from "circuit-json-to-simple-3d"
 
 test(
   "3d rendering benchmark and size comparison",
