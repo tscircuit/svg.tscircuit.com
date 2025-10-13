@@ -93,13 +93,22 @@ export default async (req: Request) => {
   }
 
   if (outputFormat === "circuit_json") {
-    const circuitJson = await getCircuitJsonFromContext(ctx)
-    return new Response(JSON.stringify(circuitJson, null, 2), {
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Disposition": 'attachment; filename="circuit.json"',
-      },
-    })
+    try {
+      const circuitJson = await getCircuitJsonFromContext(ctx)
+      return new Response(JSON.stringify(circuitJson, null, 2), {
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Disposition": 'attachment; filename="circuit.json"',
+        },
+      })
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create circuit json"
+      return new Response(JSON.stringify({ ok: false, error: message }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
   }
 
   // Validate SVG type

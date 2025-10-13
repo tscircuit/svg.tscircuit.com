@@ -25,3 +25,18 @@ export default () => (
   expect(Array.isArray(circuitJson)).toBe(true)
   expect(circuitJson.length).toBeGreaterThan(0)
 })
+
+test("format=circuit_json surfaces errors when circuit json generation fails", async () => {
+  const { serverUrl } = await getTestServer()
+
+  const response = await fetch(`${serverUrl}?code=invalid&format=circuit_json`)
+
+  expect(response.status).toBe(500)
+  expect(response.headers.get("content-type")).toContain("application/json")
+
+  const errorPayload = await response.json()
+
+  expect(errorPayload.ok).toBe(false)
+  expect(typeof errorPayload.error).toBe("string")
+  expect(errorPayload.error.length).toBeGreaterThan(0)
+})
