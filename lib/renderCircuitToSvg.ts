@@ -80,16 +80,22 @@ export async function renderCircuitToSvg(
     })
 
     try {
-      const vectorize = ((vectorizerMod as any).vectorize ||
-        (vectorizerMod as any).default) as
-        | ((bytes: Uint8Array, opts?: any) => Promise<string> | string)
-        | undefined
+      const vectorize = vectorizerMod.vectorize
 
-      if (!vectorize) {
-        throw new Error("Vectorizer function not found in @neplex/vectorizer")
-      }
-
-      const svgResult = await vectorize(pngBinary)
+      // Add missing required properties for vectorize config
+      const svgResult = await vectorize(Buffer.from(pngBinary), {
+        mode: vectorizerMod.PathSimplifyMode.Polygon,
+        colorMode: vectorizerMod.ColorMode.Color,
+        hierarchical: vectorizerMod.Hierarchical.Stacked,
+        filterSpeckle: 8,
+        colorPrecision: 8,
+        layerDifference: 8,
+        maxIterations: 100,
+        // Set required threshold properties with reasonable defaults
+        cornerThreshold: 60,
+        lengthThreshold: 4,
+        spliceThreshold: 30,
+      })
 
       if (bgOpacity > 0) {
         return svgResult.replace(
