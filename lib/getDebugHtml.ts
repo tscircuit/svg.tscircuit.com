@@ -33,6 +33,13 @@ export function getDebugHtml(ctx: RequestContext): string {
     ([key, value]) => ({ key, value }),
   )
 
+  const circuitJsonDownloadUrl = new URL(ctx.url.toString())
+  circuitJsonDownloadUrl.pathname = "/circuit_json"
+  circuitJsonDownloadUrl.searchParams.delete("debug")
+  if (ctx.compressedCode && ctx.fsMap) {
+    circuitJsonDownloadUrl.searchParams.set("circuit_source", "code")
+  }
+
   let decodedFsMap: Record<string, string> | null = null
   let decompressedCode: string | null = null
   let decompressionError: string | null = null
@@ -132,6 +139,20 @@ export function getDebugHtml(ctx: RequestContext): string {
       section {
         margin-bottom: 32px;
       }
+      .download-link {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: #1e1e1e;
+        border-radius: 4px;
+        color: #4dabf7;
+        text-decoration: none;
+        border: 1px solid #333;
+      }
+      .download-link:hover {
+        background: #262626;
+        border-color: #4dabf7;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -193,6 +214,16 @@ export function getDebugHtml(ctx: RequestContext): string {
             .join("")}
         </tbody>
       </table>
+    </section>
+    <section>
+      <h2>Downloads</h2>
+      <a
+        class="download-link"
+        href="${escapeHtml(circuitJsonDownloadUrl.toString())}"
+        download="circuit.json"
+      >
+        Download Circuit JSON
+      </a>
     </section>
     <section>
       <h2>Context Summary</h2>

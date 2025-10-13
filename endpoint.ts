@@ -16,6 +16,7 @@ import { pinoutPngHandler } from "./handlers/pinout-png"
 import { threeDSvgHandler } from "./handlers/three-d-svg"
 import { threeDPngHandler } from "./handlers/three-d-png"
 import { getDebugHtml } from "./lib/getDebugHtml"
+import { getCircuitJsonFromContext } from "./lib/getCircuitJson"
 
 export default async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -46,6 +47,33 @@ export default async (req: Request) => {
     return ctxOrError
   }
   const ctx = ctxOrError
+
+  if (url.pathname === "/circuit_json") {
+    const circuitSource = url.searchParams.get("circuit_source")
+    const preferCompressedCode =
+      circuitSource === "code" && ctx.compressedCode != null
+    const ctxForDownload = preferCompressedCode
+      ? { ...ctx, fsMap: undefined }
+      : ctx
+
+    try {
+      const circuitJson = await getCircuitJsonFromContext(ctxForDownload)
+      return new Response(JSON.stringify(circuitJson, null, 2), {
+        headers: {
+          "Content-Type": "application/json",
+          "Content-Disposition": 'attachment; filename="circuit.json"',
+        },
+      })
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to generate circuit JSON"
+      const status = errorMessage === "No circuit data provided" ? 400 : 500
+      return new Response(JSON.stringify({ ok: false, error: errorMessage }), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
+  }
 
   if (url.searchParams.has("debug")) {
     return new Response(getDebugHtml(ctx), {
