@@ -1,6 +1,6 @@
 import type { RequestContext } from "./RequestContext"
 
-export type OutputFormat = "svg" | "png"
+export type OutputFormat = "svg" | "png" | "circuit_json"
 
 export function getOutputFormat(
   url: URL,
@@ -25,6 +25,10 @@ export function getOutputFormat(
 
   if (normalized === "png") {
     return "png"
+  }
+
+  if (normalized === "circuit_json") {
+    return "circuit_json"
   }
 
   return null

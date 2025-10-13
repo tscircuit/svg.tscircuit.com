@@ -19,4 +19,5 @@ export interface RequestContext {
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
   schematicHeightRatio?: number
+  requestBody?: unknown
 }
