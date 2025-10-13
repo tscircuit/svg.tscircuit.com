@@ -4,6 +4,7 @@ import { renderGLTFToPNGBufferFromGLBBuffer } from "poppygl"
 export interface Render3dPngOptions {
   width?: number
   height?: number
+  zoomMultiplier?: number
 }
 
 export async function render3dPng(
@@ -49,8 +50,18 @@ export async function render3dPng(
     }
   }
 
-  const yHeight = maxDim * 1.4
-  const xzOffset = maxDim * 0.75
+  const baseY = maxDim * 1.4
+  const baseXZ = maxDim * 0.75
+
+  // Apply zoom: keep previous default framing when zoomMultiplier === 1.2
+  const zoomInput = options.zoomMultiplier
+  const zoom = Number.isFinite(zoomInput as number)
+    ? (zoomInput as number)
+    : 1.2
+  const effectiveScale = 1.2 / zoom
+
+  const yHeight = baseY * effectiveScale
+  const xzOffset = baseXZ * effectiveScale
 
   const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
   const lookAt: [number, number, number] = [0, 0, 0]
