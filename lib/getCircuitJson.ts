@@ -32,7 +32,7 @@ export async function getCircuitJsonFromContext(
 
     await worker.executeWithFsMap({
       fsMap,
-      entrypoint: entrypoint || "index.tsx",
+      entrypoint: entrypoint ?? undefined,
       mainComponentPath: mainComponentPath || undefined,
     })
     await worker.renderUntilSettled()
