@@ -9,6 +9,17 @@ import { render3dPng } from "./render3dPng"
 import { Buffer } from "node:buffer"
 import * as vectorizerMod from "@neplex/vectorizer"
 
+let font: Buffer | undefined
+
+async function getFont() {
+  if (font) return font
+  const res = await fetch(
+    "https://fonts.gstatic.com/s/robotomono/v22/L0x5DF4xlVMF-BfR8bXMIjhGq3-cXbKDO1w.ttf",
+  )
+  font = Buffer.from(await res.arrayBuffer())
+  return font
+}
+
 export interface RenderOptions {
   backgroundColor?: string
   backgroundOpacity?: number
@@ -73,10 +84,12 @@ export async function renderCircuitToSvg(
   }
 
   if (svgType === "3d") {
+    const font = await getFont()
     const pngBinary = await render3dPng(circuitJson, {
       width: 1024,
       height: 1024,
       zoomMultiplier: zoom,
+      font,
     })
 
     try {
