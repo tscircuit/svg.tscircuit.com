@@ -5,7 +5,6 @@ export interface Render3dPngOptions {
   width?: number
   height?: number
   zoomMultiplier?: number
-  font?: Buffer
 }
 
 export async function render3dPng(
@@ -14,7 +13,6 @@ export async function render3dPng(
 ): Promise<Uint8Array> {
   const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
     format: "glb",
-    font: options.font,
   })) as unknown
 
   let glbBinary: Uint8Array
