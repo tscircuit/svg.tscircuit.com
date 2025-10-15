@@ -32,7 +32,7 @@
   "dependencies": {
     "@neplex/vectorizer": "^0.0.5",
     "@tscircuit/simple-3d-svg": "^0.0.41",
-    "circuit-json-to-gltf": "^0.0.23",
+    "circuit-json-to-gltf": "^0.0.26",
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.239",
     "jscad-fiber": "^0.0.85",
