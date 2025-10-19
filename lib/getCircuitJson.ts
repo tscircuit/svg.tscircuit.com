@@ -3,6 +3,14 @@ import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import { decodeUrlHashToFsMap } from "./fsMap"
 import type { RequestContext } from "./RequestContext"
 import type { PlatformConfig } from "@tscircuit/props"
+import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
+
+const getPlatformConfig = (): PlatformConfig => {
+  return {
+    ...getPlatformConfigFromEval(),
+    partsEngineDisabled: true,
+  }
+}
 
 export async function getCircuitJsonFromContext(
   ctx: RequestContext,
@@ -23,9 +31,7 @@ export async function getCircuitJsonFromContext(
   if (fsMap) {
     const worker = new CircuitRunner()
 
-    const platformConfig: PlatformConfig = {
-      partsEngineDisabled: true,
-    }
+    const platformConfig: PlatformConfig = getPlatformConfig()
     await worker.setPlatformConfig(platformConfig)
 
     const projectConfig: Partial<PlatformConfig> = {}
@@ -48,9 +54,7 @@ export async function getCircuitJsonFromContext(
   if (compressedCode) {
     const worker = new CircuitRunner()
 
-    const platformConfig: PlatformConfig = {
-      partsEngineDisabled: true,
-    }
+    const platformConfig: PlatformConfig = getPlatformConfigFromEval()
     await worker.setPlatformConfig(platformConfig)
 
     const projectConfig: Partial<PlatformConfig> = {}
