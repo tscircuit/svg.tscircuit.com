@@ -2,6 +2,7 @@ import { CircuitRunner } from "@tscircuit/eval/eval"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import { decodeUrlHashToFsMap } from "./fsMap"
 import type { RequestContext } from "./RequestContext"
+import type { PlatformConfig } from "@tscircuit/props"
 
 export async function getCircuitJsonFromContext(
   ctx: RequestContext,
@@ -22,12 +23,17 @@ export async function getCircuitJsonFromContext(
   if (fsMap) {
     const worker = new CircuitRunner()
 
-    const projectConfig: any = {}
+    const platformConfig: PlatformConfig = {
+      partsEngineDisabled: true,
+    }
+    await worker.setPlatformConfig(platformConfig)
+
+    const projectConfig: Partial<PlatformConfig> = {}
     if (projectBaseUrl) {
       projectConfig.projectBaseUrl = projectBaseUrl
     }
     if (Object.keys(projectConfig).length > 0) {
-      worker.setProjectConfig(projectConfig)
+      await worker.setProjectConfig(projectConfig)
     }
 
     await worker.executeWithFsMap({
@@ -42,12 +48,17 @@ export async function getCircuitJsonFromContext(
   if (compressedCode) {
     const worker = new CircuitRunner()
 
-    const projectConfig: any = {}
+    const platformConfig: PlatformConfig = {
+      partsEngineDisabled: true,
+    }
+    await worker.setPlatformConfig(platformConfig)
+
+    const projectConfig: Partial<PlatformConfig> = {}
     if (projectBaseUrl) {
       projectConfig.projectBaseUrl = projectBaseUrl
     }
     if (Object.keys(projectConfig).length > 0) {
-      worker.setProjectConfig(projectConfig)
+      await worker.setProjectConfig(projectConfig)
     }
 
     const decodedFsMap = decodeUrlHashToFsMap(compressedCode)
