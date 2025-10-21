@@ -4,6 +4,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/copy-fonts.js",
     "start": "next dev",
     "build": "next build",
     "format": "biome format . --write",
@@ -35,6 +36,7 @@
     "circuit-json-to-gltf": "^0.0.26",
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.239",
+    "dejavu-fonts-ttf": "^2.37.3",
     "jscad-fiber": "^0.0.85",
     "poppygl": "^0.0.14",
     "sharp": "^0.34.4"
