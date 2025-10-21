@@ -1,0 +1,18 @@
+diff --git a/node_modules/circuit-json-to-gltf/dist/index.js b/node_modules/circuit-json-to-gltf/dist/index.js
+index 1234567..abcdefg 100644
+--- a/node_modules/circuit-json-to-gltf/dist/index.js
++++ b/node_modules/circuit-json-to-gltf/dist/index.js
+@@ -14552,9 +14552,12 @@ async function convertSvgToPng(svgString, resolution, backgroundColor) {
+   } else {
+     try {
+       const { svgToPngDataUrl } = await import("./svg-to-png-FCHG2ZUX.js");
++      const path = await import("path");
++      const fontPath = path.default.join(process.cwd(), "fonts", "Roboto-Regular.ttf");
+       return await svgToPngDataUrl(svgString, {
+         width: resolution,
+-        background: backgroundColor
++        background: backgroundColor,
++        fonts: [fontPath]
+       });
+     } catch (error) {
+       console.warn(

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "next dev",
     "build": "next build",
+    "postinstall": "patch-package",
     "format": "biome format . --write",
     "format:check": "biome format ."
   },
