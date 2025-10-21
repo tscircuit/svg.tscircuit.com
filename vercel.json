@@ -1,3 +1,5 @@
 {
-  "buildCommand": "chmod +x install-fonts.sh && ./install-fonts.sh && bun run build"
+  "env": {
+    "FONTCONFIG_PATH": "/var/task/fonts"
+  }
 }
