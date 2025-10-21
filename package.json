@@ -31,12 +31,12 @@
   },
   "dependencies": {
     "@neplex/vectorizer": "^0.0.5",
+    "@resvg/resvg-js": "^2.6.2",
     "@tscircuit/simple-3d-svg": "^0.0.41",
     "circuit-json-to-gltf": "^0.0.26",
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.251",
     "jscad-fiber": "^0.0.85",
-    "poppygl": "^0.0.14",
-    "sharp": "^0.34.4"
+    "poppygl": "^0.0.14"
   }
 }

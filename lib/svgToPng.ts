@@ -1,5 +1,4 @@
-import { Buffer } from "node:buffer"
-import sharp, { type SharpOptions } from "sharp"
+import { Resvg } from "@resvg/resvg-js"
 
 export type SvgToPngOptions = {
   width?: number
@@ -11,32 +10,50 @@ export async function svgToPng(
   svg: string,
   options: SvgToPngOptions,
 ): Promise<ArrayBuffer> {
-  const sharpOptions: SharpOptions = {}
+  // Resvg options
+  const resvgOptions: any = {
+    fitTo: {
+      mode: "original",
+    },
+  }
 
+  // Apply density scaling if specified
   if (options.density) {
-    sharpOptions.density = options.density
+    const scaleFactor = options.density / 72 // Convert DPI to scale factor (72 DPI is default)
+    resvgOptions.fitTo = {
+      mode: "zoom",
+      value: scaleFactor,
+    }
   }
 
-  let image = sharp(Buffer.from(svg), sharpOptions)
-
+  // Apply width/height if specified
   if (options.width || options.height) {
-    image = image.resize({
-      width: options.width,
-      height: options.height,
-      fit: "contain",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
+    if (options.width && options.height) {
+      resvgOptions.fitTo = {
+        mode: "width",
+        value: options.width,
+      }
+    } else if (options.width) {
+      resvgOptions.fitTo = {
+        mode: "width",
+        value: options.width,
+      }
+    } else if (options.height) {
+      resvgOptions.fitTo = {
+        mode: "height",
+        value: options.height,
+      }
+    }
   }
 
-  const nodeBuffer = await image
-    .png({
-      compressionLevel: 9,
-      adaptiveFiltering: true,
-    })
-    .toBuffer()
+  // Render SVG to PNG using Resvg
+  const resvg = new Resvg(svg, resvgOptions)
+  const pngData = resvg.render()
+  const pngBuffer = pngData.asPng()
 
-  const arrayBuffer = new ArrayBuffer(nodeBuffer.byteLength)
-  new Uint8Array(arrayBuffer).set(nodeBuffer)
+  // Convert to ArrayBuffer
+  const arrayBuffer = new ArrayBuffer(pngBuffer.byteLength)
+  new Uint8Array(arrayBuffer).set(pngBuffer)
 
   return arrayBuffer
 }
