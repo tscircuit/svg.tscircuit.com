@@ -1,6 +1,7 @@
 import { Resvg } from "@resvg/resvg-js"
-import { readFileSync } from "node:fs"
-import { join } from "node:path"
+import { readFileSync, existsSync } from "node:fs"
+import { join, dirname } from "node:path"
+import { fileURLToPath } from "node:url"
 
 export type SvgToPngOptions = {
   width?: number
@@ -8,13 +9,40 @@ export type SvgToPngOptions = {
   density?: number
 }
 
-// Load font once at module level
-const fontBuffer = readFileSync(
-  join(
-    process.cwd(),
-    "node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf",
-  ),
-)
+// Get the directory of the current module
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// Load font once at module level with multiple fallback strategies
+function loadFont(): Buffer | null {
+  const fontPaths = [
+    // 1. Bundled font in lib/fonts (best for Vercel)
+    join(__dirname, "fonts", "noto-sans-v27-latin-regular.ttf"),
+    // 2. Node modules path (for local development)
+    join(
+      process.cwd(),
+      "node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf",
+    ),
+    // 3. Relative from lib directory
+    join(__dirname, "..", "node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf"),
+  ]
+
+  for (const fontPath of fontPaths) {
+    try {
+      if (existsSync(fontPath)) {
+        console.log(`[svgToPng] Loading font from: ${fontPath}`)
+        return readFileSync(fontPath)
+      }
+    } catch (error) {
+      console.warn(`[svgToPng] Failed to load font from ${fontPath}:`, error)
+    }
+  }
+
+  console.error("[svgToPng] Could not load any font file!")
+  return null
+}
+
+const fontBuffer = loadFont()
 
 export async function svgToPng(
   svg: string,
@@ -25,9 +53,15 @@ export async function svgToPng(
     fitTo: {
       mode: "original",
     },
-    font: {
+  }
+
+  // Add font configuration if font was loaded successfully
+  if (fontBuffer) {
+    resvgOptions.font = {
       fontBuffers: [fontBuffer],
-    },
+    }
+  } else {
+    console.warn("[svgToPng] Rendering without fonts - text may not appear!")
   }
 
   // Apply density scaling if specified
