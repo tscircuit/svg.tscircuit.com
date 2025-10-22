@@ -52,12 +52,12 @@ export async function svgToPng(
     loadSystemFonts: true, // Enable system fonts (Arial, sans-serif, etc.)
   }
 
-  // Add custom font if available for fallback
-  if (fontPath) {
-    resvgOptions.font.fontFiles = [fontPath]
-  } else {
-    console.warn("[svgToPng] No custom font found - using system fonts only")
-  }
+  // // Add custom font if available for fallback
+  // if (fontPath) {
+  //   resvgOptions.font.fontFiles = [fontPath]
+  // } else {
+  //   console.warn("[svgToPng] No custom font found - using system fonts only")
+  // }
 
   // Apply density scaling if specified
   if (options.density) {
