@@ -1,5 +1,5 @@
 import { Resvg } from "@resvg/resvg-js"
-import { readFileSync, existsSync } from "node:fs"
+import { existsSync } from "node:fs"
 import { join, dirname } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -13,8 +13,9 @@ export type SvgToPngOptions = {
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-// Load font once at module level with multiple fallback strategies
-function loadFont(): Buffer | null {
+// Find font file path at module level with multiple fallback strategies
+// NOTE: For Node.js, resvg uses fontFiles (array of paths), not fontBuffers!
+function findFontPath(): string | null {
   const fontPaths = [
     // 1. Bundled font in lib/fonts (best for Vercel)
     join(__dirname, "fonts", "noto-sans-v27-latin-regular.ttf"),
@@ -30,19 +31,19 @@ function loadFont(): Buffer | null {
   for (const fontPath of fontPaths) {
     try {
       if (existsSync(fontPath)) {
-        console.log(`[svgToPng] Loading font from: ${fontPath}`)
-        return readFileSync(fontPath)
+        console.log(`[svgToPng] Found font at: ${fontPath}`)
+        return fontPath
       }
     } catch (error) {
-      console.warn(`[svgToPng] Failed to load font from ${fontPath}:`, error)
+      console.warn(`[svgToPng] Failed to check font at ${fontPath}:`, error)
     }
   }
 
-  console.error("[svgToPng] Could not load any font file!")
+  console.error("[svgToPng] Could not find any font file!")
   return null
 }
 
-const fontBuffer = loadFont()
+const fontPath = findFontPath()
 
 export async function svgToPng(
   svg: string,
@@ -52,7 +53,7 @@ export async function svgToPng(
   // This is necessary because resvg doesn't automatically map generic font families
   // (like "Arial" or "sans-serif") to loaded fonts
   let processedSvg = svg
-  if (fontBuffer) {
+  if (fontPath) {
     // Replace common font-family declarations with Noto Sans
     processedSvg = processedSvg
       .replace(/font-family="[^"]*"/g, 'font-family="Noto Sans"')
@@ -67,13 +68,15 @@ export async function svgToPng(
     },
   }
 
-  // Add font configuration if font was loaded successfully
-  if (fontBuffer) {
+  // Add font configuration if font path was found
+  // NOTE: Node.js version of resvg uses fontFiles (paths), not fontBuffers (binary)!
+  if (fontPath) {
     resvgOptions.font = {
-      fontBuffers: [fontBuffer],
+      fontFiles: [fontPath], // Array of file paths for Node.js
+      loadSystemFonts: false, // Disable system fonts for faster rendering
     }
   } else {
-    console.warn("[svgToPng] Rendering without fonts - text may not appear!")
+    console.warn("[svgToPng] WARNING: No font file found - text will not render!")
   }
 
   // Apply density scaling if specified
