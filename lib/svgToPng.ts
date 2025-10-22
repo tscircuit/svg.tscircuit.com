@@ -48,6 +48,18 @@ export async function svgToPng(
   svg: string,
   options: SvgToPngOptions,
 ): Promise<ArrayBuffer> {
+  // Preprocess SVG to replace font families with "Noto Sans"
+  // This is necessary because resvg doesn't automatically map generic font families
+  // (like "Arial" or "sans-serif") to loaded fonts
+  let processedSvg = svg
+  if (fontBuffer) {
+    // Replace common font-family declarations with Noto Sans
+    processedSvg = processedSvg
+      .replace(/font-family="[^"]*"/g, 'font-family="Noto Sans"')
+      .replace(/font-family:\s*[^;"}]+/g, 'font-family: Noto Sans')
+      .replace(/style="font-family:\s*sans-serif;/g, 'style="font-family: Noto Sans;')
+  }
+
   // Resvg options
   const resvgOptions: any = {
     fitTo: {
@@ -94,7 +106,7 @@ export async function svgToPng(
   }
 
   // Render SVG to PNG using Resvg
-  const resvg = new Resvg(svg, resvgOptions)
+  const resvg = new Resvg(processedSvg, resvgOptions)
   const pngData = resvg.render()
   const pngBuffer = pngData.asPng()
 
