@@ -46,17 +46,17 @@ export async function svgToPng(
     },
   }
 
-  // Add font configuration if font path was found
+  // Add font configuration
   // NOTE: Node.js version of resvg uses fontFiles (paths), not fontBuffers (binary)!
+  resvgOptions.font = {
+    loadSystemFonts: true, // Enable system fonts (Arial, sans-serif, etc.)
+  }
+
+  // Add custom font if available for fallback
   if (fontPath) {
-    resvgOptions.font = {
-      fontFiles: [fontPath], // Array of file paths for Node.js
-      loadSystemFonts: false, // Disable system fonts for faster rendering
-    }
+    resvgOptions.font.fontFiles = [fontPath]
   } else {
-    console.warn(
-      "[svgToPng] WARNING: No font file found - text will not render!",
-    )
+    console.warn("[svgToPng] No custom font found - using system fonts only")
   }
 
   // Apply density scaling if specified
@@ -93,7 +93,6 @@ export async function svgToPng(
   const pngData = resvg.render()
   const pngBuffer = pngData.asPng()
 
-  // Convert to ArrayBuffer
   const arrayBuffer = new ArrayBuffer(pngBuffer.byteLength)
   new Uint8Array(arrayBuffer).set(pngBuffer)
 
