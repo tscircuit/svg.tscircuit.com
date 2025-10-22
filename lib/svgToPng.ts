@@ -1,10 +1,20 @@
 import { Resvg } from "@resvg/resvg-js"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 
 export type SvgToPngOptions = {
   width?: number
   height?: number
   density?: number
 }
+
+// Load font once at module level
+const fontBuffer = readFileSync(
+  join(
+    process.cwd(),
+    "node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf",
+  ),
+)
 
 export async function svgToPng(
   svg: string,
@@ -14,6 +24,9 @@ export async function svgToPng(
   const resvgOptions: any = {
     fitTo: {
       mode: "original",
+    },
+    font: {
+      fontBuffers: [fontBuffer],
     },
   }
 
