@@ -8,10 +8,12 @@ export type SvgToPngOptions = {
   density?: number
 }
 
-// Find font file path at module level with multiple fallback strategies
 // NOTE: For Node.js, resvg uses fontFiles (array of paths), not fontBuffers!
 function findFontPath(): string | null {
   const fontPaths = [
+    // 1. Bundled DejaVu Sans (best - has full Unicode including Ω, µ, π, etc.)
+    join(process.cwd(), "lib/fonts/DejaVuSans.ttf"),
+    // 2. Next.js bundled Noto Sans (fallback - limited to Latin characters)
     join(
       process.cwd(),
       "node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf",
@@ -47,17 +49,14 @@ export async function svgToPng(
   }
 
   // Add font configuration
-  // NOTE: Node.js version of resvg uses fontFiles (paths), not fontBuffers (binary)!
-  resvgOptions.font = {
-    loadSystemFonts: true, // Enable system fonts (Arial, sans-serif, etc.)
+  if (fontPath) {
+    resvgOptions.font = {
+      fontFiles: [fontPath],
+      loadSystemFonts: false, // Use only bundled font for consistent rendering
+    }
+  } else {
+    console.warn("[svgToPng] No custom font found - may not render correctly!")
   }
-
-  // // Add custom font if available for fallback
-  // if (fontPath) {
-  //   resvgOptions.font.fontFiles = [fontPath]
-  // } else {
-  //   console.warn("[svgToPng] No custom font found - using system fonts only")
-  // }
 
   // Apply density scaling if specified
   if (options.density) {
