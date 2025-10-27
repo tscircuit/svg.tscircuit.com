@@ -16,6 +16,7 @@ export interface RequestContext {
   pngDensity?: number
   outputFormat?: string
   svgType?: string
+  showSolderMask?: boolean
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
   schematicHeightRatio?: number

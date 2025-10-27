@@ -13,6 +13,7 @@ export interface RenderOptions {
   backgroundColor?: string
   backgroundOpacity?: number
   zoomMultiplier?: number
+  showSolderMask?: boolean
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
   schematicHeightRatio?: number
@@ -35,6 +36,7 @@ export async function renderCircuitToSvg(
     backgroundColor = "#fff",
     backgroundOpacity = 0.0,
     zoomMultiplier = 1.2,
+    showSolderMask,
   } = options
 
   const bgOpacity = Number.isFinite(backgroundOpacity) ? backgroundOpacity : 0.0
@@ -45,7 +47,14 @@ export async function renderCircuitToSvg(
   }
 
   if (svgType === "pcb") {
-    return convertCircuitJsonToPcbSvg(circuitJson)
+    const pcbSvg =
+      typeof showSolderMask === "boolean"
+        ? convertCircuitJsonToPcbSvg(circuitJson, { showSolderMask })
+        : convertCircuitJsonToPcbSvg(circuitJson)
+
+    return showSolderMask === true
+      ? applySolderMaskPadColor(pcbSvg, "#006400")
+      : pcbSvg
   }
 
   if (svgType === "schematic") {
@@ -111,4 +120,22 @@ export async function renderCircuitToSvg(
   }
 
   throw new Error(`Invalid SVG type: ${svgType}`)
+}
+
+function applySolderMaskPadColor(svg: string, color: string): string {
+  const styleRule = `.pcb-pad{fill:${color}!important;}`
+  const styleTagRegex = /<style>([\s\S]*?)<\/style>/
+
+  if (styleTagRegex.test(svg)) {
+    return svg.replace(styleTagRegex, (_match, content) => {
+      if (content.includes(styleRule)) {
+        return `<style>${content}</style>`
+      }
+
+      const separator = content.trim().length > 0 ? "\n" : ""
+      return `<style>${content}${separator}${styleRule}</style>`
+    })
+  }
+
+  return svg.replace(/<svg([^>]*)>/, `<svg$1><style>${styleRule}</style>`)
 }

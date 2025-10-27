@@ -10,7 +10,9 @@ export const pcbSvgHandler = async (
   try {
     const circuitJson = await getCircuitJsonFromContext(ctx)
 
-    const svgContent = await renderCircuitToSvg(circuitJson, "pcb")
+    const svgContent = await renderCircuitToSvg(circuitJson, "pcb", {
+      showSolderMask: ctx.showSolderMask,
+    })
 
     return new Response(svgContent, {
       headers: {
