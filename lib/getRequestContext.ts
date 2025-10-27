@@ -50,11 +50,11 @@ export async function getRequestContext(
   ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
 
-  const showSolderMaskQuery = url.searchParams.get("showsoldermask")
+  const showSolderMaskQuery = url.searchParams.get("showSolderMask")
   if (showSolderMaskQuery != null) {
-    const parsedShowSolderMask = parseBooleanInput(showSolderMaskQuery)
-    if (parsedShowSolderMask !== undefined) {
-      ctx.showSolderMask = parsedShowSolderMask
+    const parsedshowSolderMask = parseBooleanInput(showSolderMaskQuery)
+    if (parsedshowSolderMask !== undefined) {
+      ctx.showSolderMask = parsedshowSolderMask
     }
   }
 
@@ -154,11 +154,19 @@ export async function getRequestContext(
     ctx.pngHeight = body.png_height
     ctx.pngDensity = body.png_density
 
-    const showSolderMaskInput =
-      body.show_solder_mask ?? body.showSolderMask ?? body.showsoldermask
-    const parsedShowSolderMask = parseBooleanInput(showSolderMaskInput)
-    if (parsedShowSolderMask !== undefined) {
-      ctx.showSolderMask = parsedShowSolderMask
+    if (Object.prototype.hasOwnProperty.call(body, "show_solder_mask")) {
+      const showSolderMaskValue = body.show_solder_mask
+      if (typeof showSolderMaskValue === "boolean") {
+        ctx.showSolderMask = showSolderMaskValue
+      } else {
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            error: "Invalid show_solder_mask provided in request body",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        )
+      }
     }
 
     const simulationExperimentId =
