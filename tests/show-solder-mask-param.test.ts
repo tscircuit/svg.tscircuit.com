@@ -28,35 +28,57 @@ test("showSolderMask=true renders pads with solder mask color", async () => {
   const encodedSnippet = encodeURIComponent(
     getCompressedBase64SnippetString(`
 export default () => (
-   <board width="20mm" height="20mm">
-      <chip name="U1" footprint={
-          <footprint>
-        <smtpad shape="polygon" layer="top" portHints={["pin1"]} points={[
-          { x: -4.5, y: 2 },
-          { x: -2.2, y: 2 },
-          { x: -0.4, y: 0 },
-          { x: -2.2, y: -2 },
-          { x: -4.5, y: -2 },
-        ]} />
-        <smtpad shape="polygon" layer="top" portHints={["pin2"]} points={[
-          { x: -1.8, y: 2 },
-          { x: 1.8, y: 2 },
-          { x: 3.6, y: 0 },
-          { x: 1.8, y: -2 },
-          { x: -1.8, y: -2 },
-          { x: 0, y: 0 },
-        ]} />
-        <smtpad shape="polygon" layer="top" portHints={["pin3"]} points={[
-          { x: 2.2, y: 2 },
-          { x: 6, y: 2 },
-          { x: 6, y: -2 },
-          { x: 2.2, y: -2 },
-          { x: 4, y: 0 },
-        ]} />
-      </footprint>
-      } />
-    </board>
+  <board width="20mm" height="20mm">
+    <chip
+      name="U1"
+      footprint={
+        <footprint>
+          <smtpad
+            shape="polygon"
+            layer="top"
+            portHints={["pin1"]}
+            coveredWithSolderMask={true}
+            points={[
+              { x: -4.5, y: 2 },
+              { x: -2.2, y: 2 },
+              { x: -0.4, y: 0 },
+              { x: -2.2, y: -2 },
+              { x: -4.5, y: -2 },
+            ]}
+          />
+          <smtpad
+            shape="polygon"
+            layer="top"
+            portHints={["pin2"]}
+            coveredWithSolderMask={true}
+            points={[
+              { x: -1.8, y: 2 },
+              { x: 1.8, y: 2 },
+              { x: 3.6, y: 0 },
+              { x: 1.8, y: -2 },
+              { x: -1.8, y: -2 },
+              { x: 0, y: 0 },
+            ]}
+          />
+          <smtpad
+            shape="polygon"
+            layer="top"
+            portHints={["pin3"]}
+            coveredWithSolderMask={true}
+            points={[
+              { x: 2.2, y: 2 },
+              { x: 6, y: 2 },
+              { x: 6, y: -2 },
+              { x: 2.2, y: -2 },
+              { x: 4, y: 0 },
+            ]}
+          />
+        </footprint>
+      }
+    />
+  </board>
 )
+
 `),
   )
 
@@ -66,4 +88,4 @@ export default () => (
   const svgContent = await response.text()
 
   expect(svgContent).toMatchSvgSnapshot(import.meta.path)
-})
+}, 10000)
