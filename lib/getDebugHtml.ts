@@ -62,6 +62,7 @@ export function getDebugHtml(ctx: RequestContext): string {
     pngDensity: ctx.pngDensity,
     outputFormat: ctx.outputFormat,
     svgType: ctx.svgType,
+    showSolderMask: ctx.showSolderMask,
     simulationExperimentId: ctx.simulationExperimentId,
     simulationTransientVoltageGraphIds: ctx.simulationTransientVoltageGraphIds,
     schematicHeightRatio: ctx.schematicHeightRatio,

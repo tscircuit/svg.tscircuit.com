@@ -12,7 +12,9 @@ export const pcbPngHandler = async (
   try {
     const circuitJson = await getCircuitJsonFromContext(ctx)
 
-    const svgContent = await renderCircuitToSvg(circuitJson, "pcb")
+    const svgContent = await renderCircuitToSvg(circuitJson, "pcb", {
+      showSolderMask: ctx.showSolderMask,
+    })
 
     const pngDensity = parsePositiveInt(
       ctx.url.searchParams.get("png_density") ?? ctx.pngDensity,
