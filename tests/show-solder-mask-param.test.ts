@@ -3,8 +3,8 @@ import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 import { getTestServer } from "./fixtures/get-test-server"
 import { getRequestContext } from "../lib/getRequestContext"
 
-test("showSolderMask=true sets showSolderMask flag", async () => {
-  const request = new Request("https://example.com?showSolderMask=true")
+test("show_solder_mask=true sets show_solder_mask flag", async () => {
+  const request = new Request("https://example.com?show_solder_mask=true")
   const ctxOrResponse = await getRequestContext(request)
   if (ctxOrResponse instanceof Response) {
     throw new Error("Expected request context, received Response")
@@ -14,7 +14,7 @@ test("showSolderMask=true sets showSolderMask flag", async () => {
 })
 
 test("showSolderMask=0 sets showSolderMask flag to false", async () => {
-  const request = new Request("https://example.com?showSolderMask=0")
+  const request = new Request("https://example.com?show_solder_mask=0")
   const ctxOrResponse = await getRequestContext(request)
   if (ctxOrResponse instanceof Response) {
     throw new Error("Expected request context, received Response")
