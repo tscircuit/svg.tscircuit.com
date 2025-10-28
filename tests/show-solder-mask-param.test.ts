@@ -61,7 +61,7 @@ export default () => (
   )
 
   const response = await fetch(
-    `${serverUrl}?svg_type=pcb&showSolderMask=true&code=${encodedSnippet}`,
+    `${serverUrl}?svg_type=pcb&show_solder_mask=true&code=${encodedSnippet}`,
   )
   const svgContent = await response.text()
 

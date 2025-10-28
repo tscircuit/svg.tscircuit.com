@@ -50,7 +50,7 @@ export async function getRequestContext(
   ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
 
-  const showSolderMaskQuery = url.searchParams.get("showSolderMask")
+  const showSolderMaskQuery = url.searchParams.get("show_solder_mask")
   if (showSolderMaskQuery != null) {
     const parsedshowSolderMask = parseBooleanInput(showSolderMaskQuery)
     if (parsedshowSolderMask !== undefined) {
