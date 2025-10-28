@@ -153,21 +153,9 @@ export async function getRequestContext(
     ctx.pngWidth = body.png_width
     ctx.pngHeight = body.png_height
     ctx.pngDensity = body.png_density
-
-    if (Object.prototype.hasOwnProperty.call(body, "show_solder_mask")) {
-      const showSolderMaskValue = body.show_solder_mask
-      if (typeof showSolderMaskValue === "boolean") {
-        ctx.showSolderMask = showSolderMaskValue
-      } else {
-        return new Response(
-          JSON.stringify({
-            ok: false,
-            error: "Invalid show_solder_mask provided in request body",
-          }),
-          { status: 400, headers: { "Content-Type": "application/json" } },
-        )
-      }
-    }
+    ctx.showSolderMask = parseBooleanInput(
+      url.searchParams.get("show_solder_mask"),
+    )
 
     const simulationExperimentId =
       body.simulation_experiment_id ?? body.simulationExperimentId
