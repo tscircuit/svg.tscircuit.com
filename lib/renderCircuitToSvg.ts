@@ -50,7 +50,13 @@ export async function renderCircuitToSvg(
     const pcbOptions =
       typeof showSolderMask === "boolean" ? { showSolderMask } : undefined
 
-    return convertCircuitJsonToPcbSvg(circuitJson, pcbOptions)
+    const pcbSvg = await convertCircuitJsonToPcbSvg(circuitJson, pcbOptions)
+
+    if (showSolderMask) {
+      return applySolderMaskColor(pcbSvg)
+    }
+
+    return pcbSvg
   }
 
   if (svgType === "schematic") {
@@ -116,4 +122,14 @@ export async function renderCircuitToSvg(
   }
 
   throw new Error(`Invalid SVG type: ${svgType}`)
+}
+
+const SOLDER_MASK_COLOR = "#006400"
+
+function applySolderMaskColor(svg: string): string {
+  return svg.replace(
+    /(<[^>]*class="pcb-pad"[^>]*\bfill=")([^"]*)(")/g,
+    (_, prefix: string, _currentFill: string, suffix: string) =>
+      `${prefix}${SOLDER_MASK_COLOR}${suffix}`,
+  )
 }

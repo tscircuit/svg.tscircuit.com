@@ -66,4 +66,4 @@ export default () => (
   const svgContent = await response.text()
 
   expect(svgContent).toMatchSvgSnapshot(import.meta.path)
-}, 10000)
+})
