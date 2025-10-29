@@ -28,17 +28,26 @@ export const schematicSimulationSvgHandler = async (
   try {
     const circuitJson = await getCircuitJsonFromContext(ctx)
 
-    const simulationExperimentId =
+    let simulationExperimentId =
       ctx.url.searchParams.get("simulation_experiment_id") ??
       ctx.url.searchParams.get("simulationExperimentId") ??
       ctx.simulationExperimentId
+
+    if (!simulationExperimentId) {
+      const simulationExperiment = circuitJson?.find(
+        (el: any) => el.type === "simulation_experiment",
+      )
+      if (simulationExperiment) {
+        simulationExperimentId = simulationExperiment.simulation_experiment_id
+      }
+    }
 
     if (!simulationExperimentId) {
       return new Response(
         JSON.stringify({
           ok: false,
           error:
-            "simulation_experiment_id is required to render schematic simulation output",
+            "simulation_experiment_id is required and could not be automatically determined",
         }),
         { status: 400, headers: { "Content-Type": "application/json" } },
       )

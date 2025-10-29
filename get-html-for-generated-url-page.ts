@@ -29,7 +29,7 @@ export const getHtmlForGeneratedUrlPage = (
   const pcbPngUrl = `${urlPrefix}/?svg_type=pcb&format=png&code=${encodeURIComponent(compressedCode)}`
   const schSvgUrl = `${urlPrefix}/?svg_type=schematic&code=${encodeURIComponent(compressedCode)}`
   const schPngUrl = `${urlPrefix}/?svg_type=schematic&format=png&code=${encodeURIComponent(compressedCode)}`
-  const schSimSvgUrl = `${urlPrefix}/?svg_type=schsim&code=${encodeURIComponent(compressedCode)}&simulation_experiment_id=simulation_experiment_0`
+  const schSimSvgUrl = `${urlPrefix}/?svg_type=schsim&code=${encodeURIComponent(compressedCode)}`
   const assemblySvgUrl = `${urlPrefix}/?svg_type=assembly&code=${encodeURIComponent(compressedCode)}`
   const assemblyPngUrl = `${urlPrefix}/?svg_type=assembly&format=png&code=${encodeURIComponent(compressedCode)}`
   const pinoutSvgUrl = `${urlPrefix}/?svg_type=pinout&code=${encodeURIComponent(compressedCode)}`
