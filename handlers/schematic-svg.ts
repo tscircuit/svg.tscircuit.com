@@ -1,7 +1,7 @@
 import type { RequestContext } from "../lib/RequestContext"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
-import { errorResponse } from "../lib/errorResponse"
+import { errorResponse, circuitJsonErrorResponse } from "../lib/errorResponse"
 
 export const schematicSvgHandler = async (
   req: Request,
@@ -9,6 +9,9 @@ export const schematicSvgHandler = async (
 ): Promise<Response> => {
   try {
     const circuitJson = await getCircuitJsonFromContext(ctx)
+
+    const errRes = circuitJsonErrorResponse(circuitJson)
+    if (errRes) return errRes
 
     const svgContent = await renderCircuitToSvg(circuitJson, "schematic")
 

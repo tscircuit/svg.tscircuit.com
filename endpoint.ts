@@ -1,6 +1,7 @@
 import { getIndexPageHtml } from "./get-index-page-html"
 import { getOutputFormat } from "./lib/getOutputFormat"
 import { getRequestContext } from "./lib/getRequestContext"
+import { circuitJsonErrorResponse } from "./lib/errorResponse"
 import { healthHandler } from "./handlers/health"
 import { generateUrlHandler } from "./handlers/generate_url"
 import { generateUrlsHandler } from "./handlers/generate_urls"
@@ -95,6 +96,9 @@ export default async (req: Request) => {
   if (outputFormat === "circuit_json") {
     try {
       const circuitJson = await getCircuitJsonFromContext(ctx)
+      const errRes = circuitJsonErrorResponse(circuitJson)
+      if (errRes) return errRes
+
       return new Response(JSON.stringify(circuitJson, null, 2), {
         headers: {
           "Content-Type": "application/json",

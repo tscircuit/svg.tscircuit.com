@@ -2,7 +2,7 @@ import type { RequestContext } from "../lib/RequestContext"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { render3dPng } from "../lib/render3dPng"
 import { parsePositiveInt } from "../lib/parsePositiveInt"
-import { errorResponse } from "../lib/errorResponse"
+import { errorResponse, circuitJsonErrorResponse } from "../lib/errorResponse"
 
 export const threeDPngHandler = async (
   req: Request,
@@ -10,6 +10,9 @@ export const threeDPngHandler = async (
 ): Promise<Response> => {
   try {
     const circuitJson = await getCircuitJsonFromContext(ctx)
+
+    const errRes = circuitJsonErrorResponse(circuitJson)
+    if (errRes) return errRes
 
     const pngWidth = parsePositiveInt(
       ctx.url.searchParams.get("png_width") ?? ctx.pngWidth,
