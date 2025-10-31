@@ -3,7 +3,7 @@ import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
 import { svgToPng } from "../lib/svgToPng"
 import { parsePositiveInt } from "../lib/parsePositiveInt"
-import { errorResponse } from "../lib/errorResponse"
+import { errorResponse, circuitJsonErrorResponse } from "../lib/errorResponse"
 
 export const pinoutPngHandler = async (
   req: Request,
@@ -11,6 +11,9 @@ export const pinoutPngHandler = async (
 ): Promise<Response> => {
   try {
     const circuitJson = await getCircuitJsonFromContext(ctx)
+
+    const errRes = circuitJsonErrorResponse(circuitJson)
+    if (errRes) return errRes
 
     const svgContent = await renderCircuitToSvg(circuitJson, "pinout")
 

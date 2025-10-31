@@ -1,7 +1,7 @@
 import type { RequestContext } from "../lib/RequestContext"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
-import { errorResponse } from "../lib/errorResponse"
+import { errorResponse, circuitJsonErrorResponse } from "../lib/errorResponse"
 
 function parseSimulationTransientGraphIdsFromQuery(
   params: URLSearchParams,
@@ -27,6 +27,9 @@ export const schematicSimulationSvgHandler = async (
 ): Promise<Response> => {
   try {
     const circuitJson = await getCircuitJsonFromContext(ctx)
+
+    const errRes = circuitJsonErrorResponse(circuitJson)
+    if (errRes) return errRes
 
     let simulationExperimentId =
       ctx.url.searchParams.get("simulation_experiment_id") ??
