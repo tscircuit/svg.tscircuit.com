@@ -9,6 +9,7 @@ const getPlatformConfig = (): PlatformConfig => {
   return {
     ...getPlatformConfigFromEval(),
     partsEngineDisabled: true,
+    partsEngine: undefined,
   }
 }
 
