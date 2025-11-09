@@ -54,7 +54,7 @@ export async function getCircuitJsonFromContext(
   if (compressedCode) {
     const worker = new CircuitRunner()
 
-    const platformConfig: PlatformConfig = getPlatformConfigFromEval()
+    const platformConfig: PlatformConfig = getPlatformConfig()
     await worker.setPlatformConfig(platformConfig)
 
     const projectConfig: Partial<PlatformConfig> = {}
