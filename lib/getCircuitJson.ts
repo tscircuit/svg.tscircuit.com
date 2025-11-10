@@ -1,3 +1,4 @@
+import "@tscircuit/ngspice-spice-engine"
 import { CircuitRunner } from "@tscircuit/eval/eval"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
 import { decodeUrlHashToFsMap } from "./fsMap"
