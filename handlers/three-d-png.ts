@@ -21,6 +21,7 @@ export const threeDPngHandler = async (
     const pngBuffer = await render3dPng(circuitJson, {
       width: pngWidth,
       height: pngHeight,
+      showInfiniteGrid: ctx.showInfiniteGrid,
     })
 
     return new Response(pngBuffer as any, {
