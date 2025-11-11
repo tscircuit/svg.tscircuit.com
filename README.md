@@ -151,11 +151,6 @@ curl "https://svg.tscircuit.com/?svg_type=pinout&code=YOUR_ENCODED_CODE"
 curl "https://svg.tscircuit.com/?svg_type=3d&code=YOUR_ENCODED_CODE"
 ```
 
-**3D Visualization with Infinite Grid:**
-```bash
-curl "https://svg.tscircuit.com/?svg_type=3d&format=png&show_infinite_grid=true&code=YOUR_ENCODED_CODE"
-```
-
 ## Code Encoding
 
 The `code` parameter must be a compressed and base64-encoded string. You can use the `@tscircuit/create-snippet-url` package to generate these:
