@@ -34,6 +34,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 - `format` (optional): Output format. Defaults to `svg`. Set `format=png` to receive a PNG rasterized version. PNG-specific query parameters:
   - `png_width` / `png_height`
   - `png_density`
+- `show_infinite_grid` (optional): For 3D views only. Set to `true` to display an infinite grid in the 3D render. Default: `false`
 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
@@ -148,6 +149,11 @@ curl "https://svg.tscircuit.com/?svg_type=pinout&code=YOUR_ENCODED_CODE"
 **3D Visualization:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=3d&code=YOUR_ENCODED_CODE"
+```
+
+**3D Visualization with Infinite Grid:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=3d&format=png&show_infinite_grid=true&code=YOUR_ENCODED_CODE"
 ```
 
 ## Code Encoding

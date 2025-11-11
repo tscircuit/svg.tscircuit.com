@@ -5,6 +5,7 @@ export interface Render3dPngOptions {
   width?: number
   height?: number
   zoomMultiplier?: number
+  showInfiniteGrid?: boolean
 }
 
 export async function render3dPng(
@@ -72,5 +73,12 @@ export async function render3dPng(
     backgroundColor: null,
     camPos,
     lookAt,
+    grid: options.showInfiniteGrid
+      ? {
+          infiniteGrid: true,
+          gridColor: [0.8, 0.8, 0.8],
+          sectionColor: [0.7, 0.7, 0.7],
+        }
+      : false,
   })
 }

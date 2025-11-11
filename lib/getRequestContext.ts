@@ -58,6 +58,14 @@ export async function getRequestContext(
     }
   }
 
+  const showInfiniteGridQuery = url.searchParams.get("show_infinite_grid")
+  if (showInfiniteGridQuery != null) {
+    const parsedShowInfiniteGrid = parseBooleanInput(showInfiniteGridQuery)
+    if (parsedShowInfiniteGrid !== undefined) {
+      ctx.showInfiniteGrid = parsedShowInfiniteGrid
+    }
+  }
+
   // Parse fsMap from query parameter
   const fsMapQueryParam = url.searchParams.get("fs_map")
   if (fsMapQueryParam) {
@@ -154,7 +162,10 @@ export async function getRequestContext(
     ctx.pngHeight = body.png_height
     ctx.pngDensity = body.png_density
     ctx.showSolderMask = parseBooleanInput(
-      url.searchParams.get("show_solder_mask"),
+      body.show_solder_mask ?? url.searchParams.get("show_solder_mask"),
+    )
+    ctx.showInfiniteGrid = parseBooleanInput(
+      body.show_infinite_grid ?? url.searchParams.get("show_infinite_grid"),
     )
 
     const simulationExperimentId =
