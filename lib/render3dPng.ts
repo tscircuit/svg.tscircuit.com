@@ -76,8 +76,8 @@ export async function render3dPng(
     grid: options.showInfiniteGrid
       ? {
           infiniteGrid: true,
-          gridColor: [0.8, 0.8, 0.8],
-          sectionColor: [0.7, 0.7, 0.7],
+          gridColor: [0.93, 0.93, 0.93],
+          sectionColor: [0.75, 0.75, 0.75],
           offset: { y: 0 },
         }
       : false,
