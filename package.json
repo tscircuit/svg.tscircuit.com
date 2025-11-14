@@ -37,6 +37,6 @@
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.258",
     "jscad-fiber": "^0.0.85",
-    "poppygl": "^0.0.16"
+    "poppygl": "^0.0.17"
   }
 }
