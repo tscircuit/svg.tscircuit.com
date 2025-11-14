@@ -6,6 +6,7 @@ export interface Render3dPngOptions {
   height?: number
   zoomMultiplier?: number
   showInfiniteGrid?: boolean
+  backgroundColor?: string
 }
 
 export async function render3dPng(
@@ -70,14 +71,14 @@ export async function render3dPng(
   return await renderGLTFToPNGBufferFromGLBBuffer(glbBinary, {
     width: pngWidth,
     height: pngHeight,
-    backgroundColor: null,
+    backgroundColor: options.backgroundColor ?? null,
     camPos,
     lookAt,
     grid: options.showInfiniteGrid
       ? {
           infiniteGrid: true,
-          gridColor: [0.8, 0.8, 0.8],
-          sectionColor: [0.7, 0.7, 0.7],
+          gridColor: [0.9, 0.9, 0.9],
+          sectionColor: [0.7, 0.7, 0.9],
           offset: { y: 0 },
         }
       : false,

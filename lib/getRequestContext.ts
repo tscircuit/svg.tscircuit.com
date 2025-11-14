@@ -66,6 +66,12 @@ export async function getRequestContext(
     }
   }
 
+  // Parse background_color from query parameter
+  const backgroundColorQuery = url.searchParams.get("background_color")
+  if (backgroundColorQuery != null) {
+    ctx.backgroundColor = backgroundColorQuery
+  }
+
   // Parse fsMap from query parameter
   const fsMapQueryParam = url.searchParams.get("fs_map")
   if (fsMapQueryParam) {
