@@ -57,7 +57,7 @@ test(
     )
 
     const response = await fetch(
-      `${serverUrl}?svg_type=3d&format=png&show_infinite_grid=true&code=${encodedSnippet}`,
+      `${serverUrl}?svg_type=3d&format=png&background_color=%23ffffff&show_infinite_grid=true&code=${encodedSnippet}`,
     )
 
     expect(response.status).toBe(200)
