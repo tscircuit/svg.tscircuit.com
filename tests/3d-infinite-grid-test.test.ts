@@ -19,7 +19,7 @@ test(
     )
 
     const colorResponse = await fetch(
-      `${serverUrl}?svg_type=3d&format=png&background_color=%23ffffff&background_opacity=0&show_infinite_grid=true&code=${encodedCode}`,
+      `${serverUrl}?svg_type=3d&format=png&background_color=%23ffffff&show_infinite_grid=true&code=${encodedCode}`,
     )
 
     expect(colorResponse.status).toBe(200)
