@@ -70,7 +70,7 @@ export default () => (
 
         <analogsimulation
           duration={100}
-          timePerStep={1}
+          timePerStep={0.01}
           spiceEngine="ngspice"
         />
       </board>
