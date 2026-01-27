@@ -1,6 +1,5 @@
 {
   "lockfileVersion": 1,
-  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "svg.tscircuit.com",
@@ -8,7 +7,7 @@
         "@neplex/vectorizer": "^0.0.5",
         "@resvg/resvg-js": "^2.6.2",
         "@tscircuit/simple-3d-svg": "^0.0.41",
-        "circuit-json-to-gltf": "^0.0.48",
+        "circuit-json-to-gltf": "^0.0.60",
         "circuit-json-to-simple-3d": "^0.0.9",
         "circuit-to-svg": "^0.0.319",
         "jscad-fiber": "^0.0.85",
@@ -437,7 +436,7 @@
 
     "circuit-json-to-connectivity-map": ["circuit-json-to-connectivity-map@0.0.23", "", { "dependencies": { "@tscircuit/math-utils": "^0.0.9" }, "peerDependencies": { "typescript": "^5.9.3" } }, "sha512-DSOiXaXOTvjU+7et8ITXb2LjgKto6cQzLv3hReYdXuUNtLw2GVnpOly1G83VcIBcSQ4hRVHI4VMKRyZB3XVzdg=="],
 
-    "circuit-json-to-gltf": ["circuit-json-to-gltf@0.0.48", "", { "dependencies": { "@jscad/modeling": "^2.12.6", "jscad-electronics": "^0.0.53", "jscad-to-gltf": "^0.0.5" }, "peerDependencies": { "@resvg/resvg-js": "2", "@resvg/resvg-wasm": "2", "@tscircuit/circuit-json-util": "*", "circuit-json": "*", "circuit-to-svg": "*", "typescript": "^5" }, "optionalPeers": ["@resvg/resvg-js", "@resvg/resvg-wasm"] }, "sha512-hjHkHAyvEQ7NHugryUig+aZNagogN0oDTD2K0ZgdScWevl65VRmYAbZHOJPorBPZ8fT0XTfV4heOnievwmA7Eg=="],
+    "circuit-json-to-gltf": ["circuit-json-to-gltf@0.0.60", "", { "dependencies": { "@jscad/modeling": "^2.12.6", "jscad-electronics": "^0.0.53", "jscad-to-gltf": "^0.0.5" }, "peerDependencies": { "@resvg/resvg-js": "2", "@resvg/resvg-wasm": "2", "@tscircuit/circuit-json-util": "*", "circuit-json": "*", "circuit-to-svg": "*", "typescript": "^5" }, "optionalPeers": ["@resvg/resvg-js", "@resvg/resvg-wasm"] }, "sha512-aYSe6N+Y0rZTYT3lj1RwYW4AF2aah1Z5vvPjvkzbeKj6BKpjHKGNxfkm7S6eVBk9jkoXp5HTTeVNZL4PGn81Ng=="],
 
     "circuit-json-to-simple-3d": ["circuit-json-to-simple-3d@0.0.9", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-thpCtDb9LpAQfGO+Z0hae19sxVAmJAMYM/It9UTMCtyXC3zoUHwRcp/oqtMO/ZIW+JDBhiR8AHmmtKScL2kW7Q=="],
 
