@@ -6,7 +6,7 @@ test("pcb courtyard rendering", async () => {
   const { serverUrl } = await getTestServer()
 
   const response = await fetch(
-    `${serverUrl}?svg_type=pcb&code=${encodeURIComponent(
+    `${serverUrl}?svg_type=pcb&show_courtyards=true&code=${encodeURIComponent(
       getCompressedBase64SnippetString(`
 export default () => (
   <board width="30mm" height="30mm">

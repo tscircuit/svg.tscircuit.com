@@ -14,6 +14,7 @@ export const pcbPngHandler = async (
 
     const svgContent = await renderCircuitToSvg(circuitJson, "pcb", {
       showSolderMask: ctx.showSolderMask,
+      showCourtyards: ctx.showCourtyards,
     })
 
     const pngDensity = parsePositiveInt(
