@@ -17,6 +17,7 @@ export interface RequestContext {
   outputFormat?: string
   svgType?: string
   showSolderMask?: boolean
+  showCourtyards?: boolean
   showInfiniteGrid?: boolean
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]

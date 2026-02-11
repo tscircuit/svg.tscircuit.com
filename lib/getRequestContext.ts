@@ -58,6 +58,14 @@ export async function getRequestContext(
     }
   }
 
+  const showCourtyardsQuery = url.searchParams.get("show_courtyards")
+  if (showCourtyardsQuery != null) {
+    const parsedShowCourtyards = parseBooleanInput(showCourtyardsQuery)
+    if (parsedShowCourtyards !== undefined) {
+      ctx.showCourtyards = parsedShowCourtyards
+    }
+  }
+
   const showInfiniteGridQuery = url.searchParams.get("show_infinite_grid")
   if (showInfiniteGridQuery != null) {
     const parsedShowInfiniteGrid = parseBooleanInput(showInfiniteGridQuery)
@@ -169,6 +177,9 @@ export async function getRequestContext(
     ctx.pngDensity = body.png_density
     ctx.showSolderMask = parseBooleanInput(
       body.show_solder_mask ?? url.searchParams.get("show_solder_mask"),
+    )
+    ctx.showCourtyards = parseBooleanInput(
+      body.show_courtyards ?? url.searchParams.get("show_courtyards"),
     )
     ctx.showInfiniteGrid = parseBooleanInput(
       body.show_infinite_grid ?? url.searchParams.get("show_infinite_grid"),

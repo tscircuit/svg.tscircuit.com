@@ -14,6 +14,7 @@ export interface RenderOptions {
   backgroundOpacity?: number
   zoomMultiplier?: number
   showSolderMask?: boolean
+  showCourtyards?: boolean
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
   schematicHeightRatio?: number
@@ -37,6 +38,7 @@ export async function renderCircuitToSvg(
     backgroundOpacity = 0.0,
     zoomMultiplier = 1.2,
     showSolderMask,
+    showCourtyards,
   } = options
 
   const bgOpacity = Number.isFinite(backgroundOpacity) ? backgroundOpacity : 0.0
@@ -47,7 +49,7 @@ export async function renderCircuitToSvg(
   }
 
   if (svgType === "pcb") {
-    const pcbOptions = { showSolderMask }
+    const pcbOptions = { showSolderMask, showCourtyards }
 
     const pcbSvg = await convertCircuitJsonToPcbSvg(circuitJson, pcbOptions)
 
