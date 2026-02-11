@@ -33,7 +33,7 @@
     "@neplex/vectorizer": "^0.0.5",
     "@resvg/resvg-js": "^2.6.2",
     "@tscircuit/simple-3d-svg": "^0.0.41",
-    "circuit-json-to-gltf": "^0.0.62",
+    "circuit-json-to-gltf": "^0.0.64",
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.319",
     "jscad-fiber": "^0.0.85",
