@@ -35,7 +35,7 @@
     "@tscircuit/simple-3d-svg": "^0.0.41",
     "circuit-json-to-gltf": "^0.0.64",
     "circuit-json-to-simple-3d": "^0.0.9",
-    "circuit-to-svg": "^0.0.319",
+    "circuit-to-svg": "^0.0.327",
     "jscad-fiber": "^0.0.85",
     "poppygl": "^0.0.17"
   }
