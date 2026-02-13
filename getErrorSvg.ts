@@ -1,6 +1,8 @@
 export const getErrorSvg = (err: string) => {
   const splitMessage = (msg: string): string[] => {
-    msg = msg.includes(":") ? msg.replace(/[^:]+:/, "") : msg
+    if (msg.startsWith("Error:")) {
+      msg = msg.replace(/^Error:\s*/, "")
+    }
     const chunks: string[] = []
     let currentChunk = ""
     msg.split(" ").forEach((word) => {
