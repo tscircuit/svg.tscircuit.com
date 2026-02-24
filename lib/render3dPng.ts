@@ -71,6 +71,7 @@ export async function render3dPng(
   return await renderGLTFToPNGBufferFromGLBBuffer(glbBinary, {
     width: pngWidth,
     height: pngHeight,
+    supersampling: 2,
     backgroundColor: options.backgroundColor ?? null,
     camPos,
     lookAt,
