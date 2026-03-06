@@ -22,7 +22,7 @@
     "patch-package": "^8.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tscircuit": "^0.0.1343",
+    "tscircuit": "^0.0.1447",
     "web-worker": "^1.3.0",
     "winterspec": "^0.0.100"
   },
@@ -33,7 +33,7 @@
     "@neplex/vectorizer": "^0.0.5",
     "@resvg/resvg-js": "^2.6.2",
     "@tscircuit/simple-3d-svg": "^0.0.41",
-    "circuit-json-to-gltf": "^0.0.70",
+    "circuit-json-to-gltf": "^0.0.74",
     "circuit-json-to-simple-3d": "^0.0.9",
     "circuit-to-svg": "^0.0.333",
     "jscad-fiber": "^0.0.85",
