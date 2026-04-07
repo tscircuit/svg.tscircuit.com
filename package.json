@@ -6,6 +6,7 @@
   "scripts": {
     "start": "next dev",
     "build": "next build",
+    "postinstall": "node scripts/apply-dependency-patches.mjs",
     "format": "biome format . --write",
     "format:check": "biome format ."
   },
