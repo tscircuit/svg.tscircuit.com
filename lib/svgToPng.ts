@@ -37,10 +37,35 @@ function findFontPath(): string | null {
 
 const fontPath = findFontPath()
 
+function normalizeSvgFonts(svg: string): string {
+  return svg
+    .replace(
+      /font-family:\s*Arial,\s*serif;/g,
+      'font-family: "DejaVu Sans", Arial, serif;',
+    )
+    .replace(
+      /font-family:\s*'Inter',\s*'Helvetica Neue',\s*Arial,\s*sans-serif;/g,
+      `font-family: "DejaVu Sans", 'Inter', 'Helvetica Neue', Arial, sans-serif;`,
+    )
+    .replace(
+      /font-family:\s*sans-serif;/g,
+      'font-family: "DejaVu Sans", sans-serif;',
+    )
+    .replace(
+      /font-family="Arial, serif"/g,
+      'font-family="DejaVu Sans, Arial, serif"',
+    )
+    .replace(
+      /font-family="sans-serif"/g,
+      'font-family="DejaVu Sans, sans-serif"',
+    )
+}
+
 export async function svgToPng(
   svg: string,
   options: SvgToPngOptions,
 ): Promise<ArrayBuffer> {
+  const normalizedSvg = normalizeSvgFonts(svg)
   // Resvg options
   const resvgOptions: any = {
     fitTo: {
@@ -88,7 +113,7 @@ export async function svgToPng(
   }
 
   // Render SVG to PNG using Resvg
-  const resvg = new Resvg(svg, resvgOptions)
+  const resvg = new Resvg(normalizedSvg, resvgOptions)
   const pngData = resvg.render()
   const pngBuffer = pngData.asPng()
 
