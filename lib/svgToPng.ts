@@ -41,6 +41,12 @@ export async function svgToPng(
   svg: string,
   options: SvgToPngOptions,
 ): Promise<ArrayBuffer> {
+  const normalizedSvg = svg
+    .replace(/font-family="sans-serif"/g, 'font-family="DejaVu Sans"')
+    .replace(/font-family="Arial, sans-serif"/g, 'font-family="DejaVu Sans"')
+    .replace(/font-family:\s*sans-serif;/g, 'font-family: DejaVu Sans;')
+    .replace(/font-family:\s*Arial,\s*serif;/g, 'font-family: DejaVu Sans;')
+
   // Resvg options
   const resvgOptions: any = {
     fitTo: {
@@ -53,6 +59,10 @@ export async function svgToPng(
     resvgOptions.font = {
       fontFiles: [fontPath],
       loadSystemFonts: false, // Use only bundled font for consistent rendering
+      defaultFontFamily: "DejaVu Sans",
+      sansSerifFamily: "DejaVu Sans",
+      serifFamily: "DejaVu Sans",
+      monospaceFamily: "DejaVu Sans",
     }
   } else {
     console.warn("[svgToPng] No custom font found - may not render correctly!")
@@ -88,7 +98,7 @@ export async function svgToPng(
   }
 
   // Render SVG to PNG using Resvg
-  const resvg = new Resvg(svg, resvgOptions)
+  const resvg = new Resvg(normalizedSvg, resvgOptions)
   const pngData = resvg.render()
   const pngBuffer = pngData.asPng()
 
