@@ -23,7 +23,7 @@
     "patch-package": "^8.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tscircuit": "^0.0.1662",
+    "tscircuit": "^0.0.1693",
     "web-worker": "^1.3.0",
     "winterspec": "^0.0.100"
   },
@@ -36,7 +36,7 @@
     "@tscircuit/simple-3d-svg": "^0.0.41",
     "circuit-json-to-gltf": "^0.0.93",
     "circuit-json-to-simple-3d": "^0.0.9",
-    "circuit-to-svg": "^0.0.333",
+    "circuit-to-svg": "^0.0.345",
     "jscad-fiber": "^0.0.85",
     "poppygl": "0.0.18"
   }
