@@ -12,7 +12,6 @@
         "circuit-json-to-simple-3d": "^0.0.9",
         "circuit-to-svg": "^0.0.345",
         "jscad-fiber": "^0.0.85",
-        "manifold-3d": "^3.4.1",
         "poppygl": "0.0.18",
       },
       "devDependencies": {
