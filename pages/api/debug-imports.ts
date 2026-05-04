@@ -1,23 +1,34 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-
-let importError: string | null = null
-let endpointModule: any = null
-
-try {
-  endpointModule = require("../../endpoint")
-} catch (e: any) {
-  importError = `${e.name}: ${e.message}\n${e.stack?.slice(0, 2000)}`
-}
+import endpoint from "../../endpoint"
 
 export default async function handler(
-  _req: NextApiRequest,
+  req: NextApiRequest,
   res: NextApiResponse,
 ) {
-  res.status(200).json({
-    nodeVersion: process.version,
-    platform: process.platform,
-    arch: process.arch,
-    importError,
-    endpointLoaded: !!endpointModule,
-  })
+  try {
+    const testUrl = new URL("/health", `http://${req.headers.host}`)
+    const testRequest = new Request(testUrl, {
+      method: "GET",
+      headers: new Headers({ host: req.headers.host as string }),
+    })
+
+    const response = await endpoint(testRequest)
+    const body = await response.text()
+
+    res.status(200).json({
+      nodeVersion: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      endpointStatus: response.status,
+      endpointBody: body.slice(0, 500),
+    })
+  } catch (e: any) {
+    res.status(200).json({
+      nodeVersion: process.version,
+      platform: process.platform,
+      arch: process.arch,
+      runtimeError: `${e.name}: ${e.message}`,
+      stack: e.stack?.slice(0, 3000),
+    })
+  }
 }
