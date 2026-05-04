@@ -1,34 +1,79 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import endpoint from "../../endpoint"
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  const results: Record<string, string> = {}
+
+  // Test each import that endpoint.ts uses
   try {
-    const testUrl = new URL("/health", `http://${req.headers.host}`)
-    const testRequest = new Request(testUrl, {
-      method: "GET",
-      headers: new Headers({ host: req.headers.host as string }),
-    })
-
-    const response = await endpoint(testRequest)
-    const body = await response.text()
-
-    res.status(200).json({
-      nodeVersion: process.version,
-      platform: process.platform,
-      arch: process.arch,
-      endpointStatus: response.status,
-      endpointBody: body.slice(0, 500),
-    })
+    await import("@tscircuit/ngspice-spice-engine")
+    results["ngspice-spice-engine"] = "OK"
   } catch (e: any) {
-    res.status(200).json({
-      nodeVersion: process.version,
-      platform: process.platform,
-      arch: process.arch,
-      runtimeError: `${e.name}: ${e.message}`,
-      stack: e.stack?.slice(0, 3000),
-    })
+    results["ngspice-spice-engine"] = e.stack?.slice(0, 500) || e.message
   }
+
+  try {
+    await import("@tscircuit/eval/eval")
+    results["eval/eval"] = "OK"
+  } catch (e: any) {
+    results["eval/eval"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  try {
+    await import("@tscircuit/eval")
+    results["eval"] = "OK"
+  } catch (e: any) {
+    results["eval"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  try {
+    await import("circuit-to-svg")
+    results["circuit-to-svg"] = "OK"
+  } catch (e: any) {
+    results["circuit-to-svg"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  try {
+    await import("circuit-json-to-gltf")
+    results["circuit-json-to-gltf"] = "OK"
+  } catch (e: any) {
+    results["circuit-json-to-gltf"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  try {
+    await import("@resvg/resvg-js")
+    results["resvg-js"] = "OK"
+  } catch (e: any) {
+    results["resvg-js"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  try {
+    await import("@neplex/vectorizer")
+    results["vectorizer"] = "OK"
+  } catch (e: any) {
+    results["vectorizer"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  try {
+    await import("poppygl")
+    results["poppygl"] = "OK"
+  } catch (e: any) {
+    results["poppygl"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  try {
+    await import("fflate")
+    results["fflate"] = "OK"
+  } catch (e: any) {
+    results["fflate"] = e.stack?.slice(0, 500) || e.message
+  }
+
+  res.status(200).json({
+    nodeVersion: process.version,
+    platform: process.platform,
+    arch: process.arch,
+    results,
+  })
 }
