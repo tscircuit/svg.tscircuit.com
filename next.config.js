@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    outputFileTracingIncludes: {
-      "/api/*": ["./node_modules/manifold-3d/**/*"],
-    },
-  },
   rewrites() {
     return {
       fallback: [
