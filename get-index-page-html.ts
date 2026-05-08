@@ -115,7 +115,11 @@ export const getIndexPageHtml = () => {
     import { gzipSync, strToU8 } from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
     
     const bytesToBase64 = (bytes) => {
-      const binString = String.fromCodePoint(...bytes);
+      const chunkSize = 0x8000;
+      let binString = '';
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binString += String.fromCodePoint(...bytes.subarray(i, i + chunkSize));
+      }
       return btoa(binString);
     };
     
@@ -180,7 +184,6 @@ export const getIndexPageHtml = () => {
         alert('Error: ' + e.message);
       }
     };
-    
     window.addFile('index.tsx', \`export default () => (
   <board width="10mm" height="10mm">
     <resistor
