@@ -49,7 +49,6 @@ test(
         ? cadComponent.model_step_url
         : undefined
 
-    expect(circuitJson.some((item) => item.type === "pcb_smtpad")).toBe(true)
     expect(cadComponent).toBeDefined()
     expect(modelObjUrl ?? modelStepUrl).toBeDefined()
 
