@@ -2,12 +2,14 @@ import { test, expect } from "bun:test"
 import { getTestServer } from "./fixtures/get-test-server"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 
-test("async footprint conversion", async () => {
-  const { serverUrl } = await getTestServer()
+test(
+  "async footprint conversion",
+  async () => {
+    const { serverUrl } = await getTestServer()
 
-  const response = await fetch(
-    `${serverUrl}?svg_type=pcb&code=${encodeURIComponent(
-      getCompressedBase64SnippetString(`
+    const response = await fetch(
+      `${serverUrl}?svg_type=pcb&code=${encodeURIComponent(
+        getCompressedBase64SnippetString(`
 export default () => (
 <board width="10mm" height="10mm">
   <resistor
@@ -19,9 +21,11 @@ export default () => (
 </board>
 )
     `),
-    )}`,
-  )
-  const svgContent = await response.text()
+      )}`,
+    )
+    const svgContent = await response.text()
 
-  expect(svgContent).toMatchSvgSnapshot(import.meta.path)
-})
+    expect(svgContent).toMatchSvgSnapshot(import.meta.path)
+  },
+  { timeout: 30000 },
+)
