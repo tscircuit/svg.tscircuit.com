@@ -1,47 +1,48 @@
 import { test, expect } from "bun:test"
-import { getTestServer } from "./fixtures/get-test-server"
-import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
+import { createHash } from "node:crypto"
+import endpoint from "../endpoint"
+import c2040CircuitJson from "./fixtures/jlcpcb-c2040-preview.circuit.json"
 
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
 
-const c2040Snippet = `
-export default () => (
-<board width="20mm" height="20mm">
-  <resistor
-    name="R1"
-    resistance="10k"
-    footprint="jlcpcb:C2040"
-    pcbX={0}
-  />
-</board>
-)
-`
+// Freeze the resolved JLCPCB footprint so this regression test stays offline.
+const createCircuitJsonRequest = (svgType: "pcb" | "3d", format?: "png") => {
+  const searchParams = new URLSearchParams({
+    svg_type: svgType,
+  })
 
-test("RP2040 with jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
-  const { serverUrl } = await getTestServer()
-  const encodedSnippet = encodeURIComponent(
-    getCompressedBase64SnippetString(c2040Snippet),
-  )
+  if (format) {
+    searchParams.set("format", format)
+  }
 
-  const pcbResponse = await fetch(
-    `${serverUrl}?svg_type=pcb&code=${encodedSnippet}`,
-  )
+  return new Request(`http://localhost/?${searchParams.toString()}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      circuit_json: c2040CircuitJson,
+    }),
+  })
+}
+
+test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
+  const pcbResponse = await endpoint(createCircuitJsonRequest("pcb"))
   const pcbSvgContent = await pcbResponse.text()
 
   expect(pcbResponse.status).toBe(200)
-  expect(pcbSvgContent).toMatchSvgSnapshot(import.meta.path)
+  await expect(pcbSvgContent).toMatchSvgSnapshot(import.meta.path)
 
-  const svg3dResponse = await fetch(
-    `${serverUrl}?svg_type=3d&code=${encodedSnippet}`,
-  )
+  const svg3dResponse = await endpoint(createCircuitJsonRequest("3d"))
   const svg3dContent = await svg3dResponse.text()
 
   expect(svg3dResponse.status).toBe(200)
-  expect(svg3dContent).toContain("<svg")
-
-  const png3dResponse = await fetch(
-    `${serverUrl}?svg_type=3d&format=png&code=${encodedSnippet}`,
+  expect(svg3dResponse.headers.get("content-type")).toContain("image/svg+xml")
+  expect(createHash("sha256").update(svg3dContent).digest("hex")).toBe(
+    "df89c49dc4d2e771e0e3ae264af2ab87f3a38ea35bc87c8495b7fb75bb524072",
   )
+
+  const png3dResponse = await endpoint(createCircuitJsonRequest("3d", "png"))
   const png3dBuffer = new Uint8Array(await png3dResponse.arrayBuffer())
 
   expect(png3dResponse.status).toBe(200)
