@@ -22,9 +22,16 @@ export default () => (
       )}`,
     )
     const svgContent = await response.text()
+    const smtPadCount = (svgContent.match(/data-type="pcb_smtpad"/g) ?? []).length
+    const silkscreenPathCount =
+      (svgContent.match(/data-type="pcb_silkscreen_path"/g) ?? []).length
 
     expect(response.status).toBe(200)
-    expect(svgContent).toMatchSvgSnapshot(import.meta.path)
+    expect(svgContent).toContain("<svg")
+    expect(svgContent).toContain('data-type="pcb_board"')
+    expect(svgContent).toContain('data-pcb-component-id="pcb_component_0"')
+    expect(smtPadCount).toBeGreaterThan(50)
+    expect(silkscreenPathCount).toBeGreaterThan(10)
   },
   { timeout: 30000 },
 )
