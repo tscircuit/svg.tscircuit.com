@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test"
 import { getTestServer } from "./fixtures/get-test-server"
 
-test("endpoint error handling for generate_url", async () => {
+test("request handler error handling for generate_url", async () => {
   const { serverUrl } = await getTestServer()
 
   // Test missing code parameter for generate_url

@@ -6,12 +6,6 @@ import type { RequestContext } from "./RequestContext"
 import type { PlatformConfig } from "@tscircuit/props"
 import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
 
-const getPlatformConfig = (): PlatformConfig => {
-  return {
-    ...getPlatformConfigFromEval(),
-  }
-}
-
 export async function getCircuitJsonFromContext(
   ctx: RequestContext,
 ): Promise<any> {
@@ -31,7 +25,7 @@ export async function getCircuitJsonFromContext(
   if (fsMap) {
     const worker = new CircuitRunner()
 
-    const platformConfig: PlatformConfig = getPlatformConfig()
+    const platformConfig: PlatformConfig = getPlatformConfigFromEval()
     await worker.setPlatformConfig(platformConfig)
 
     const projectConfig: Partial<PlatformConfig> = {}
@@ -54,7 +48,7 @@ export async function getCircuitJsonFromContext(
   if (compressedCode) {
     const worker = new CircuitRunner()
 
-    const platformConfig: PlatformConfig = getPlatformConfig()
+    const platformConfig: PlatformConfig = getPlatformConfigFromEval()
     await worker.setPlatformConfig(platformConfig)
 
     const projectConfig: Partial<PlatformConfig> = {}

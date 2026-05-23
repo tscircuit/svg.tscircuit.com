@@ -18,7 +18,7 @@ import { threeDPngHandler } from "./handlers/three-d-png"
 import { getDebugHtml } from "./lib/getDebugHtml"
 import { getCircuitJsonFromContext } from "./lib/getCircuitJson"
 
-export default async (req: Request) => {
+export const handleRequest = async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
 
   // Handle health check
@@ -174,3 +174,5 @@ export default async (req: Request) => {
     { status: 400 },
   )
 }
+
+export default handleRequest

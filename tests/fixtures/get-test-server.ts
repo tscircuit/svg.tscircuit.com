@@ -1,5 +1,5 @@
 import getPort from "get-port"
-import endpoint from "../../endpoint"
+import { handleRequest } from "../../handle-request"
 
 export const getTestServer = async () => {
   const port = await getPort()
@@ -8,7 +8,7 @@ export const getTestServer = async () => {
 
   const server = Bun.serve({
     port,
-    fetch: endpoint,
+    fetch: handleRequest,
     idleTimeout: 20,
   })
   ;(globalThis as any).servers?.push({
