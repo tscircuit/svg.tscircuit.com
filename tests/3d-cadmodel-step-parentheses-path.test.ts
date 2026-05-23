@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test"
 import { readFileSync } from "node:fs"
-import endpoint from "../endpoint"
+import { handleRequest } from "../handle-request"
 
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
 
@@ -46,7 +46,9 @@ const createRequest = (format: "circuit_json" | "png") =>
 test(
   'supports `import stepUrl from "./stepfile.step"` for a path containing parentheses',
   async () => {
-    const circuitJsonResponse = await endpoint(createRequest("circuit_json"))
+    const circuitJsonResponse = await handleRequest(
+      createRequest("circuit_json"),
+    )
 
     expect(circuitJsonResponse.status).toBe(200)
 
@@ -65,7 +67,7 @@ test(
     expect(modelStepUrl?.startsWith("blob:")).toBe(true)
     expect(cadComponent?.model_stl_url).toBeUndefined()
 
-    const response = await endpoint(createRequest("png"))
+    const response = await handleRequest(createRequest("png"))
 
     expect(response.status).toBe(200)
     expect(response.headers.get("content-type")).toContain("image/png")

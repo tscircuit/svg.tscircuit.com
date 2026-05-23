@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next"
-import endpoint from "../../endpoint"
+import { handleRequest } from "../../handle-request"
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,8 +13,8 @@ export default async function handler(
     body: req.body ? JSON.stringify(req.body) : undefined,
   })
 
-  // Call the endpoint handler
-  const response = await endpoint(request)
+  // Call the shared request handler.
+  const response = await handleRequest(request)
 
   // Convert response back to NextJS format
   const contentType = response.headers.get("Content-Type") || ""

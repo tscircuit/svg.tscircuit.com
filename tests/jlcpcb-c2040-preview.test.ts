@@ -1,12 +1,12 @@
 import { test, expect } from "bun:test"
 import { createHash } from "node:crypto"
-import endpoint from "../endpoint"
+import { handleRequest } from "../handle-request"
 import c2040CircuitJson from "./fixtures/jlcpcb-c2040-preview.circuit.json"
 
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
 
 // Freeze the resolved JLCPCB footprint so this regression test stays offline.
-const createCircuitJsonRequest = (svgType: "pcb" | "3d", format?: "png") => {
+const createPreviewRequest = (svgType: "pcb" | "3d", format?: "png") => {
   const searchParams = new URLSearchParams({
     svg_type: svgType,
   })
@@ -27,13 +27,13 @@ const createCircuitJsonRequest = (svgType: "pcb" | "3d", format?: "png") => {
 }
 
 test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
-  const pcbResponse = await endpoint(createCircuitJsonRequest("pcb"))
+  const pcbResponse = await handleRequest(createPreviewRequest("pcb"))
   const pcbSvgContent = await pcbResponse.text()
 
   expect(pcbResponse.status).toBe(200)
   await expect(pcbSvgContent).toMatchSvgSnapshot(import.meta.path)
 
-  const svg3dResponse = await endpoint(createCircuitJsonRequest("3d"))
+  const svg3dResponse = await handleRequest(createPreviewRequest("3d"))
   const svg3dContent = await svg3dResponse.text()
 
   expect(svg3dResponse.status).toBe(200)
@@ -42,7 +42,7 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
     "df89c49dc4d2e771e0e3ae264af2ab87f3a38ea35bc87c8495b7fb75bb524072",
   )
 
-  const png3dResponse = await endpoint(createCircuitJsonRequest("3d", "png"))
+  const png3dResponse = await handleRequest(createPreviewRequest("3d", "png"))
   const png3dBuffer = new Uint8Array(await png3dResponse.arrayBuffer())
 
   expect(png3dResponse.status).toBe(200)
