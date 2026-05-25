@@ -15,3 +15,14 @@ test("strips Error prefix only when present", () => {
   expect(svg).toContain("parameter")
   expect(svg).not.toContain("Error:")
 })
+
+test("escapes special XML characters like <, >, &, and quotes", () => {
+  const svg = getErrorSvg('Error: <board> cannot directly contain <led> & "R1"')
+
+  expect(svg).toContain("&lt;board&gt;")
+  expect(svg).toContain("&lt;led&gt;")
+  expect(svg).toContain("&amp;")
+  expect(svg).toContain("&quot;R1&quot;")
+  expect(svg).not.toContain("<board>")
+  expect(svg).not.toContain("<led>")
+})
