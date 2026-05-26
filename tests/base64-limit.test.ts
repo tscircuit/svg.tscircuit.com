@@ -8,7 +8,7 @@ test("bytesToBase64 handles large payloads without exceeding call stack limit", 
     largeArray[i] = i % 256
   }
 
-  // Under the new Buffer-backed implementation, this runs successfully and stack-safely!
+  // Under the new implementation, this runs successfully and stack-safely!
   const encoded = bytesToBase64(largeArray)
   expect(encoded).toBeDefined()
   expect(encoded.length).toBeGreaterThan(0)
@@ -28,7 +28,7 @@ test("encodeFsMapToHash encodes large fsMap payloads successfully (production sc
   }
   fsMap["large_project_file.txt"] = nonRepetitive
 
-  // Under the new Buffer-backed implementation, encoding large projects runs perfectly and successfully!
+  // Under the new implementation, encoding large projects runs perfectly and successfully!
   const encodedFsMap = encodeFsMapToHash(fsMap)
   expect(encodedFsMap).toBeDefined()
   expect(encodedFsMap.length).toBeGreaterThan(0)
