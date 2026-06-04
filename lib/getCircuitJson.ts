@@ -5,6 +5,10 @@ import { decodeUrlHashToFsMap } from "./fsMap"
 import type { RequestContext } from "./RequestContext"
 import type { PlatformConfig } from "@tscircuit/props"
 import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
+import { withBuiltInEvalModuleResolver } from "./builtInEvalModules"
+
+const createPlatformConfig = (): PlatformConfig =>
+  withBuiltInEvalModuleResolver(getPlatformConfigFromEval())
 
 export async function getCircuitJsonFromContext(
   ctx: RequestContext,
@@ -25,7 +29,7 @@ export async function getCircuitJsonFromContext(
   if (fsMap) {
     const worker = new CircuitRunner()
 
-    const platformConfig: PlatformConfig = getPlatformConfigFromEval()
+    const platformConfig = createPlatformConfig()
     await worker.setPlatformConfig(platformConfig)
 
     const projectConfig: Partial<PlatformConfig> = {}
@@ -48,7 +52,7 @@ export async function getCircuitJsonFromContext(
   if (compressedCode) {
     const worker = new CircuitRunner()
 
-    const platformConfig: PlatformConfig = getPlatformConfigFromEval()
+    const platformConfig = createPlatformConfig()
     await worker.setPlatformConfig(platformConfig)
 
     const projectConfig: Partial<PlatformConfig> = {}

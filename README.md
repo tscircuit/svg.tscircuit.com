@@ -72,6 +72,20 @@ curl "https://svg.tscircuit.com/?svg_type=pcb" \
   }'
 ```
 
+**Example Request with a custom `tscircuit.config.ts` (TI parts engine):**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=pcb" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fs_map": {
+      "package.json": "{\"dependencies\":{\"@tscircuit/ti-parts-engine\":\"github:tscircuit/ti-parts-engine\"}}",
+      "tscircuit.config.ts": "import { createTiPlatformConfig } from \"@tscircuit/ti-parts-engine\";\nexport default { platformConfig: createTiPlatformConfig() };",
+      "index.circuit.tsx": "export default () => (<board><chip footprint=\"ti:LM358\" name=\"U1\" /></board>);"
+    },
+    "main_component_path": "index.circuit.tsx"
+  }'
+```
+
 ### 2. Health Check
 
 **URL:** `GET /health`
