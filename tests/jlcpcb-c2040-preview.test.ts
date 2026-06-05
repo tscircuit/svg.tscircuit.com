@@ -1,5 +1,4 @@
 import { test, expect } from "bun:test"
-import { createHash } from "node:crypto"
 import { handleRequest } from "../handle-request"
 import c2040CircuitJson from "./fixtures/jlcpcb-c2040-preview.circuit.json"
 
@@ -38,9 +37,7 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
 
   expect(svg3dResponse.status).toBe(200)
   expect(svg3dResponse.headers.get("content-type")).toContain("image/svg+xml")
-  expect(createHash("sha256").update(svg3dContent).digest("hex")).toBe(
-    "df89c49dc4d2e771e0e3ae264af2ab87f3a38ea35bc87c8495b7fb75bb524072",
-  )
+  await expect(svg3dContent).toMatch3dSvgSnapshot(import.meta.path, "3d")
 
   const png3dResponse = await handleRequest(createPreviewRequest("3d", "png"))
   const png3dBuffer = new Uint8Array(await png3dResponse.arrayBuffer())
