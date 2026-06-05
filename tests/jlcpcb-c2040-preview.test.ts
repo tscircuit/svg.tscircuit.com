@@ -125,7 +125,9 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
   // the preview fails even though the same cad_component has a valid STEP model.
   await expect(
     render3dPngWithLegacyCadSourceSelection(mutatedDualSourceCircuitJson),
-  ).rejects.toThrow("Was there a typo in the url or port?")
+  ).rejects.toThrow(
+    /Was there a typo in the url or port\?|Unable to connect\. Is the computer able to access the url\?/,
+  )
 
   const svg3dResponse = await handleRequest(createPreviewRequest("3d"))
   const svg3dContent = await svg3dResponse.text()
