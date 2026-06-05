@@ -109,7 +109,9 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
   expect(dualSourceCircuitJsonResponse.status).toBe(200)
 
   const dualSourceCircuitJson =
-    (await dualSourceCircuitJsonResponse.json()) as Array<Record<string, unknown>>
+    (await dualSourceCircuitJsonResponse.json()) as Array<
+      Record<string, unknown>
+    >
   const mutatedDualSourceCircuitJson = dualSourceCircuitJson.map((item) =>
     item.type === "cad_component"
       ? {
@@ -152,9 +154,9 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
   expect(fixedDualSourceResponse.headers.get("content-type")).toContain(
     "image/png",
   )
-  expect(Array.from(fixedDualSourceBuffer.slice(0, pngSignature.length))).toEqual(
-    pngSignature,
-  )
+  expect(
+    Array.from(fixedDualSourceBuffer.slice(0, pngSignature.length)),
+  ).toEqual(pngSignature)
 
   const png3dResponse = await handleRequest(createPreviewRequest("3d", "png"))
   const png3dBuffer = new Uint8Array(await png3dResponse.arrayBuffer())
