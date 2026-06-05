@@ -1,11 +1,34 @@
 import { test, expect } from "bun:test"
 import { createHash } from "node:crypto"
+import { readFileSync } from "node:fs"
 import { convertCircuitJsonToGltf } from "circuit-json-to-gltf"
 import { renderGLTFToPNGBufferFromGLBBuffer } from "poppygl"
 import { handleRequest } from "../handle-request"
 import c2040CircuitJson from "./fixtures/jlcpcb-c2040-preview.circuit.json"
 
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
+
+const stepFixtureContents = readFileSync(
+  new URL("./fixtures/soic8.step", import.meta.url),
+  "utf8",
+)
+
+const dualCadSourceFsMap = {
+  "index.tsx": `
+import stepUrl from "./fixtures/soic12(1).step"
+
+export default () => (
+  <board>
+    <chip
+      name="U1"
+      footprint="soic8"
+      cadModel={<cadmodel modelUrl={stepUrl} />}
+    />
+  </board>
+)
+`,
+  "fixtures/soic12(1).step": stepFixtureContents,
+}
 
 // Freeze the resolved JLCPCB footprint so this regression test stays offline.
 const createPreviewRequest = (svgType: "pcb" | "3d", format?: "png") => {
@@ -28,8 +51,23 @@ const createPreviewRequest = (svgType: "pcb" | "3d", format?: "png") => {
   })
 }
 
-const render3dPngWithLegacyCadSourceSelection = async () => {
-  const glbResult = (await convertCircuitJsonToGltf(c2040CircuitJson as any, {
+const createDualCadSourceRequest = (format: "circuit_json" | "png") =>
+  new Request(
+    `http://localhost/?svg_type=3d&format=${format}&background_color=%23ffffff&show_infinite_grid=true`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fs_map: dualCadSourceFsMap,
+        main_component_path: "index.tsx",
+      }),
+    },
+  )
+
+const render3dPngWithLegacyCadSourceSelection = async (circuitJson: any) => {
+  const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
     format: "glb",
   })) as unknown
 
@@ -65,12 +103,27 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
   expect(pcbResponse.status).toBe(200)
   await expect(pcbSvgContent).toMatchSvgSnapshot(import.meta.path)
 
-  // The fixture contains both OBJ and STEP URLs. The legacy 3D path preferred
-  // OBJ first, which turned an unreachable EasyEDA CAD asset into this request
-  // failing with a connection error instead of rendering the board preview.
-  await expect(render3dPngWithLegacyCadSourceSelection()).rejects.toThrow(
-    "Unable to connect. Is the computer able to access the url?",
+  const dualSourceCircuitJsonResponse = await handleRequest(
+    createDualCadSourceRequest("circuit_json"),
   )
+  expect(dualSourceCircuitJsonResponse.status).toBe(200)
+
+  const dualSourceCircuitJson =
+    (await dualSourceCircuitJsonResponse.json()) as Array<Record<string, unknown>>
+  const mutatedDualSourceCircuitJson = dualSourceCircuitJson.map((item) =>
+    item.type === "cad_component"
+      ? {
+          ...item,
+          model_obj_url: "https://127.0.0.1:9/missing.obj",
+        }
+      : item,
+  )
+
+  // The legacy 3D path preferred OBJ first. When that OBJ URL is unreachable,
+  // the preview fails even though the same cad_component has a valid STEP model.
+  await expect(
+    render3dPngWithLegacyCadSourceSelection(mutatedDualSourceCircuitJson),
+  ).rejects.toThrow("Was there a typo in the url or port?")
 
   const svg3dResponse = await handleRequest(createPreviewRequest("3d"))
   const svg3dContent = await svg3dResponse.text()
@@ -79,6 +132,28 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
   expect(svg3dResponse.headers.get("content-type")).toContain("image/svg+xml")
   expect(createHash("sha256").update(svg3dContent).digest("hex")).toBe(
     "18c808126e36e288f3a315fe1004ee9a996955346aaa797e3473990a9221284e",
+  )
+
+  const fixedDualSourceResponse = await handleRequest(
+    new Request("http://localhost/?svg_type=3d&format=png", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        circuit_json: mutatedDualSourceCircuitJson,
+      }),
+    }),
+  )
+  const fixedDualSourceBuffer = new Uint8Array(
+    await fixedDualSourceResponse.arrayBuffer(),
+  )
+  expect(fixedDualSourceResponse.status).toBe(200)
+  expect(fixedDualSourceResponse.headers.get("content-type")).toContain(
+    "image/png",
+  )
+  expect(Array.from(fixedDualSourceBuffer.slice(0, pngSignature.length))).toEqual(
+    pngSignature,
   )
 
   const png3dResponse = await handleRequest(createPreviewRequest("3d", "png"))
