@@ -1,5 +1,5 @@
 import { convertCircuitJsonToGltf } from "circuit-json-to-gltf"
-import { renderGLTFToPNGBufferFromGLBBuffer } from "poppygl"
+import { renderGLTFToPNGFromGLB } from "poppygl"
 
 export interface Render3dPngOptions {
   width?: number
@@ -68,7 +68,7 @@ export async function render3dPng(
   const camPos: [number, number, number] = [xzOffset, yHeight, xzOffset]
   const lookAt: [number, number, number] = [0, 0, 0]
 
-  return await renderGLTFToPNGBufferFromGLBBuffer(glbBinary, {
+  return await renderGLTFToPNGFromGLB(glbBinary, {
     width: pngWidth,
     height: pngHeight,
     supersampling: 2,
