@@ -13,6 +13,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@tscircuit/create-snippet-url": "^0.0.13",
+    "@tscircuit/eecircuit-engine": "https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.4.tgz",
     "@types/bun": "latest",
     "@types/react": "19.0.8",
     "bun-match-svg": "^0.0.14",
