@@ -9,11 +9,34 @@ export interface Render3dPngOptions {
   backgroundColor?: string
 }
 
+const normalizeCadModelSources = (circuitJson: any) => {
+  if (!Array.isArray(circuitJson)) return circuitJson
+
+  return circuitJson.map((item) => {
+    if (
+      item?.type === "cad_component" &&
+      typeof item.model_obj_url === "string" &&
+      typeof item.model_step_url === "string"
+    ) {
+      return {
+        ...item,
+        // Prefer STEP when both URLs exist. The upstream GLTF converter
+        // degrades safely on STEP load failures but throws on OBJ failures.
+        model_obj_url: undefined,
+      }
+    }
+
+    return item
+  })
+}
+
 export async function render3dPng(
   circuitJson: any,
   options: Render3dPngOptions = {},
 ): Promise<Uint8Array> {
-  const glbResult = (await convertCircuitJsonToGltf(circuitJson, {
+  const normalizedCircuitJson = normalizeCadModelSources(circuitJson)
+
+  const glbResult = (await convertCircuitJsonToGltf(normalizedCircuitJson, {
     format: "glb",
   })) as unknown
 
