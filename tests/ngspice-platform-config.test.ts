@@ -1,11 +1,8 @@
-import { test, expect } from "bun:test"
-import { createNodeNgspiceEngine } from "../lib/createNodeNgspiceEngine"
+import { expect, test } from "bun:test"
+import { createPlatformConfig } from "../lib/getCircuitJson"
 
-// The default @tscircuit/ngspice-spice-engine loads its WASM via import("blob:…"),
-// which Node's ESM loader rejects, so analog simulations fail under Next.js's
-// Node runtime. createNodeNgspiceEngine drives the locally installed
-// @tscircuit/eecircuit-engine directly. This is the SPICE netlist tscircuit
-// generates for a V1(15V) -> ammeter -> R1(2ohm) loop with a VOUT probe.
+// This is the SPICE netlist tscircuit generates for a V1(15V) -> ammeter ->
+// R1(2ohm) loop with a VOUT probe.
 const spiceString = `* Circuit JSON to SPICE Netlist
 RR1 N2 0 2
 Vsimulation_voltage_source_0 N1 0 DC 15
@@ -19,12 +16,14 @@ Vsense_simulation_current_probe_0 N1 N2 DC 0
 `
 
 test(
-  "node ngspice engine emits voltage and current transient graphs",
+  "eval platform ngspice engine emits voltage and current transient graphs",
   async () => {
-    const engine = createNodeNgspiceEngine()
-    const { simulationResultCircuitJson } = await engine.simulate(spiceString)
+    const engine = createPlatformConfig().spiceEngineMap?.ngspice
+    expect(engine).toBeDefined()
 
+    const { simulationResultCircuitJson } = await engine!.simulate(spiceString)
     const types = simulationResultCircuitJson.map((graph: any) => graph.type)
+
     expect(types).toContain("simulation_transient_voltage_graph")
     expect(types).toContain("simulation_transient_current_graph")
   },
