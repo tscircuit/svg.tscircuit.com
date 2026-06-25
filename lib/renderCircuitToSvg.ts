@@ -29,6 +29,38 @@ export type SvgRenderType =
   | "3d"
   | "schsim"
 
+/**
+ * When a SPICE simulation fails, @tscircuit/core records the real cause as a
+ * `simulation_*_experiment_error` element (e.g. `simulation_unknown_experiment_error`)
+ * and produces no transient graphs. circuit-to-svg only sees the missing graphs and
+ * throws a generic "No ...graph elements found" message, swallowing the real cause.
+ * This finds that recorded error so we can surface its message instead.
+ */
+function findSimulationExperimentError(
+  circuitJson: any,
+  simulationExperimentId: string,
+): { message: string } | undefined {
+  if (!Array.isArray(circuitJson)) return undefined
+
+  const errors = circuitJson.filter(
+    (el: any) =>
+      el &&
+      typeof el.type === "string" &&
+      el.type.startsWith("simulation_") &&
+      el.type.endsWith("_experiment_error") &&
+      typeof el.message === "string",
+  )
+
+  if (errors.length === 0) return undefined
+
+  // Prefer an error scoped to this experiment; fall back to one without an id.
+  return (
+    errors.find(
+      (el: any) => el.simulation_experiment_id === simulationExperimentId,
+    ) ?? errors.find((el: any) => el.simulation_experiment_id == null)
+  )
+}
+
 export async function renderCircuitToSvg(
   circuitJson: any,
   svgType: SvgRenderType,
@@ -74,13 +106,26 @@ export async function renderCircuitToSvg(
       )
     }
 
-    return convertCircuitJsonToSchematicSimulationSvg({
-      circuitJson,
-      simulation_experiment_id: options.simulationExperimentId,
-      simulation_transient_voltage_graph_ids:
-        options.simulationTransientVoltageGraphIds,
-      schematicHeightRatio: options.schematicHeightRatio,
-    })
+    try {
+      return convertCircuitJsonToSchematicSimulationSvg({
+        circuitJson,
+        simulation_experiment_id: options.simulationExperimentId,
+        simulation_transient_voltage_graph_ids:
+          options.simulationTransientVoltageGraphIds,
+        schematicHeightRatio: options.schematicHeightRatio,
+      })
+    } catch (err) {
+      const simulationError = findSimulationExperimentError(
+        circuitJson,
+        options.simulationExperimentId,
+      )
+      if (simulationError) {
+        throw new Error(
+          `Simulation failed for "${options.simulationExperimentId}": ${simulationError.message}`,
+        )
+      }
+      throw err
+    }
   }
 
   if (svgType === "pinout") {
