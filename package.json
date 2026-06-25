@@ -38,7 +38,7 @@
     "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
     "circuit-json-to-gltf": "^0.0.99",
     "circuit-json-to-simple-3d": "^0.0.9",
-    "circuit-to-svg": "^0.0.345",
+    "circuit-to-svg": "^0.0.360",
     "jscad-fiber": "^0.0.85",
     "poppygl": "^0.0.24"
   }
