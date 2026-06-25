@@ -7,6 +7,7 @@
       "dependencies": {
         "@neplex/vectorizer": "^0.0.5",
         "@resvg/resvg-js": "^2.6.2",
+        "@tscircuit/eecircuit-engine": "https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.4.tgz",
         "@tscircuit/simple-3d-svg": "^0.0.41",
         "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
         "circuit-json-to-gltf": "^0.0.99",
@@ -18,7 +19,6 @@
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
         "@tscircuit/create-snippet-url": "^0.0.13",
-        "@tscircuit/eecircuit-engine": "https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.4.tgz",
         "@types/bun": "latest",
         "@types/react": "19.0.8",
         "bun-match-svg": "^0.0.14",
