@@ -6,9 +6,29 @@ import type { RequestContext } from "./RequestContext"
 import type { PlatformConfig } from "@tscircuit/props"
 import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
 import { withBuiltInEvalModuleResolver } from "./builtInEvalModules"
+import { getNgspiceSpiceEngineMap, preloadNgspice } from "./ngspice"
 
-const createPlatformConfig = (): PlatformConfig =>
-  withBuiltInEvalModuleResolver(getPlatformConfigFromEval())
+void preloadNgspice().catch((error) => {
+  console.error("Failed to preload ngspice:", error)
+})
+
+const createPlatformConfig = (): PlatformConfig => {
+  const basePlatformConfig = getPlatformConfigFromEval()
+
+  return withBuiltInEvalModuleResolver({
+    ...basePlatformConfig,
+    spiceEngineMap: {
+      ...basePlatformConfig.spiceEngineMap,
+      ...getNgspiceSpiceEngineMap(),
+    },
+  })
+}
+
+const createCircuitRunner = async () => {
+  const worker = new CircuitRunner()
+  await worker.setDisableCdnLoading(true)
+  return worker
+}
 
 export async function getCircuitJsonFromContext(
   ctx: RequestContext,
@@ -27,7 +47,7 @@ export async function getCircuitJsonFromContext(
   }
 
   if (fsMap) {
-    const worker = new CircuitRunner()
+    const worker = await createCircuitRunner()
 
     const platformConfig = createPlatformConfig()
     await worker.setPlatformConfig(platformConfig)
@@ -50,7 +70,7 @@ export async function getCircuitJsonFromContext(
   }
 
   if (compressedCode) {
-    const worker = new CircuitRunner()
+    const worker = await createCircuitRunner()
 
     const platformConfig = createPlatformConfig()
     await worker.setPlatformConfig(platformConfig)
