@@ -112,19 +112,6 @@ export const getIndexPageHtml = () => {
     </div>
   </div>
   <script type="module">
-    import { gzipSync, strToU8 } from 'https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js';
-    
-    const bytesToBase64 = (bytes) => {
-      const binString = String.fromCodePoint(...bytes);
-      return btoa(binString);
-    };
-    
-    const encodeFsMapToHash = (fsMap) => {
-      const text = JSON.stringify(fsMap);
-      const compressedData = gzipSync(strToU8(text));
-      return bytesToBase64(compressedData);
-    };
-    
     let fileCount = 0;
     const filesEl = document.getElementById('files');
     
