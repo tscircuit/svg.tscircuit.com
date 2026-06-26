@@ -17,6 +17,7 @@ import { threeDSvgHandler } from "./handlers/three-d-svg"
 import { threeDPngHandler } from "./handlers/three-d-png"
 import { getDebugHtml } from "./lib/getDebugHtml"
 import { getCircuitJsonFromContext } from "./lib/getCircuitJson"
+import { normalizeError } from "./lib/normalizeError"
 
 export const handleRequest = async (req: Request) => {
   const url = new URL(req.url.replace("/api", "/"))
@@ -102,12 +103,14 @@ export const handleRequest = async (req: Request) => {
         },
       })
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to create circuit json"
-      return new Response(JSON.stringify({ ok: false, error: message }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      })
+      const normalizedError = normalizeError(error)
+      return new Response(
+        JSON.stringify({ ok: false, error: normalizedError.message }),
+        {
+          status: normalizedError.status,
+          headers: { "Content-Type": "application/json" },
+        },
+      )
     }
   }
 

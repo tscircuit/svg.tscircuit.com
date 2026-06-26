@@ -26,3 +26,10 @@ test("escapes special XML characters like <, >, &, and quotes", () => {
   expect(svg).not.toContain("<board>")
   expect(svg).not.toContain("<led>")
 })
+
+test("renders a custom error title when provided", () => {
+  const svg = getErrorSvg("Error: failed to render board", "Rendering Error")
+
+  expect(svg).toContain("Rendering Error")
+  expect(svg).not.toContain(">Compilation Error<")
+})

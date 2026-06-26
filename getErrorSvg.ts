@@ -6,7 +6,10 @@ const escapeXml = (value: string): string =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;")
 
-export const getErrorSvg = (err: string) => {
+export const getErrorSvg = (
+  err: string,
+  title: string = "Compilation Error",
+) => {
   const splitMessage = (msg: string): string[] => {
     if (msg.startsWith("Error:")) {
       msg = msg.replace(/^Error:\s*/, "")
@@ -65,7 +68,7 @@ export const getErrorSvg = (err: string) => {
       </svg>
       
       <!-- Title -->
-      <text x="36" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#7F1D1D">Compilation Error</text>
+      <text x="36" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="600" fill="#7F1D1D">${escapeXml(title)}</text>
     </g>
     
     <!-- Monospace Error Text Block -->
