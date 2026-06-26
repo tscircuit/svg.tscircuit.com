@@ -9,39 +9,6 @@ import { render3dPng } from "./render3dPng"
 import { Buffer } from "node:buffer"
 import * as vectorizerMod from "@neplex/vectorizer"
 
-function findSimulationExperimentError(
-  circuitJson: any[],
-  simulationExperimentId?: string,
-) {
-  return circuitJson.find((element) => {
-    if (!element || typeof element !== "object") return false
-
-    const type =
-      typeof element.type === "string"
-        ? element.type
-        : typeof element.error_type === "string"
-          ? element.error_type
-          : ""
-
-    if (!type.startsWith("simulation_") || !type.endsWith("_error")) {
-      return false
-    }
-
-    if (typeof element.message !== "string" || element.message.length === 0) {
-      return false
-    }
-
-    if (!simulationExperimentId) {
-      return true
-    }
-
-    return (
-      element.simulation_experiment_id === simulationExperimentId ||
-      element.simulation_experiment_id == null
-    )
-  })
-}
-
 export interface RenderOptions {
   backgroundColor?: string
   backgroundOpacity?: number
@@ -107,26 +74,13 @@ export async function renderCircuitToSvg(
       )
     }
 
-    try {
-      return convertCircuitJsonToSchematicSimulationSvg({
-        circuitJson,
-        simulation_experiment_id: options.simulationExperimentId,
-        simulation_transient_voltage_graph_ids:
-          options.simulationTransientVoltageGraphIds,
-        schematicHeightRatio: options.schematicHeightRatio,
-      })
-    } catch (err) {
-      const simulationError = findSimulationExperimentError(
-        circuitJson,
-        options.simulationExperimentId,
-      )
-      if (simulationError) {
-        throw new Error(
-          `Simulation failed for "${options.simulationExperimentId}": ${simulationError.message}`,
-        )
-      }
-      throw err
-    }
+    return convertCircuitJsonToSchematicSimulationSvg({
+      circuitJson,
+      simulation_experiment_id: options.simulationExperimentId,
+      simulation_transient_voltage_graph_ids:
+        options.simulationTransientVoltageGraphIds,
+      schematicHeightRatio: options.schematicHeightRatio,
+    })
   }
 
   if (svgType === "pinout") {
