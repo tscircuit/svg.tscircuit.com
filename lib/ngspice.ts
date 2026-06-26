@@ -18,16 +18,11 @@ const getNgspiceEngine = () => {
 
 export const preloadNgspice = () => getNgspiceEngine()
 
-export const createNgspicePlatformConfig = (): Pick<
-  PlatformConfig,
-  "spiceEngineMap"
-> => ({
-  spiceEngineMap: {
-    ngspice: {
-      simulate: async (spice) => {
-        const engine = await getNgspiceEngine()
-        return engine.simulate(spice)
-      },
+export const getNgspiceSpiceEngineMap = (): PlatformConfig["spiceEngineMap"] => ({
+  ngspice: {
+    simulate: async (spice) => {
+      const engine = await getNgspiceEngine()
+      return engine.simulate(spice)
     },
   },
 })

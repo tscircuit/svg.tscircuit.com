@@ -6,7 +6,7 @@ import type { RequestContext } from "./RequestContext"
 import type { PlatformConfig } from "@tscircuit/props"
 import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
 import { withBuiltInEvalModuleResolver } from "./builtInEvalModules"
-import { createNgspicePlatformConfig, preloadNgspice } from "./ngspice"
+import { getNgspiceSpiceEngineMap, preloadNgspice } from "./ngspice"
 
 void preloadNgspice().catch((error) => {
   console.error("Failed to preload ngspice:", error)
@@ -19,7 +19,7 @@ const createPlatformConfig = (): PlatformConfig => {
     ...basePlatformConfig,
     spiceEngineMap: {
       ...basePlatformConfig.spiceEngineMap,
-      ...createNgspicePlatformConfig().spiceEngineMap,
+      ...getNgspiceSpiceEngineMap(),
     },
   })
 }
