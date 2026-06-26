@@ -40,3 +40,31 @@ export default () => (
   const postSvgContent = await postResponse.text()
   expect(postSvgContent).toContain("<svg")
 })
+
+test("code parameter preserves plus signs in unencoded GET requests", async () => {
+  const { serverUrl } = await getTestServer()
+
+  const compressedCode = getCompressedBase64SnippetString(`
+export default () => (
+  <board width="10mm" height="10mm">
+    <resistor
+      resistance="1k"
+      footprint="0402"
+      name="R1"
+      schX={3}
+      pcbX={3}
+    />
+  </board>
+)
+  `)
+
+  expect(compressedCode.includes("+")).toBe(true)
+
+  const response = await fetch(`${serverUrl}?svg_type=pcb&code=${compressedCode}`)
+
+  expect(response.status).toBe(200)
+  expect(response.headers.get("content-type")).toBe("image/svg+xml")
+  const svgContent = await response.text()
+  expect(svgContent).toContain("<svg")
+  expect(svgContent).not.toContain("The string contains invalid characters.")
+})

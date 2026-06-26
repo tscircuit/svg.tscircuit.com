@@ -26,6 +26,31 @@ const parseBooleanInput = (value: unknown): boolean | undefined => {
   return undefined
 }
 
+const getRawQueryParam = (reqUrl: string, key: string): string | undefined => {
+  const queryStartIndex = reqUrl.indexOf("?")
+  if (queryStartIndex === -1) return undefined
+
+  const rawQuery = reqUrl.slice(queryStartIndex + 1)
+  for (const segment of rawQuery.split("&")) {
+    if (!segment) continue
+
+    const separatorIndex = segment.indexOf("=")
+    const rawKey =
+      separatorIndex === -1 ? segment : segment.slice(0, separatorIndex)
+    const rawValue = separatorIndex === -1 ? "" : segment.slice(separatorIndex + 1)
+
+    if (decodeURIComponent(rawKey) !== key) continue
+
+    try {
+      return decodeURIComponent(rawValue)
+    } catch {
+      return rawValue
+    }
+  }
+
+  return undefined
+}
+
 /**
  * Parses the request and builds a RequestContext object.
  * Returns either a RequestContext or an error Response if parsing fails.
@@ -44,7 +69,8 @@ export async function getRequestContext(
   }
 
   // Parse request parameters
-  ctx.compressedCode = url.searchParams.get("code") || undefined
+  ctx.compressedCode =
+    getRawQueryParam(req.url, "code") ?? url.searchParams.get("code") ?? undefined
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
   ctx.projectBaseUrl = url.searchParams.get("project_base_url") || undefined
   ctx.mainComponentPath =
