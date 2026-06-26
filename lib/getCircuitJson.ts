@@ -8,7 +8,9 @@ import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
 import { withBuiltInEvalModuleResolver } from "./builtInEvalModules"
 import { createNgspicePlatformConfig, preloadNgspice } from "./ngspice"
 
-preloadNgspice()
+void preloadNgspice().catch((error) => {
+  console.error("Failed to preload ngspice:", error)
+})
 
 const createPlatformConfig = (): PlatformConfig => {
   const basePlatformConfig = getPlatformConfigFromEval()

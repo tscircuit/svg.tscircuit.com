@@ -16,9 +16,7 @@ const getNgspiceEngine = () => {
   return ngspiceEnginePromise
 }
 
-export const preloadNgspice = () => {
-  void getNgspiceEngine()
-}
+export const preloadNgspice = () => getNgspiceEngine()
 
 export const createNgspicePlatformConfig = (): Pick<
   PlatformConfig,
