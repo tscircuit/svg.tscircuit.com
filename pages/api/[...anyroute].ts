@@ -7,9 +7,11 @@ export default async function handler(
 ) {
   // Convert NextJS request to standard Request object
   const url = new URL(req.url!, `http://${req.headers.host}`)
+  const headers = new Headers(req.headers as any)
+  headers.set("x-original-url", req.url ?? "")
   const request = new Request(url, {
     method: req.method,
-    headers: new Headers(req.headers as any),
+    headers,
     body: req.body ? JSON.stringify(req.body) : undefined,
   })
 

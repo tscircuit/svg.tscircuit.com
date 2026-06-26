@@ -59,6 +59,7 @@ export async function getRequestContext(
   req: Request,
 ): Promise<RequestContext | Response> {
   const url = new URL(req.url.replace("/api", "/"))
+  const originalUrl = req.headers.get("x-original-url") || req.url
   const host = `${url.protocol}//${url.host}`
 
   // Build initial context
@@ -70,7 +71,9 @@ export async function getRequestContext(
 
   // Parse request parameters
   ctx.compressedCode =
-    getRawQueryParam(req.url, "code") ?? url.searchParams.get("code") ?? undefined
+    getRawQueryParam(originalUrl, "code") ??
+    url.searchParams.get("code") ??
+    undefined
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
   ctx.projectBaseUrl = url.searchParams.get("project_base_url") || undefined
   ctx.mainComponentPath =
