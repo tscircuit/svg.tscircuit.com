@@ -50,6 +50,21 @@ function getAutoSelectedSimulationGraphIds(
   return { currentGraphIds, voltageGraphIds }
 }
 
+function getSimulationExperimentError(
+  circuitJson: any[],
+  simulationExperimentId: string,
+): string | undefined {
+  const simulationError = circuitJson.find(
+    (element: any) =>
+      element.type === "simulation_unknown_experiment_error" &&
+      element.simulation_experiment_id === simulationExperimentId &&
+      typeof element.message === "string" &&
+      element.message.trim().length > 0,
+  )
+
+  return simulationError?.message
+}
+
 export const schematicSimulationSvgHandler = async (
   req: Request,
   ctx: RequestContext,
@@ -108,6 +123,20 @@ export const schematicSimulationSvgHandler = async (
             ctx.simulationTransientCurrentGraphIds.length > 0
           ? ctx.simulationTransientCurrentGraphIds
           : autoSelectedGraphIds.currentGraphIds
+
+    if (
+      simulationTransientVoltageGraphIds.length === 0 &&
+      simulationTransientCurrentGraphIds.length === 0
+    ) {
+      const simulationErrorMessage = getSimulationExperimentError(
+        circuitJson,
+        simulationExperimentId,
+      )
+
+      if (simulationErrorMessage) {
+        throw new Error(simulationErrorMessage)
+      }
+    }
 
     const schematicHeightRatioParam =
       ctx.url.searchParams.get("schematic_height_ratio") ??
