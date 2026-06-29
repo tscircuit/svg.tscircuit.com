@@ -17,6 +17,7 @@ export interface RenderOptions {
   showCourtyards?: boolean
   show_courtyards?: boolean
   simulationExperimentId?: string
+  simulationTransientCurrentGraphIds?: string[]
   simulationTransientVoltageGraphIds?: string[]
   schematicHeightRatio?: number
 }
@@ -77,6 +78,8 @@ export async function renderCircuitToSvg(
     return convertCircuitJsonToSchematicSimulationSvg({
       circuitJson,
       simulation_experiment_id: options.simulationExperimentId,
+      simulation_transient_current_graph_ids:
+        options.simulationTransientCurrentGraphIds,
       simulation_transient_voltage_graph_ids:
         options.simulationTransientVoltageGraphIds,
       schematicHeightRatio: options.schematicHeightRatio,

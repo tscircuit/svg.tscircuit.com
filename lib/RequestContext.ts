@@ -20,6 +20,7 @@ export interface RequestContext {
   showCourtyards?: boolean
   showInfiniteGrid?: boolean
   simulationExperimentId?: string
+  simulationTransientCurrentGraphIds?: string[]
   simulationTransientVoltageGraphIds?: string[]
   schematicHeightRatio?: number
   requestBody?: unknown

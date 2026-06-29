@@ -5,8 +5,9 @@ import { errorResponse } from "../lib/errorResponse"
 
 function parseSimulationTransientGraphIdsFromQuery(
   params: URLSearchParams,
+  key: string,
 ): string[] {
-  const values = params.getAll("simulation_transient_voltage_graph_ids")
+  const values = params.getAll(key)
   if (values.length === 0) {
     return []
   }
@@ -19,6 +20,34 @@ function parseSimulationTransientGraphIdsFromQuery(
         .filter((segment) => segment.length > 0),
     )
     .filter((value, index, array) => array.indexOf(value) === index)
+}
+
+function getAutoSelectedSimulationGraphIds(
+  circuitJson: any[],
+  simulationExperimentId: string,
+): {
+  currentGraphIds: string[]
+  voltageGraphIds: string[]
+} {
+  const currentGraphIds = circuitJson
+    .filter(
+      (element: any) =>
+        element.type === "simulation_transient_current_graph" &&
+        element.simulation_experiment_id === simulationExperimentId &&
+        typeof element.simulation_transient_current_graph_id === "string",
+    )
+    .map((element: any) => element.simulation_transient_current_graph_id)
+
+  const voltageGraphIds = circuitJson
+    .filter(
+      (element: any) =>
+        element.type === "simulation_transient_voltage_graph" &&
+        element.simulation_experiment_id === simulationExperimentId &&
+        typeof element.simulation_transient_voltage_graph_id === "string",
+    )
+    .map((element: any) => element.simulation_transient_voltage_graph_id)
+
+  return { currentGraphIds, voltageGraphIds }
 }
 
 export const schematicSimulationSvgHandler = async (
@@ -55,11 +84,30 @@ export const schematicSimulationSvgHandler = async (
 
     const queryGraphIds = parseSimulationTransientGraphIdsFromQuery(
       ctx.url.searchParams,
+      "simulation_transient_voltage_graph_ids",
+    )
+    const queryCurrentGraphIds = parseSimulationTransientGraphIdsFromQuery(
+      ctx.url.searchParams,
+      "simulation_transient_current_graph_ids",
+    )
+    const autoSelectedGraphIds = getAutoSelectedSimulationGraphIds(
+      circuitJson,
+      simulationExperimentId,
     )
     const simulationTransientVoltageGraphIds =
       queryGraphIds.length > 0
         ? queryGraphIds
-        : ctx.simulationTransientVoltageGraphIds
+        : ctx.simulationTransientVoltageGraphIds &&
+            ctx.simulationTransientVoltageGraphIds.length > 0
+          ? ctx.simulationTransientVoltageGraphIds
+          : autoSelectedGraphIds.voltageGraphIds
+    const simulationTransientCurrentGraphIds =
+      queryCurrentGraphIds.length > 0
+        ? queryCurrentGraphIds
+        : ctx.simulationTransientCurrentGraphIds &&
+            ctx.simulationTransientCurrentGraphIds.length > 0
+          ? ctx.simulationTransientCurrentGraphIds
+          : autoSelectedGraphIds.currentGraphIds
 
     const schematicHeightRatioParam =
       ctx.url.searchParams.get("schematic_height_ratio") ??
@@ -77,6 +125,7 @@ export const schematicSimulationSvgHandler = async (
 
     const svgContent = await renderCircuitToSvg(circuitJson, "schsim", {
       simulationExperimentId,
+      simulationTransientCurrentGraphIds,
       simulationTransientVoltageGraphIds,
       schematicHeightRatio,
     })

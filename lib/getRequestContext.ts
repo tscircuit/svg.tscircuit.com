@@ -216,6 +216,31 @@ export async function getRequestContext(
       }
     }
 
+    const transientCurrentGraphIdsInput =
+      body.simulation_transient_current_graph_ids ??
+      body.simulationTransientCurrentGraphIds
+    if (transientCurrentGraphIdsInput != null) {
+      if (Array.isArray(transientCurrentGraphIdsInput)) {
+        ctx.simulationTransientCurrentGraphIds = transientCurrentGraphIdsInput
+          .map((value) => (typeof value === "string" ? value : String(value)))
+          .filter((value) => value.trim().length > 0)
+      } else if (typeof transientCurrentGraphIdsInput === "string") {
+        ctx.simulationTransientCurrentGraphIds = transientCurrentGraphIdsInput
+          .split(",")
+          .map((value) => value.trim())
+          .filter((value) => value.length > 0)
+      } else {
+        return new Response(
+          JSON.stringify({
+            ok: false,
+            error:
+              "Invalid simulation_transient_current_graph_ids provided in request body",
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } },
+        )
+      }
+    }
+
     const schematicHeightRatioInput =
       body.schematic_height_ratio ?? body.schematicHeightRatio
     if (schematicHeightRatioInput != null) {
