@@ -58,8 +58,11 @@ const evalModuleFallbackPatchedSnippet =
 const evalNestedBlobImportOriginalSnippet =
   'code = transformJsDelivrImports(code);'
 
+const evalNestedBlobImportBrokenPatchedSnippet =
+  'code = transformJsDelivrImports(code);\n        code = code.replace(/import\\(URL\\.createObjectURL\\(new Blob\\(\\[(.*?)\\],\\{type:"text\\\\/javascript"\\}\\)\\)\\)/g, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
+
 const evalNestedBlobImportPatchedSnippet =
-  'code = transformJsDelivrImports(code);\n        code = code.replace(/import\\(URL\\.createObjectURL\\(new Blob\\(\\[(.*?)\\],\\{type:\"text\\\\/javascript\"\\}\\)\\)\\)/g, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
+  'code = transformJsDelivrImports(code);\n        const nestedBlobImportPattern = new RegExp(\'import\\\\(URL\\\\.createObjectURL\\\\(new Blob\\\\(\\\\[(.*?)\\\\],\\\\{type:\"text/javascript\"\\\\}\\\\)\\\\)\\\\)\', \"g\");\n        code = code.replace(nestedBlobImportPattern, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
 
 function patchOcctImportJs() {
   if (!existsSync(occtImportJsPath)) {
@@ -118,7 +121,12 @@ function patchEvalBlobImports() {
       )
     }
 
-    if (
+    if (patchedSource.includes(evalNestedBlobImportBrokenPatchedSnippet)) {
+      patchedSource = patchedSource.replace(
+        evalNestedBlobImportBrokenPatchedSnippet,
+        evalNestedBlobImportPatchedSnippet,
+      )
+    } else if (
       !patchedSource.includes(evalNestedBlobImportPatchedSnippet) &&
       patchedSource.includes(evalNestedBlobImportOriginalSnippet)
     ) {
