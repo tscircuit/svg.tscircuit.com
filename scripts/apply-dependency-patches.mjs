@@ -55,6 +55,12 @@ const evalModuleFallbackOriginalSnippet =
 const evalModuleFallbackPatchedSnippet =
   'const url = `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;\n        const { default: loadedModule } = await import(url);\n        return loadedModule;'
 
+const evalNestedBlobImportOriginalSnippet =
+  'code = transformJsDelivrImports(code);'
+
+const evalNestedBlobImportPatchedSnippet =
+  'code = transformJsDelivrImports(code);\n        code = code.replace(/import\\(URL\\.createObjectURL\\(new Blob\\(\\[(.*?)\\],\\{type:\"text\\\\/javascript\"\\}\\)\\)\\)/g, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
+
 function patchOcctImportJs() {
   if (!existsSync(occtImportJsPath)) {
     console.warn(
@@ -94,27 +100,42 @@ function patchEvalBlobImports() {
 
     const source = readFileSync(filePath, "utf8")
 
-    if (source.includes(evalModuleFallbackPatchedSnippet)) {
-      console.log(`[postinstall] @tscircuit/eval already patched: ${filePath}`)
-      continue
-    }
-
-    if (!source.includes(evalModuleFallbackOriginalSnippet)) {
+    if (
+      !source.includes(evalModuleFallbackPatchedSnippet) &&
+      !source.includes(evalModuleFallbackOriginalSnippet)
+    ) {
       throw new Error(
-        `[postinstall] @tscircuit/eval patch target not found in ${filePath}; upstream file changed`,
+        `[postinstall] @tscircuit/eval fallback patch target not found in ${filePath}; upstream file changed`,
       )
     }
 
-    writeFileSync(
-      filePath,
-      source.replace(
+    let patchedSource = source
+
+    if (!patchedSource.includes(evalModuleFallbackPatchedSnippet)) {
+      patchedSource = patchedSource.replace(
         evalModuleFallbackOriginalSnippet,
         evalModuleFallbackPatchedSnippet,
-      ),
-    )
-    console.log(
-      `[postinstall] patched @tscircuit/eval CDN fallback imports in ${filePath}`,
-    )
+      )
+    }
+
+    if (
+      !patchedSource.includes(evalNestedBlobImportPatchedSnippet) &&
+      patchedSource.includes(evalNestedBlobImportOriginalSnippet)
+    ) {
+      patchedSource = patchedSource.replace(
+        evalNestedBlobImportOriginalSnippet,
+        evalNestedBlobImportPatchedSnippet,
+      )
+    }
+
+    if (patchedSource !== source) {
+      writeFileSync(filePath, patchedSource)
+      console.log(
+        `[postinstall] patched @tscircuit/eval CDN fallback imports in ${filePath}`,
+      )
+    } else {
+      console.log(`[postinstall] @tscircuit/eval already patched: ${filePath}`)
+    }
   }
 }
 
