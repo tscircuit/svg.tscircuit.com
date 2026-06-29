@@ -53,7 +53,7 @@ const evalModuleFallbackOriginalSnippet =
   'const blob = new Blob([code], { type: "application/javascript" });\n        const url = URL.createObjectURL(blob);\n        try {\n          const { default: loadedModule } = await import(url);\n          return loadedModule;\n        } finally {\n          URL.revokeObjectURL(url);\n        }'
 
 const evalModuleFallbackDataOnlyPatchedSnippet =
-  'const url = `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;\n        const { default: loadedModule } = await import(url);\n        return loadedModule;'
+  "const url = `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;\n        const { default: loadedModule } = await import(url);\n        return loadedModule;"
 
 const evalModuleFallbackNodeDataPatchedSnippet =
   'const isNodeRuntime = typeof process !== "undefined" && !!process.versions?.node;\n        let url;\n        if (isNodeRuntime) {\n          url = `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;\n        } else {\n          const blob = new Blob([code], { type: "application/javascript" });\n          url = URL.createObjectURL(blob);\n        }\n        try {\n          const { default: loadedModule } = await import(url);\n          return loadedModule;\n        } finally {\n          if (!isNodeRuntime) {\n            URL.revokeObjectURL(url);\n          }\n        }'
@@ -62,13 +62,13 @@ const evalModuleFallbackPatchedSnippet =
   'const isNodeRuntime = typeof process !== "undefined" && !!process.versions?.node;\n        let url;\n        let tempDir;\n        if (isNodeRuntime) {\n          const [{ mkdtemp, rm, writeFile }, { tmpdir }, path, { pathToFileURL }] = await Promise.all([\n            import("node:fs/promises"),\n            import("node:os"),\n            import("node:path"),\n            import("node:url")\n          ]);\n          tempDir = await mkdtemp(path.join(tmpdir(), "tscircuit-eval-cdn-"));\n          const filePath = path.join(tempDir, "index.mjs");\n          await writeFile(filePath, code, "utf8");\n          url = pathToFileURL(filePath).href;\n        } else {\n          const blob = new Blob([code], { type: "application/javascript" });\n          url = URL.createObjectURL(blob);\n        }\n        try {\n          const { default: loadedModule } = await import(url);\n          return loadedModule;\n        } finally {\n          if (isNodeRuntime && tempDir) {\n            const { rm } = await import("node:fs/promises");\n            await rm(tempDir, { recursive: true, force: true });\n          } else if (!isNodeRuntime) {\n            URL.revokeObjectURL(url);\n          }\n        }'
 
 const evalNestedBlobImportOriginalSnippet =
-  'code = transformJsDelivrImports(code);'
+  "code = transformJsDelivrImports(code);"
 
 const evalNestedBlobImportBrokenPatchedSnippet =
-  'code = transformJsDelivrImports(code);\n        code = code.replace(/import\\(URL\\.createObjectURL\\(new Blob\\(\\[(.*?)\\],\\{type:"text\\\\/javascript"\\}\\)\\)\\)/g, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
+  "code = transformJsDelivrImports(code);\n        code = code.replace(/import\\(URL\\.createObjectURL\\(new Blob\\(\\[(.*?)\\],\\{type:\"text\\\\/javascript\"\\}\\)\\)\\)/g, 'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)');"
 
 const evalNestedBlobImportPatchedSnippet =
-  'code = transformJsDelivrImports(code);\n        const nestedBlobImportPattern = new RegExp(\'import\\\\(URL\\\\.createObjectURL\\\\(new Blob\\\\(\\\\[(.*?)\\\\],\\\\{type:\"text/javascript\"\\\\}\\\\)\\\\)\\\\)\', "g");\n        code = code.replace(nestedBlobImportPattern, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
+  "code = transformJsDelivrImports(code);\n        const nestedBlobImportPattern = new RegExp('import\\\\(URL\\\\.createObjectURL\\\\(new Blob\\\\(\\\\[(.*?)\\\\],\\\\{type:\"text/javascript\"\\\\}\\\\)\\\\)\\\\)', \"g\");\n        code = code.replace(nestedBlobImportPattern, 'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)');"
 
 function patchOcctImportJs() {
   if (!existsSync(occtImportJsPath)) {
@@ -127,7 +127,9 @@ function patchEvalBlobImports() {
         evalModuleFallbackNodeDataPatchedSnippet,
         evalModuleFallbackPatchedSnippet,
       )
-    } else if (patchedSource.includes(evalModuleFallbackDataOnlyPatchedSnippet)) {
+    } else if (
+      patchedSource.includes(evalModuleFallbackDataOnlyPatchedSnippet)
+    ) {
       patchedSource = patchedSource.replace(
         evalModuleFallbackDataOnlyPatchedSnippet,
         evalModuleFallbackPatchedSnippet,
