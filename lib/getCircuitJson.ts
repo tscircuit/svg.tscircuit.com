@@ -14,23 +14,13 @@ void preloadNgspice().catch((error) => {
 
 const createPlatformConfig = (): PlatformConfig => {
   const basePlatformConfig = getPlatformConfigFromEval()
-  const {
-    localCacheEngine,
-    partsEngine,
-    autorouterMap,
-    footprintLibraryMap,
-    footprintFileParserMap,
-    staticFileLoaderMap,
-  } = basePlatformConfig
 
   return withBuiltInEvalModuleResolver({
-    localCacheEngine,
-    partsEngine,
-    autorouterMap,
-    footprintLibraryMap,
-    footprintFileParserMap,
-    staticFileLoaderMap,
-    spiceEngineMap: getNgspiceSpiceEngineMap(),
+    ...basePlatformConfig,
+    spiceEngineMap: {
+      ...basePlatformConfig.spiceEngineMap,
+      ...getNgspiceSpiceEngineMap(),
+    },
   })
 }
 

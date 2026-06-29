@@ -19,51 +19,6 @@ const occtOriginalSnippet =
 const occtPatchedSnippet =
   'scriptDirectory=__dirname+"/";if(!Module["wasmBinary"]){Module["wasmBinary"]=fs.readFileSync(nodePath.join(__dirname,"occt-import-js.wasm"))}readBinary=filename=>{filename=isFileURI(filename)?new URL(filename):nodePath.normalize(filename);var ret=fs.readFileSync(filename);return ret};readAsync=(filename,binary=true)=>{filename=isFileURI(filename)?new URL(filename):nodePath.normalize(filename);return new Promise((resolve,reject)=>{fs.readFile(filename,binary?undefined:"utf8",(err,data)=>{if(err)reject(err);else resolve(binary?data.buffer:data)})})};'
 
-const evalModuleFallbackPaths = [
-  path.join(
-    projectRoot,
-    "node_modules",
-    "@tscircuit",
-    "eval",
-    "dist",
-    "lib",
-    "index.js",
-  ),
-  path.join(
-    projectRoot,
-    "node_modules",
-    "@tscircuit",
-    "eval",
-    "dist",
-    "eval",
-    "index.js",
-  ),
-  path.join(
-    projectRoot,
-    "node_modules",
-    "@tscircuit",
-    "eval",
-    "dist",
-    "platform-config",
-    "getPlatformConfig.js",
-  ),
-]
-
-const evalModuleFallbackOriginalSnippet =
-  'const blob = new Blob([code], { type: "application/javascript" });\n        const url = URL.createObjectURL(blob);\n        try {\n          const { default: loadedModule } = await import(url);\n          return loadedModule;\n        } finally {\n          URL.revokeObjectURL(url);\n        }'
-
-const evalModuleFallbackPatchedSnippet =
-  'const url = `data:text/javascript;charset=utf-8,${encodeURIComponent(code)}`;\n        const { default: loadedModule } = await import(url);\n        return loadedModule;'
-
-const evalNestedBlobImportOriginalSnippet =
-  'code = transformJsDelivrImports(code);'
-
-const evalNestedBlobImportBrokenPatchedSnippet =
-  'code = transformJsDelivrImports(code);\n        code = code.replace(/import\\(URL\\.createObjectURL\\(new Blob\\(\\[(.*?)\\],\\{type:"text\\\\/javascript"\\}\\)\\)\\)/g, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
-
-const evalNestedBlobImportPatchedSnippet =
-  'code = transformJsDelivrImports(code);\n        const nestedBlobImportPattern = new RegExp(\'import\\\\(URL\\\\.createObjectURL\\\\(new Blob\\\\(\\\\[(.*?)\\\\],\\\\{type:\"text/javascript\"\\\\}\\\\)\\\\)\\\\)\', \"g\");\n        code = code.replace(nestedBlobImportPattern, \'import(`data:text/javascript;charset=utf-8,${encodeURIComponent($1)}`)\');'
-
 function patchOcctImportJs() {
   if (!existsSync(occtImportJsPath)) {
     console.warn(
@@ -92,60 +47,4 @@ function patchOcctImportJs() {
   console.log("[postinstall] patched occt-import-js to preload STEP wasm")
 }
 
-function patchEvalBlobImports() {
-  for (const filePath of evalModuleFallbackPaths) {
-    if (!existsSync(filePath)) {
-      console.warn(
-        `[postinstall] Skipping @tscircuit/eval blob import patch, file not found: ${filePath}`,
-      )
-      continue
-    }
-
-    const source = readFileSync(filePath, "utf8")
-
-    if (
-      !source.includes(evalModuleFallbackPatchedSnippet) &&
-      !source.includes(evalModuleFallbackOriginalSnippet)
-    ) {
-      throw new Error(
-        `[postinstall] @tscircuit/eval fallback patch target not found in ${filePath}; upstream file changed`,
-      )
-    }
-
-    let patchedSource = source
-
-    if (!patchedSource.includes(evalModuleFallbackPatchedSnippet)) {
-      patchedSource = patchedSource.replace(
-        evalModuleFallbackOriginalSnippet,
-        evalModuleFallbackPatchedSnippet,
-      )
-    }
-
-    if (patchedSource.includes(evalNestedBlobImportBrokenPatchedSnippet)) {
-      patchedSource = patchedSource.replace(
-        evalNestedBlobImportBrokenPatchedSnippet,
-        evalNestedBlobImportPatchedSnippet,
-      )
-    } else if (
-      !patchedSource.includes(evalNestedBlobImportPatchedSnippet) &&
-      patchedSource.includes(evalNestedBlobImportOriginalSnippet)
-    ) {
-      patchedSource = patchedSource.replace(
-        evalNestedBlobImportOriginalSnippet,
-        evalNestedBlobImportPatchedSnippet,
-      )
-    }
-
-    if (patchedSource !== source) {
-      writeFileSync(filePath, patchedSource)
-      console.log(
-        `[postinstall] patched @tscircuit/eval CDN fallback imports in ${filePath}`,
-      )
-    } else {
-      console.log(`[postinstall] @tscircuit/eval already patched: ${filePath}`)
-    }
-  }
-}
-
 patchOcctImportJs()
-patchEvalBlobImports()
