@@ -35,11 +35,9 @@
     "@neplex/vectorizer": "^0.0.5",
     "@resvg/resvg-js": "^2.6.2",
     "@tscircuit/ngspice-spice-engine": "^0.0.18",
-    "@tscircuit/simple-3d-svg": "^0.0.41",
     "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
-    "circuit-json-to-simple-3d": "^0.0.9",
+    "circuit-json-to-3d-png": "^0.0.7",
     "fflate": "^0.8.2",
-    "jscad-fiber": "^0.0.85",
-    "poppygl": "^0.0.24"
+    "jscad-fiber": "^0.0.85"
   }
 }
