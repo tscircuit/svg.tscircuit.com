@@ -1,6 +1,4 @@
-import {
-  renderCircuitJsonTo3dPng,
-} from "circuit-json-to-3d-png"
+import { renderCircuitJsonTo3dPng } from "circuit-json-to-3d-png"
 
 export interface Render3dPngOptions {
   width?: number

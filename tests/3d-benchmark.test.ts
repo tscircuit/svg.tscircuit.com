@@ -27,13 +27,10 @@ test(
 
     // Direct 3D PNG rendering via circuit-json-to-3d-png
     const startPng = performance.now()
-    const png3d = await render3dPng(
-      testCircuitJson as any,
-      {
-        backgroundColor: "#ffffff",
-        zoomMultiplier: 1.2,
-      },
-    )
+    const png3d = await render3dPng(testCircuitJson as any, {
+      backgroundColor: "#ffffff",
+      zoomMultiplier: 1.2,
+    })
     const durationPng = performance.now() - startPng
 
     expect(png3d).toBeInstanceOf(Uint8Array)
