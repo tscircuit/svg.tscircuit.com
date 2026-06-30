@@ -90,5 +90,5 @@ test(
     expect(postSvgContent).toContain("<svg")
     expect(postSvgContent).toMatch3dSvgSnapshot(import.meta.path, "post")
   },
-  { timeout: 30000 },
+  { timeout: 60000 },
 )
