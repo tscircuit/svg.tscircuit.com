@@ -38,6 +38,7 @@
     "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
     "circuit-json-to-3d-png": "^0.0.7",
     "fflate": "^0.8.2",
-    "jscad-fiber": "^0.0.85"
+    "jscad-fiber": "^0.0.85",
+    "qrcode-svg": "^1.1.0"
   }
 }

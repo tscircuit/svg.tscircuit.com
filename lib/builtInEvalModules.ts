@@ -1,8 +1,10 @@
 import type { PlatformConfig } from "@tscircuit/props"
+import QRCode from "qrcode-svg"
 import * as tiPartsEngine from "@tscircuit/ti-parts-engine"
 
 const BUILT_IN_EVAL_MODULES = {
   "@tscircuit/ti-parts-engine": tiPartsEngine,
+  "qrcode-svg": QRCode,
 } as const
 
 const BUILT_IN_EVAL_MODULE_SHIMS: Record<
@@ -21,6 +23,12 @@ export const createDefaultBridgeFetch = mod.createDefaultBridgeFetch
 export const DEFAULT_BASE_URL = mod.DEFAULT_BASE_URL
 export const DEFAULT_KICAD_VERSION = mod.DEFAULT_KICAD_VERSION
 export default mod
+`,
+  "qrcode-svg": `
+const QRCode = globalThis.__svgTscircuitBuiltInEvalModules["qrcode-svg"]
+
+export { QRCode }
+export default QRCode
 `,
 }
 
