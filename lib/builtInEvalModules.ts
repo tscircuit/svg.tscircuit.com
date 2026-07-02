@@ -1,6 +1,16 @@
 import type { PlatformConfig } from "@tscircuit/props"
-import QRCode from "qrcode-svg"
 import * as tiPartsEngine from "@tscircuit/ti-parts-engine"
+import { createRequire } from "node:module"
+
+type QRCodeConstructor = new (
+  options: string | Record<string, unknown>,
+) => { svg(): string }
+
+// qrcode-svg is CommonJS and does not ship TypeScript declarations.
+// Load it through require so the runtime module works without adding a project
+// declaration file just for this built-in eval shim.
+const require = createRequire(import.meta.url)
+const QRCode = require("qrcode-svg") as QRCodeConstructor
 
 const BUILT_IN_EVAL_MODULES = {
   "@tscircuit/ti-parts-engine": tiPartsEngine,
