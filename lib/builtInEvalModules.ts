@@ -1,4 +1,5 @@
 import type { PlatformConfig } from "@tscircuit/props"
+import * as tscircuitCommon from "@tscircuit/common"
 import * as tiPartsEngine from "@tscircuit/ti-parts-engine"
 import { createRequire } from "node:module"
 
@@ -13,6 +14,7 @@ const require = createRequire(import.meta.url)
 const QRCode = require("qrcode-svg") as QRCodeConstructor
 
 const BUILT_IN_EVAL_MODULES = {
+  "@tscircuit/common": tscircuitCommon,
   "@tscircuit/ti-parts-engine": tiPartsEngine,
   "qrcode-svg": QRCode,
 } as const
@@ -21,6 +23,18 @@ const BUILT_IN_EVAL_MODULE_SHIMS: Record<
   keyof typeof BUILT_IN_EVAL_MODULES,
   string
 > = {
+  "@tscircuit/common": `
+const mod = globalThis.__svgTscircuitBuiltInEvalModules["@tscircuit/common"]
+
+export const ArduinoShield = mod.ArduinoShield
+export const MicroModBoard = mod.MicroModBoard
+export const ProMicroBoard = mod.ProMicroBoard
+export const RaspberryPiHatBoard = mod.RaspberryPiHatBoard
+export const ViaGridBoard = mod.ViaGridBoard
+export const XiaoBoard = mod.XiaoBoard
+export const XiaoReceiver = mod.XiaoReceiver
+export default mod
+`,
   "@tscircuit/ti-parts-engine": `
 const mod = globalThis.__svgTscircuitBuiltInEvalModules["@tscircuit/ti-parts-engine"]
 
