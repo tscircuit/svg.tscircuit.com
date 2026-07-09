@@ -4,10 +4,12 @@ import {
   convertCircuitJsonToSchematicSvg,
   convertCircuitJsonToPinoutSvg,
   convertCircuitJsonToSchematicSimulationSvg,
+  convertCircuitJsonToSimulationGraphSvg,
 } from "circuit-to-svg"
 import { render3dPng } from "./render3dPng"
 import { Buffer } from "node:buffer"
 import * as vectorizerMod from "@neplex/vectorizer"
+import type { CircuitJson } from "circuit-json"
 
 export interface RenderOptions {
   backgroundColor?: string
@@ -18,6 +20,7 @@ export interface RenderOptions {
   show_courtyards?: boolean
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
+  simulationTransientCurrentGraphIds?: string[]
   schematicHeightRatio?: number
 }
 
@@ -28,9 +31,10 @@ export type SvgRenderType =
   | "assembly"
   | "3d"
   | "schsim"
+  | "sim"
 
 export async function renderCircuitToSvg(
-  circuitJson: any,
+  circuitJson: CircuitJson,
   svgType: SvgRenderType,
   options: RenderOptions = {},
 ): Promise<string> {
@@ -77,9 +81,28 @@ export async function renderCircuitToSvg(
     return convertCircuitJsonToSchematicSimulationSvg({
       circuitJson,
       simulation_experiment_id: options.simulationExperimentId,
+      simulation_transient_current_graph_ids:
+        options.simulationTransientCurrentGraphIds,
       simulation_transient_voltage_graph_ids:
         options.simulationTransientVoltageGraphIds,
       schematicHeightRatio: options.schematicHeightRatio,
+    })
+  }
+
+  if (svgType === "sim") {
+    if (!options.simulationExperimentId) {
+      throw new Error(
+        "simulation_experiment_id is required when rendering sim SVG output",
+      )
+    }
+
+    return convertCircuitJsonToSimulationGraphSvg({
+      circuitJson,
+      simulation_experiment_id: options.simulationExperimentId,
+      simulation_transient_current_graph_ids:
+        options.simulationTransientCurrentGraphIds,
+      simulation_transient_voltage_graph_ids:
+        options.simulationTransientVoltageGraphIds,
     })
   }
 
