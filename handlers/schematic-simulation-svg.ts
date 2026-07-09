@@ -3,6 +3,42 @@ import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
 import { errorResponse } from "../lib/errorResponse"
 
+/**
+ * When a SPICE simulation fails, tscircuit-core inserts a
+ * `simulation_unknown_experiment_error` element carrying the real failure
+ * message (e.g. the underlying ngspice error) instead of producing any
+ * `simulation_transient_voltage_graph` elements. Without this, circuit-to-svg
+ * only reports the generic "No simulation_transient_voltage_graph elements
+ * found" message, masking the actual cause. Surface the real message instead.
+ */
+function findSimulationExperimentError(
+  circuitJson: any,
+  simulationExperimentId: string,
+): string | undefined {
+  if (!Array.isArray(circuitJson)) {
+    return undefined
+  }
+
+  const messages = circuitJson
+    .filter(
+      (el: any) =>
+        el?.type === "simulation_unknown_experiment_error" &&
+        (el.simulation_experiment_id == null ||
+          el.simulation_experiment_id === simulationExperimentId),
+    )
+    .map((el: any) => el?.message)
+    .filter(
+      (message: unknown): message is string =>
+        typeof message === "string" && message.trim().length > 0,
+    )
+
+  if (messages.length === 0) {
+    return undefined
+  }
+
+  return messages.join("\n")
+}
+
 function parseSimulationTransientGraphIdsFromQuery(
   params: URLSearchParams,
 ): string[] {
@@ -51,6 +87,14 @@ export const schematicSimulationSvgHandler = async (
         }),
         { status: 400, headers: { "Content-Type": "application/json" } },
       )
+    }
+
+    const simulationError = findSimulationExperimentError(
+      circuitJson,
+      simulationExperimentId,
+    )
+    if (simulationError) {
+      throw new Error(simulationError)
     }
 
     const queryGraphIds = parseSimulationTransientGraphIdsFromQuery(
