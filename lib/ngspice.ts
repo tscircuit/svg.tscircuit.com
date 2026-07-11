@@ -10,11 +10,37 @@ type NgspiceEngine = NonNullable<PlatformConfig["spiceEngineMap"]>[string]
 
 let simulationPromise: Promise<Simulation> | undefined
 
+type WindowWithOptionalLocation = {
+  location?: {
+    protocol: string
+    hostname: string
+    port: string
+    href: string
+  }
+}
+
+const addLocationToEecircuitWindowShim = () => {
+  const windowValue = (globalThis as { window?: unknown }).window
+  if (!windowValue || typeof windowValue !== "object") return
+  if ("location" in windowValue) return
+
+  const windowShim = windowValue as WindowWithOptionalLocation
+  windowShim.location = {
+    protocol: "http:",
+    hostname: "localhost",
+    port: "",
+    href: "http://localhost/",
+  }
+}
+
+addLocationToEecircuitWindowShim()
+
 const getSimulation = async () => {
   if (!simulationPromise) {
     simulationPromise = (async () => {
       const simulation = new Simulation({ ngBehavior: "psa" })
       await simulation.start()
+      addLocationToEecircuitWindowShim()
       return simulation
     })().catch((error) => {
       simulationPromise = undefined

@@ -1,41 +1,37 @@
 import {
-  getCompressedBase64SnippetString,
-  createSnippetUrl,
-} from "@tscircuit/create-snippet-url"
-import { encodeFsMapToHash } from "./lib/fsMap"
+  createGeneratedSvgUrls,
+  type GeneratedUrlInput,
+  type GeneratedSvgUrls,
+} from "./lib/createGeneratedSvgUrls"
+
+const renderUrlRow = (label: string, url: string) => `
+        <tr>
+          <td>${label}</td>
+          <td><a href="${url}" target="_blank">${url}</a></td>
+        </tr>`
+
+const renderGeneratedUrlRows = (urls: GeneratedSvgUrls) =>
+  [
+    renderUrlRow("Package URL", urls.packageUrl),
+    renderUrlRow("PCB SVG URL", urls.pcbSvgUrl),
+    renderUrlRow("PCB PNG URL", urls.pcbPngUrl),
+    renderUrlRow("Schematic SVG URL", urls.schSvgUrl),
+    renderUrlRow("Schematic Simulation SVG URL", urls.schSimSvgUrl),
+    renderUrlRow("Simulation Graph SVG URL", urls.simSvgUrl),
+    renderUrlRow("Schematic PNG URL", urls.schPngUrl),
+    renderUrlRow("Assembly SVG URL", urls.assemblySvgUrl),
+    renderUrlRow("Assembly PNG URL", urls.assemblyPngUrl),
+    renderUrlRow("Pinout SVG URL", urls.pinoutSvgUrl),
+    renderUrlRow("Pinout PNG URL", urls.pinoutPngUrl),
+    renderUrlRow("3D SVG URL", urls.threeDSvgUrl),
+    renderUrlRow("3D PNG URL", urls.threeDPngUrl),
+  ].join("")
 
 export const getHtmlForGeneratedUrlPage = (
-  codeOrFsMap: string | { fsMap: Record<string, string>; entrypoint?: string },
+  codeOrFsMap: GeneratedUrlInput,
   urlPrefix = "https://svg.tscircuit.com",
 ) => {
-  let code: string
-  let packgaeUrl: string
-  let compressedCode: string
-
-  if (typeof codeOrFsMap === "string") {
-    code = codeOrFsMap
-    packgaeUrl = createSnippetUrl(code)
-    compressedCode = getCompressedBase64SnippetString(code)
-  } else {
-    const { fsMap, entrypoint } = codeOrFsMap
-    const mainFile = entrypoint || Object.keys(fsMap)[0]
-    code = fsMap[mainFile]
-    const fsMapHash = encodeFsMapToHash(fsMap)
-    packgaeUrl = `https://tscircuit.com/editor?#data:application/gzip;base64,${fsMapHash}`
-    compressedCode = fsMapHash
-  }
-
-  const pcbSvgUrl = `${urlPrefix}/?svg_type=pcb&code=${encodeURIComponent(compressedCode)}`
-  const pcbPngUrl = `${urlPrefix}/?svg_type=pcb&format=png&code=${encodeURIComponent(compressedCode)}`
-  const schSvgUrl = `${urlPrefix}/?svg_type=schematic&code=${encodeURIComponent(compressedCode)}`
-  const schPngUrl = `${urlPrefix}/?svg_type=schematic&format=png&code=${encodeURIComponent(compressedCode)}`
-  const schSimSvgUrl = `${urlPrefix}/?svg_type=schsim&code=${encodeURIComponent(compressedCode)}`
-  const assemblySvgUrl = `${urlPrefix}/?svg_type=assembly&code=${encodeURIComponent(compressedCode)}`
-  const assemblyPngUrl = `${urlPrefix}/?svg_type=assembly&format=png&code=${encodeURIComponent(compressedCode)}`
-  const pinoutSvgUrl = `${urlPrefix}/?svg_type=pinout&code=${encodeURIComponent(compressedCode)}`
-  const pinoutPngUrl = `${urlPrefix}/?svg_type=pinout&format=png&code=${encodeURIComponent(compressedCode)}`
-  const threeDSvgUrl = `${urlPrefix}/?svg_type=3d&code=${encodeURIComponent(compressedCode)}`
-  const threeDPngUrl = `${urlPrefix}/?svg_type=3d&format=png&code=${encodeURIComponent(compressedCode)}`
+  const urls = createGeneratedSvgUrls(codeOrFsMap, urlPrefix)
 
   return `
 <!DOCTYPE html>
@@ -103,55 +99,7 @@ export const getHtmlForGeneratedUrlPage = (
           <th>URL</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td>Package URL</td>
-          <td><a href="${packgaeUrl}" target="_blank">${packgaeUrl}</a></td>
-        </tr>
-        <tr>
-          <td>PCB SVG URL</td>
-          <td><a href="${pcbSvgUrl}" target="_blank">${pcbSvgUrl}</a></td>
-        </tr>
-        <tr>
-          <td>PCB PNG URL</td>
-          <td><a href="${pcbPngUrl}" target="_blank">${pcbPngUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Schematic SVG URL</td>
-          <td><a href="${schSvgUrl}" target="_blank">${schSvgUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Schematic Simulation SVG URL</td>
-          <td><a href="${schSimSvgUrl}" target="_blank">${schSimSvgUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Schematic PNG URL</td>
-          <td><a href="${schPngUrl}" target="_blank">${schPngUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Assembly SVG URL</td>
-          <td><a href="${assemblySvgUrl}" target="_blank">${assemblySvgUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Assembly PNG URL</td>
-          <td><a href="${assemblyPngUrl}" target="_blank">${assemblyPngUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Pinout SVG URL</td>
-          <td><a href="${pinoutSvgUrl}" target="_blank">${pinoutSvgUrl}</a></td>
-        </tr>
-        <tr>
-          <td>Pinout PNG URL</td>
-          <td><a href="${pinoutPngUrl}" target="_blank">${pinoutPngUrl}</a></td>
-        </tr>
-        <tr>
-          <td>3D SVG URL</td>
-          <td><a href="${threeDSvgUrl}" target="_blank">${threeDSvgUrl}</a></td>
-        </tr>
-        <tr>
-          <td>3D PNG URL</td>
-          <td><a href="${threeDPngUrl}" target="_blank">${threeDPngUrl}</a></td>
-        </tr>
+      <tbody>${renderGeneratedUrlRows(urls)}
       </tbody>
     </table>
   </div>

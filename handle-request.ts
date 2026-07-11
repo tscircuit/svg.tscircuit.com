@@ -7,6 +7,7 @@ import { generateUrlsHandler } from "./handlers/generate_urls"
 import { schematicSvgHandler } from "./handlers/schematic-svg"
 import { schematicPngHandler } from "./handlers/schematic-png"
 import { schematicSimulationSvgHandler } from "./handlers/schematic-simulation-svg"
+import { simulationGraphSvgHandler } from "./handlers/simulation-graph-svg"
 import { pcbSvgHandler } from "./handlers/pcb-svg"
 import { pcbPngHandler } from "./handlers/pcb-png"
 import { assemblySvgHandler } from "./handlers/assembly-svg"
@@ -116,7 +117,7 @@ export const handleRequest = async (req: Request) => {
     url.searchParams.get("svg_type") || url.searchParams.get("view")
   if (
     !svgType ||
-    !["pcb", "schematic", "assembly", "3d", "pinout", "schsim"].includes(
+    !["pcb", "schematic", "assembly", "3d", "pinout", "schsim", "sim"].includes(
       svgType,
     )
   ) {
@@ -139,6 +140,9 @@ export const handleRequest = async (req: Request) => {
   }
   if (svgType === "schsim" && outputFormat === "svg") {
     return schematicSimulationSvgHandler(req, ctx)
+  }
+  if (svgType === "sim" && outputFormat === "svg") {
+    return simulationGraphSvgHandler(req, ctx)
   }
   if (svgType === "pcb" && outputFormat === "svg") {
     return pcbSvgHandler(req, ctx)

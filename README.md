@@ -28,6 +28,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
   - `schsim` - Schematic simulation view with graph regions
+  - `sim` - Simulation graph view
   - `assembly` - Assembly overlay view with components and labels
   - `pinout` - Pinout diagram view
   - `3d` - 3D visualization view
