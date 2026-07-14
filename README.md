@@ -36,6 +36,8 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `png_width` / `png_height`
   - `png_density`
 - `show_infinite_grid` (optional): For 3D views only. Set to `true` to display an infinite grid in the 3D render. Default: `false`
+- `simulation_experiment_id` (optional): For `sim` and `schsim`, render the experiment with this Circuit JSON id.
+- `simulation_experiment_name` (optional): For `sim` and `schsim`, render the uniquely named experiment. If neither selector is provided, the first experiment is rendered.
 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
@@ -150,6 +152,20 @@ curl "https://svg.tscircuit.com/?svg_type=pcb&format=png&code=YOUR_ENCODED_CODE"
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=schematic&code=YOUR_ENCODED_CODE"
 ```
+
+**Named Simulation Graph:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=sim&simulation_experiment_name=Root%20Fast&code=YOUR_ENCODED_CODE"
+```
+
+**Named Schematic Simulation:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=schsim&simulation_experiment_name=Input%20Group&code=YOUR_ENCODED_CODE"
+```
+
+Each simulation request returns one static SVG. Use a unique `name` on every
+`<analogsimulation />`, then create one URL per name when presenting multiple
+simulation results. Use `simulation_experiment_id` when names are duplicated.
 
 **Assembly View:**
 ```bash

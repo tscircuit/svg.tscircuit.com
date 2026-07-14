@@ -78,6 +78,16 @@ const createNgspiceEngine = async (): Promise<NgspiceEngine> => ({
 })
 
 let ngspiceEnginePromise: Promise<NgspiceEngine> | undefined
+let simulationQueue = Promise.resolve()
+
+const runSerializedSimulation = <T>(run: () => Promise<T>): Promise<T> => {
+  const result = simulationQueue.then(run)
+  simulationQueue = result.then(
+    () => undefined,
+    () => undefined,
+  )
+  return result
+}
 
 const getNgspiceEngine = () => {
   if (!ngspiceEnginePromise) {
@@ -96,8 +106,10 @@ export const getNgspiceSpiceEngineMap =
   (): PlatformConfig["spiceEngineMap"] => ({
     ngspice: {
       simulate: async (spice) => {
-        const engine = await getNgspiceEngine()
-        return engine.simulate(spice)
+        return runSerializedSimulation(async () => {
+          const engine = await getNgspiceEngine()
+          return engine.simulate(spice)
+        })
       },
     },
   })
