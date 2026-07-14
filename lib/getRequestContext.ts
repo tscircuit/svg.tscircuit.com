@@ -191,6 +191,12 @@ export async function getRequestContext(
       ctx.simulationExperimentId = simulationExperimentId
     }
 
+    const simulationExperimentName =
+      body.simulation_experiment_name ?? body.simulationExperimentName
+    if (typeof simulationExperimentName === "string") {
+      ctx.simulationExperimentName = simulationExperimentName
+    }
+
     const transientGraphIdsInput =
       body.simulation_transient_voltage_graph_ids ??
       body.simulationTransientVoltageGraphIds
