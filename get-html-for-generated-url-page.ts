@@ -3,21 +3,98 @@ import {
   type GeneratedUrlInput,
   type GeneratedSvgUrls,
 } from "./lib/createGeneratedSvgUrls"
+import type { SimulationExperiment } from "circuit-json"
+
+type SimulationExperimentForGeneratedUrl = Pick<
+  SimulationExperiment,
+  "simulation_experiment_id" | "name"
+>
+
+const escapeHtml = (value: string) =>
+  value.replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      })[character]!,
+  )
 
 const renderUrlRow = (label: string, url: string) => `
         <tr>
-          <td>${label}</td>
-          <td><a href="${url}" target="_blank">${url}</a></td>
+          <td>${escapeHtml(label)}</td>
+          <td><a href="${escapeHtml(url)}" target="_blank">${escapeHtml(url)}</a></td>
         </tr>`
 
-const renderGeneratedUrlRows = (urls: GeneratedSvgUrls) =>
+const selectSimulationExperiment = (
+  url: string,
+  experiment: SimulationExperimentForGeneratedUrl,
+  useName: boolean,
+) => {
+  const selectedUrl = new URL(url)
+  if (useName) {
+    selectedUrl.searchParams.set("simulation_experiment_name", experiment.name)
+  } else {
+    selectedUrl.searchParams.set(
+      "simulation_experiment_id",
+      experiment.simulation_experiment_id,
+    )
+  }
+  return selectedUrl.toString()
+}
+
+const renderSimulationUrlRows = (
+  urls: GeneratedSvgUrls,
+  simulationExperiments: SimulationExperimentForGeneratedUrl[],
+) => {
+  if (simulationExperiments.length === 0) {
+    return [
+      renderUrlRow("Schematic Simulation SVG URL", urls.schSimSvgUrl),
+      renderUrlRow("Simulation Graph SVG URL", urls.simSvgUrl),
+    ]
+  }
+
+  const nameCounts = new Map<string, number>()
+  for (const experiment of simulationExperiments) {
+    const name = experiment.name.trim()
+    if (name) nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1)
+  }
+
+  return simulationExperiments.flatMap((experiment) => {
+    const name = experiment.name.trim()
+    const useName = Boolean(name) && nameCounts.get(name) === 1
+    const label = useName
+      ? name
+      : name
+        ? `${name} (${experiment.simulation_experiment_id})`
+        : experiment.simulation_experiment_id
+
+    return [
+      renderUrlRow(
+        `Schematic Simulation SVG URL — ${label}`,
+        selectSimulationExperiment(urls.schSimSvgUrl, experiment, useName),
+      ),
+      renderUrlRow(
+        `Simulation Graph SVG URL — ${label}`,
+        selectSimulationExperiment(urls.simSvgUrl, experiment, useName),
+      ),
+    ]
+  })
+}
+
+const renderGeneratedUrlRows = (
+  urls: GeneratedSvgUrls,
+  simulationExperiments: SimulationExperimentForGeneratedUrl[],
+) =>
   [
     renderUrlRow("Package URL", urls.packageUrl),
     renderUrlRow("PCB SVG URL", urls.pcbSvgUrl),
     renderUrlRow("PCB PNG URL", urls.pcbPngUrl),
     renderUrlRow("Schematic SVG URL", urls.schSvgUrl),
-    renderUrlRow("Schematic Simulation SVG URL", urls.schSimSvgUrl),
-    renderUrlRow("Simulation Graph SVG URL", urls.simSvgUrl),
+    ...renderSimulationUrlRows(urls, simulationExperiments),
     renderUrlRow("Schematic PNG URL", urls.schPngUrl),
     renderUrlRow("Assembly SVG URL", urls.assemblySvgUrl),
     renderUrlRow("Assembly PNG URL", urls.assemblyPngUrl),
@@ -30,6 +107,7 @@ const renderGeneratedUrlRows = (urls: GeneratedSvgUrls) =>
 export const getHtmlForGeneratedUrlPage = (
   codeOrFsMap: GeneratedUrlInput,
   urlPrefix = "https://svg.tscircuit.com",
+  simulationExperiments: SimulationExperimentForGeneratedUrl[] = [],
 ) => {
   const urls = createGeneratedSvgUrls(codeOrFsMap, urlPrefix)
 
@@ -99,7 +177,7 @@ export const getHtmlForGeneratedUrlPage = (
           <th>URL</th>
         </tr>
       </thead>
-      <tbody>${renderGeneratedUrlRows(urls)}
+      <tbody>${renderGeneratedUrlRows(urls, simulationExperiments)}
       </tbody>
     </table>
   </div>

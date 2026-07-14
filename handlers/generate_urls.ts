@@ -1,5 +1,7 @@
 import type { RequestContext } from "../lib/RequestContext"
 import { getHtmlForGeneratedUrlPage } from "../get-html-for-generated-url-page"
+import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
+import type { SimulationExperiment } from "circuit-json"
 
 export const generateUrlsHandler = async (
   req: Request,
@@ -42,10 +44,25 @@ export const generateUrlsHandler = async (
       )
     }
 
+    const circuitJson = await getCircuitJsonFromContext({
+      ...ctx,
+      fsMap,
+      entrypoint: undefined,
+      mainComponentPath: ctx.mainComponentPath ?? resolvedEntrypoint,
+    })
+    const simulationExperiments = circuitJson.filter(
+      (element: unknown): element is SimulationExperiment =>
+        typeof element === "object" &&
+        element !== null &&
+        "type" in element &&
+        element.type === "simulation_experiment",
+    )
+
     return new Response(
       getHtmlForGeneratedUrlPage(
         { fsMap, entrypoint: resolvedEntrypoint },
         ctx.host,
+        simulationExperiments,
       ),
       {
         headers: { "Content-Type": "text/html" },
