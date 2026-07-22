@@ -1,7 +1,7 @@
 import {
   convertCircuitJsonToAssemblySvg,
   convertCircuitJsonToPcbSvg,
-  convertCircuitJsonToSchematicSvg,
+  convertCircuitJsonToStackedSchematicSheetsSvg,
   convertCircuitJsonToPinoutSvg,
   convertCircuitJsonToSchematicSimulationSvg,
   convertCircuitJsonToSimulationGraphSvg,
@@ -68,7 +68,7 @@ export async function renderCircuitToSvg(
   }
 
   if (svgType === "schematic") {
-    return convertCircuitJsonToSchematicSvg(circuitJson)
+    return convertCircuitJsonToStackedSchematicSheetsSvg(circuitJson)
   }
 
   if (svgType === "schsim") {
