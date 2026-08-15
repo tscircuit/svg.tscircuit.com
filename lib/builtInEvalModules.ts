@@ -1,7 +1,8 @@
-import type { PlatformConfig } from "@tscircuit/props"
-import * as tscircuitCommon from "@tscircuit/common"
-import * as tiPartsEngine from "@tscircuit/ti-parts-engine"
 import { createRequire } from "node:module"
+import * as tscircuitCommon from "@tscircuit/common"
+import type { PlatformConfig } from "@tscircuit/props"
+import * as tiPartsEngine from "@tscircuit/ti-parts-engine"
+import * as biscuitboard from "biscuitboard"
 
 type QRCodeConstructor = new (
   options: string | Record<string, unknown>,
@@ -16,8 +17,29 @@ const QRCode = require("qrcode-svg") as QRCodeConstructor
 const BUILT_IN_EVAL_MODULES = {
   "@tscircuit/common": tscircuitCommon,
   "@tscircuit/ti-parts-engine": tiPartsEngine,
+  biscuitboard,
   "qrcode-svg": QRCode,
 } as const
+
+const createNamedBuiltInEvalModuleShim = (
+  moduleName: keyof typeof BUILT_IN_EVAL_MODULES,
+  moduleExports: object,
+) => {
+  const namedExports = Object.keys(moduleExports)
+    .filter((exportName) => /^[$A-Z_a-z][$\w]*$/.test(exportName))
+    .map(
+      (exportName) =>
+        `export const ${exportName} = mod[${JSON.stringify(exportName)}]`,
+    )
+    .join("\n")
+
+  return `
+const mod = globalThis.__svgTscircuitBuiltInEvalModules[${JSON.stringify(moduleName)}]
+
+${namedExports}
+export default mod
+`
+}
 
 const BUILT_IN_EVAL_MODULE_SHIMS: Record<
   keyof typeof BUILT_IN_EVAL_MODULES,
@@ -48,6 +70,7 @@ export const DEFAULT_BASE_URL = mod.DEFAULT_BASE_URL
 export const DEFAULT_KICAD_VERSION = mod.DEFAULT_KICAD_VERSION
 export default mod
 `,
+  biscuitboard: createNamedBuiltInEvalModuleShim("biscuitboard", biscuitboard),
   "qrcode-svg": `
 const QRCode = globalThis.__svgTscircuitBuiltInEvalModules["qrcode-svg"]
 
