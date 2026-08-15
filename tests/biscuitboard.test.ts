@@ -2,7 +2,33 @@ import { expect, test } from "bun:test"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 import { getTestServer } from "./fixtures/get-test-server"
 
-test("renders BiscuitBoard imports from the npm package", async () => {
+const TEMPLATE_PREVIEWS = [
+  { exportName: "BiscuitBoard", props: "routingDisabled" },
+  {
+    exportName: "BreadboardClad",
+    props: "routingDisabled markHeadersNoConnect",
+  },
+  { exportName: "Clad40x40", props: "routingDisabled" },
+  {
+    exportName: "ArduinoShieldClad",
+    props: "routingDisabled markHeadersNoConnect",
+  },
+  { exportName: "BoosterPackClad", props: "routingDisabled" },
+  {
+    exportName: "XiaoCladWithPinHeaders",
+    props: "routingDisabled markHeadersNoConnect",
+  },
+  {
+    exportName: "XiaoCladWithPerforatedPinHeaders",
+    props: "routingDisabled markHeadersNoConnect",
+  },
+  {
+    exportName: "FeatherCladWithPinHeaders",
+    props: "routingDisabled markHeadersNoConnect",
+  },
+] as const
+
+test("renders the general-purpose Biscuit Board preview", async () => {
   const { serverUrl } = await getTestServer()
 
   const response = await fetch(
@@ -38,3 +64,27 @@ export default () => (
   expect(svgContent).not.toContain("Cannot find module")
   expect(svgContent).toMatchSvgSnapshot(import.meta.path)
 })
+
+test("renders every Biscuit Board template export", async () => {
+  const { serverUrl } = await getTestServer()
+
+  for (const { exportName, props } of TEMPLATE_PREVIEWS) {
+    const response = await fetch(
+      `${serverUrl}?svg_type=pcb&code=${encodeURIComponent(
+        getCompressedBase64SnippetString(`
+import { ${exportName} } from "biscuitboard"
+
+export default () => <${exportName} ${props} />
+          `),
+      )}`,
+    )
+    const svgContent = await response.text()
+
+    if (!response.ok || !svgContent.startsWith("<svg")) {
+      throw new Error(
+        `${exportName} preview failed (${response.status}): ${svgContent}`,
+      )
+    }
+    expect(svgContent).not.toContain("Cannot find module")
+  }
+}, 30_000)
