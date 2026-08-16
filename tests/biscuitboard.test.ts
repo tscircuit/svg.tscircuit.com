@@ -8,9 +8,9 @@ const TEMPLATE_PREVIEWS = [
   {
     exportName: "BiscuitBoard",
     props: "",
-    usb: { x: 10, y: 0 },
-    resistor: { x: 19, y: 2 },
-    led: { x: 19, y: -2 },
+    usb: { x: 10, y: -23.75 },
+    resistor: { x: 6, y: -17 },
+    led: { x: 2, y: -17 },
   },
   {
     exportName: "BreadboardClad",
@@ -78,20 +78,20 @@ export default () => (
       standard="usb_c"
       footprint="${USB_FOOTPRINT}"
       pcbX={10}
-      pcbY={0}
+      pcbY={-23.75}
     />
     <resistor
       name="R1"
       resistance="1k"
       footprint="0603"
-      pcbX={19}
-      pcbY={2}
+      pcbX={6}
+      pcbY={-17}
     />
     <led
       name="LED1"
       footprint="0603"
-      pcbX={19}
-      pcbY={-2}
+      pcbX={2}
+      pcbY={-17}
     />
     <trace
       name="vbus_to_resistor"
