@@ -2,6 +2,8 @@ import { expect, test } from "bun:test"
 import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 import { getTestServer } from "./fixtures/get-test-server"
 
+const USB_FOOTPRINT = "jlcpcb:C456012"
+
 const TEMPLATE_PREVIEWS = [
   {
     exportName: "BiscuitBoard",
@@ -71,7 +73,13 @@ import { BiscuitBoard } from "biscuitboard"
 
 export default () => (
   <BiscuitBoard>
-    <connector name="J_USB" standard="usb_c" pcbX={10} pcbY={0} />
+    <connector
+      name="J_USB"
+      standard="usb_c"
+      footprint="${USB_FOOTPRINT}"
+      pcbX={10}
+      pcbY={0}
+    />
     <resistor
       name="R1"
       resistance="1k"
@@ -85,7 +93,21 @@ export default () => (
       pcbX={19}
       pcbY={-2}
     />
-    <trace from=".R1 > .pin2" to=".LED1 > .anode" />
+    <trace
+      name="vbus_to_resistor"
+      from=".J_USB > .VBUS1"
+      to=".R1 > .pin1"
+    />
+    <trace
+      name="resistor_to_led"
+      from=".R1 > .pin2"
+      to=".LED1 > .anode"
+    />
+    <trace
+      name="led_to_ground"
+      from=".LED1 > .cathode"
+      to=".J_USB > .GND1"
+    />
   </BiscuitBoard>
 )
         `),
@@ -95,6 +117,7 @@ export default () => (
 
   expect(response.status).toBe(200)
   expect(svgContent).not.toContain("Cannot find module")
+  expect(svgContent).toContain('class="pcb-trace"')
   expect(svgContent).toMatchSvgSnapshot(import.meta.path)
 }, 15_000)
 
@@ -112,6 +135,7 @@ export default () => (
     <connector
       name="J_USB"
       standard="usb_c"
+      footprint="${USB_FOOTPRINT}"
       pcbX={${usb.x}}
       pcbY={${usb.y}}
     />
