@@ -42,7 +42,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
-- `circuit_json` (GET query parameter or POST body): For GET, pass base64-encoded Circuit JSON. For POST, pass raw Circuit JSON as `{"circuit_json": {...}}`.
+- `circuit_json` (GET query parameter or POST body): For GET, pass base64-encoded Circuit JSON (optionally gzip-compressed). For POST, pass raw Circuit JSON as `{"circuit_json": {...}}`.
 - `fs_map` (GET query parameter or POST body): Map of filenames to file contents. For GET requests, provide the map as a gzip-compressed, base64-encoded JSON string (e.g. using `encodeFsMapToHash` from `lib/fsMap`) or as a JSON stringified object. For POST requests, send `{ "fs_map": { "index.tsx": "export default () => ..." } }`. Optionally include an `entrypoint` value to specify which file should be executed (defaults to `index.tsx`).
 
 Either `code`, `fs_map`, or `circuit_json` must be provided.

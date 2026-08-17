@@ -1,3 +1,4 @@
+import { decompressSync } from "fflate"
 import type { RequestContext } from "./RequestContext"
 import { base64ToBytes } from "./base64"
 import { isFsMapRecord } from "./fsMap"
@@ -50,9 +51,12 @@ export async function getRequestContext(
   const circuitJsonQuery = url.searchParams.get("circuit_json")
   if (circuitJsonQuery) {
     try {
-      const decodedCircuitJson = new TextDecoder().decode(
-        base64ToBytes(circuitJsonQuery),
-      )
+      const encodedBytes = base64ToBytes(circuitJsonQuery)
+      const circuitJsonBytes =
+        encodedBytes[0] === 0x1f && encodedBytes[1] === 0x8b
+          ? decompressSync(encodedBytes)
+          : encodedBytes
+      const decodedCircuitJson = new TextDecoder().decode(circuitJsonBytes)
       ctx.circuitJson = JSON.parse(decodedCircuitJson)
     } catch {
       return new Response(

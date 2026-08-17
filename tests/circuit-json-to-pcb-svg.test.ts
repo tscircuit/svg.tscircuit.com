@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test"
+import { gzipSync, strToU8 } from "fflate"
 import { bytesToBase64 } from "../lib/base64"
 import { getTestServer } from "./fixtures/get-test-server"
 import testCircuitJson from "./fixtures/test-circuit.json"
@@ -26,6 +27,15 @@ test("circuit_json to pcb svg conversion and error handling", async () => {
   const getSvgContent = await validGetResponse.text()
   expect(validGetResponse.headers.get("content-type")).toBe("image/svg+xml")
   expect(getSvgContent).toContain(">R1</text>")
+
+  const compressedGetUrl = new URL(serverUrl)
+  compressedGetUrl.searchParams.set("svg_type", "pcb")
+  compressedGetUrl.searchParams.set(
+    "circuit_json",
+    bytesToBase64(gzipSync(strToU8(JSON.stringify(testCircuitJson)))),
+  )
+  const compressedGetResponse = await fetch(compressedGetUrl)
+  expect(await compressedGetResponse.text()).toContain(">R1</text>")
 
   // Test 3: Invalid JSON in POST body
   const invalidJsonResponse = await fetch(`${serverUrl}?svg_type=pcb`, {
