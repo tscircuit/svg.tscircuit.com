@@ -1,6 +1,8 @@
-import { parseFsMapParam } from "./parseFsMapParam"
-import { isFsMapRecord } from "./fsMap"
 import type { RequestContext } from "./RequestContext"
+import { base64ToBytes } from "./base64"
+import { isFsMapRecord } from "./fsMap"
+import { parseFsMapParam } from "./parseFsMapParam"
+import { parsePcbViewBox } from "./parsePcbViewBox"
 
 const TRUE_BOOLEAN_STRINGS = new Set(["1", "true", "yes", "on"])
 const FALSE_BOOLEAN_STRINGS = new Set(["0", "false", "no", "off"])
@@ -45,10 +47,28 @@ export async function getRequestContext(
 
   // Parse request parameters
   ctx.compressedCode = url.searchParams.get("code") || undefined
+  const circuitJsonQuery = url.searchParams.get("circuit_json")
+  if (circuitJsonQuery) {
+    try {
+      const decodedCircuitJson = new TextDecoder().decode(
+        base64ToBytes(circuitJsonQuery),
+      )
+      ctx.circuitJson = JSON.parse(decodedCircuitJson)
+    } catch {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "Invalid base64-encoded circuit_json query parameter",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
+  }
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
   ctx.projectBaseUrl = url.searchParams.get("project_base_url") || undefined
   ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
+  let viewBoxInput: unknown = url.searchParams.get("viewbox")
 
   const showSolderMaskQuery = url.searchParams.get("show_solder_mask")
   if (showSolderMaskQuery != null) {
@@ -184,6 +204,7 @@ export async function getRequestContext(
     ctx.showInfiniteGrid = parseBooleanInput(
       body.show_infinite_grid ?? url.searchParams.get("show_infinite_grid"),
     )
+    viewBoxInput = body.viewbox ?? viewBoxInput
 
     const simulationExperimentId =
       body.simulation_experiment_id ?? body.simulationExperimentId
@@ -235,6 +256,21 @@ export async function getRequestContext(
     if (body.output_format || body.format) {
       ctx.outputFormat = body.output_format || body.format
     }
+  }
+
+  if (viewBoxInput != null) {
+    const pcbViewBox = parsePcbViewBox(viewBoxInput)
+    if (!pcbViewBox) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error:
+            "Invalid viewbox. Expected minX,minY,maxX,maxY with positive width and height",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      )
+    }
+    ctx.pcbViewBox = pcbViewBox
   }
 
   return ctx

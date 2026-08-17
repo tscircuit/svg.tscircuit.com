@@ -1,10 +1,13 @@
+import type { CircuitJson } from "circuit-json"
+import type { PcbViewBox } from "./parsePcbViewBox"
+
 export interface RequestContext {
   url: URL
   host: string
   method: string
   compressedCode?: string
   fsMap?: Record<string, string>
-  circuitJson?: any
+  circuitJson?: CircuitJson
   entrypoint?: string
   projectBaseUrl?: string
   mainComponentPath?: string
@@ -19,6 +22,7 @@ export interface RequestContext {
   showSolderMask?: boolean
   showCourtyards?: boolean
   showInfiniteGrid?: boolean
+  pcbViewBox?: PcbViewBox
   simulationExperimentId?: string
   simulationExperimentName?: string
   simulationTransientVoltageGraphIds?: string[]

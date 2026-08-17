@@ -87,7 +87,7 @@ export const handleRequest = async (req: Request) => {
       JSON.stringify({
         ok: false,
         error:
-          "No code parameter (GET/POST), circuit_json (POST), or fs_map (GET/POST) provided",
+          "No code parameter (GET/POST), circuit_json (GET/POST), or fs_map (GET/POST) provided",
       }),
       { status: 400 },
     )

@@ -1,9 +1,9 @@
 import type { RequestContext } from "../lib/RequestContext"
+import { errorResponse } from "../lib/errorResponse"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
+import { parsePositiveInt } from "../lib/parsePositiveInt"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
 import { svgToPng } from "../lib/svgToPng"
-import { parsePositiveInt } from "../lib/parsePositiveInt"
-import { errorResponse } from "../lib/errorResponse"
 
 export const pcbPngHandler = async (
   req: Request,
@@ -15,6 +15,7 @@ export const pcbPngHandler = async (
     const svgContent = await renderCircuitToSvg(circuitJson, "pcb", {
       showSolderMask: ctx.showSolderMask,
       showCourtyards: ctx.showCourtyards,
+      pcbViewBox: ctx.pcbViewBox,
     })
 
     const pngDensity = parsePositiveInt(

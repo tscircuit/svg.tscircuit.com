@@ -1,7 +1,7 @@
 import type { RequestContext } from "../lib/RequestContext"
+import { errorResponse } from "../lib/errorResponse"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
-import { errorResponse } from "../lib/errorResponse"
 
 export const pcbSvgHandler = async (
   req: Request,
@@ -13,6 +13,7 @@ export const pcbSvgHandler = async (
     const svgContent = await renderCircuitToSvg(circuitJson, "pcb", {
       showSolderMask: ctx.showSolderMask,
       showCourtyards: ctx.showCourtyards,
+      pcbViewBox: ctx.pcbViewBox,
     })
 
     return new Response(svgContent, {
