@@ -36,12 +36,13 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `png_width` / `png_height`
   - `png_density`
 - `show_infinite_grid` (optional): For 3D views only. Set to `true` to display an infinite grid in the 3D render. Default: `false`
+- `viewbox` (optional): For PCB views, a real-coordinate crop formatted as `minX,minY,maxX,maxY`. Elements crossing the region remain rendered but are clipped to this view.
 - `simulation_experiment_id` (optional): For `sim` and `schsim`, render the experiment with this Circuit JSON id.
 - `simulation_experiment_name` (optional): For `sim` and `schsim`, render the uniquely named experiment. If neither selector is provided, the first experiment is rendered.
 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
-- `circuit_json` (POST body only): Raw circuit JSON object - pass as `{"circuit_json": {...}}`
+- `circuit_json` (GET query parameter or POST body): For GET, pass base64-encoded Circuit JSON (optionally gzip-compressed). For POST, pass raw Circuit JSON as `{"circuit_json": {...}}`.
 - `fs_map` (GET query parameter or POST body): Map of filenames to file contents. For GET requests, provide the map as a gzip-compressed, base64-encoded JSON string (e.g. using `encodeFsMapToHash` from `lib/fsMap`) or as a JSON stringified object. For POST requests, send `{ "fs_map": { "index.tsx": "export default () => ..." } }`. Optionally include an `entrypoint` value to specify which file should be executed (defaults to `index.tsx`).
 
 Either `code`, `fs_map`, or `circuit_json` must be provided.

@@ -1,15 +1,16 @@
-import {
-  convertCircuitJsonToAssemblySvg,
-  convertCircuitJsonToPcbSvg,
-  convertCircuitJsonToStackedSchematicSheetsSvg,
-  convertCircuitJsonToPinoutSvg,
-  convertCircuitJsonToSchematicSimulationSvg,
-  convertCircuitJsonToSimulationGraphSvg,
-} from "circuit-to-svg"
-import { render3dPng } from "./render3dPng"
 import { Buffer } from "node:buffer"
 import * as vectorizerMod from "@neplex/vectorizer"
 import type { CircuitJson } from "circuit-json"
+import {
+  convertCircuitJsonToAssemblySvg,
+  convertCircuitJsonToPcbSvg,
+  convertCircuitJsonToPinoutSvg,
+  convertCircuitJsonToSchematicSimulationSvg,
+  convertCircuitJsonToSimulationGraphSvg,
+  convertCircuitJsonToStackedSchematicSheetsSvg,
+} from "circuit-to-svg"
+import type { PcbViewBox } from "./parsePcbViewBox"
+import { render3dPng } from "./render3dPng"
 
 export interface RenderOptions {
   backgroundColor?: string
@@ -18,6 +19,7 @@ export interface RenderOptions {
   showSolderMask?: boolean
   showCourtyards?: boolean
   show_courtyards?: boolean
+  pcbViewBox?: PcbViewBox
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
   simulationTransientCurrentGraphIds?: string[]
@@ -44,6 +46,7 @@ export async function renderCircuitToSvg(
     zoomMultiplier = 1.2,
     showSolderMask,
     showCourtyards,
+    pcbViewBox,
   } = options
 
   const resolvedShowCourtyards = showCourtyards ?? options.show_courtyards
@@ -60,6 +63,7 @@ export async function renderCircuitToSvg(
       showSolderMask,
       showCourtyards: resolvedShowCourtyards,
       show_courtyards: resolvedShowCourtyards,
+      viewport: pcbViewBox,
     }
 
     const pcbSvg = await convertCircuitJsonToPcbSvg(circuitJson, pcbOptions)

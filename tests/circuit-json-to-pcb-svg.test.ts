@@ -1,4 +1,4 @@
-import { test, expect } from "bun:test"
+import { expect, test } from "bun:test"
 import { getTestServer } from "./fixtures/get-test-server"
 import testCircuitJson from "./fixtures/test-circuit.json"
 
@@ -31,7 +31,7 @@ test("circuit_json to pcb svg conversion and error handling", async () => {
   const noParamsError = await noParamsResponse.json()
   expect(noParamsError.ok).toBe(false)
   expect(noParamsError.error).toContain(
-    "No code parameter (GET/POST), circuit_json (POST), or fs_map (GET/POST) provided",
+    "No code parameter (GET/POST), circuit_json (GET/POST), or fs_map (GET/POST) provided",
   )
 
   // Test 4: Invalid svg_type with POST circuit_json
@@ -55,6 +55,6 @@ test("circuit_json to pcb svg conversion and error handling", async () => {
   const noCircuitJsonError = await noCircuitJsonResponse.json()
   expect(noCircuitJsonError.ok).toBe(false)
   expect(noCircuitJsonError.error).toContain(
-    "No code parameter (GET/POST), circuit_json (POST), or fs_map (GET/POST) provided",
+    "No code parameter (GET/POST), circuit_json (GET/POST), or fs_map (GET/POST) provided",
   )
 })
