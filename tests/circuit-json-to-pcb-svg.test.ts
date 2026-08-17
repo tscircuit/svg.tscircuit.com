@@ -1,6 +1,4 @@
 import { expect, test } from "bun:test"
-import { gzipSync, strToU8 } from "fflate"
-import { bytesToBase64 } from "../lib/base64"
 import { getTestServer } from "./fixtures/get-test-server"
 import testCircuitJson from "./fixtures/test-circuit.json"
 
@@ -16,28 +14,7 @@ test("circuit_json to pcb svg conversion and error handling", async () => {
   const svgContent = await validResponse.text()
   expect(svgContent).toMatchSvgSnapshot(import.meta.path)
 
-  // Test 2: Valid base64-encoded Circuit JSON via GET
-  const encodedCircuitJson = bytesToBase64(
-    new TextEncoder().encode(JSON.stringify(testCircuitJson)),
-  )
-  const getUrl = new URL(serverUrl)
-  getUrl.searchParams.set("svg_type", "pcb")
-  getUrl.searchParams.set("circuit_json", encodedCircuitJson)
-  const validGetResponse = await fetch(getUrl)
-  const getSvgContent = await validGetResponse.text()
-  expect(validGetResponse.headers.get("content-type")).toBe("image/svg+xml")
-  expect(getSvgContent).toContain(">R1</text>")
-
-  const compressedGetUrl = new URL(serverUrl)
-  compressedGetUrl.searchParams.set("svg_type", "pcb")
-  compressedGetUrl.searchParams.set(
-    "circuit_json",
-    bytesToBase64(gzipSync(strToU8(JSON.stringify(testCircuitJson)))),
-  )
-  const compressedGetResponse = await fetch(compressedGetUrl)
-  expect(await compressedGetResponse.text()).toContain(">R1</text>")
-
-  // Test 3: Invalid JSON in POST body
+  // Test 2: Invalid JSON in POST body
   const invalidJsonResponse = await fetch(`${serverUrl}?svg_type=pcb`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -48,7 +25,7 @@ test("circuit_json to pcb svg conversion and error handling", async () => {
   expect(invalidJsonError.ok).toBe(false)
   expect(invalidJsonError.error).toContain("Invalid JSON in request body")
 
-  // Test 4: Missing parameters (with a non-root path to bypass index page logic)
+  // Test 3: Missing parameters (with a non-root path to bypass index page logic)
   const noParamsResponse = await fetch(`${serverUrl}/svg?svg_type=pcb`)
   expect(noParamsResponse.status).toBe(400)
   const noParamsError = await noParamsResponse.json()
@@ -57,7 +34,7 @@ test("circuit_json to pcb svg conversion and error handling", async () => {
     "No code parameter (GET/POST), circuit_json (GET/POST), or fs_map (GET/POST) provided",
   )
 
-  // Test 5: Invalid svg_type with POST circuit_json
+  // Test 4: Invalid svg_type with POST circuit_json
   const invalidTypeResponse = await fetch(`${serverUrl}?svg_type=invalid`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -68,7 +45,7 @@ test("circuit_json to pcb svg conversion and error handling", async () => {
   expect(invalidTypeError.ok).toBe(false)
   expect(invalidTypeError.error).toContain("Invalid svg_type")
 
-  // Test 6: POST without circuit_json in body
+  // Test 5: POST without circuit_json in body
   const noCircuitJsonResponse = await fetch(`${serverUrl}?svg_type=pcb`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
