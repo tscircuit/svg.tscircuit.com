@@ -3,7 +3,7 @@ const nextConfig = {
   transpilePackages: ["@tscircuit/ti-parts-engine"],
   experimental: {
     outputFileTracingIncludes: {
-      "/api/*": ["node_modules/manifold-3d/**/*"],
+      "/api/*": ["node_modules/@tscircuit/manifold-2d/**/*"],
     },
   },
   rewrites() {
