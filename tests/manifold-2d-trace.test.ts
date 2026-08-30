@@ -12,16 +12,17 @@ const traceTest = existsSync(tracePath) ? test : test.skip
 
 const requiredTraceFiles = [
   "node_modules/@tscircuit/copper-pour-solver/dist/index.js",
-  "node_modules/manifold-3d/package.json",
-  "node_modules/manifold-3d/lib/wasm.js",
-  "node_modules/manifold-3d/manifold.js",
-  "node_modules/manifold-3d/manifold.wasm",
+  "node_modules/@tscircuit/manifold-2d/package.json",
+  "node_modules/@tscircuit/manifold-2d/index.js",
+  "node_modules/@tscircuit/manifold-2d/vendor/manifold.js",
+  "node_modules/@tscircuit/manifold-2d/vendor/manifold.wasm",
+  "node_modules/@tscircuit/manifold-2d/vendor/manifold.wasm.base64.js",
 ]
 
 const normalizeTracePath = (filePath: string) => filePath.replaceAll("\\", "/")
 
 traceTest(
-  "Next API trace includes manifold-3d for copper-pour-solver",
+  "Next API trace includes @tscircuit/manifold-2d for copper-pour-solver",
   async () => {
     const trace = JSON.parse(await readFile(tracePath, "utf8")) as {
       files: string[]
@@ -35,8 +36,9 @@ traceTest(
 
     expect(missingFiles).toEqual([])
     expect(
-      tracedFiles.filter((file) => file.includes("node_modules/manifold-3d/"))
-        .length,
+      tracedFiles.filter((file) =>
+        file.includes("node_modules/@tscircuit/manifold-2d/"),
+      ).length,
     ).toBeGreaterThan(0)
   },
 )

@@ -19,6 +19,22 @@ const occtOriginalSnippet =
 const occtPatchedSnippet =
   'scriptDirectory=__dirname+"/";if(!Module["wasmBinary"]){Module["wasmBinary"]=fs.readFileSync(nodePath.join(__dirname,"occt-import-js.wasm"))}readBinary=filename=>{filename=isFileURI(filename)?new URL(filename):nodePath.normalize(filename);var ret=fs.readFileSync(filename);return ret};readAsync=(filename,binary=true)=>{filename=isFileURI(filename)?new URL(filename):nodePath.normalize(filename);return new Promise((resolve,reject)=>{fs.readFile(filename,binary?undefined:"utf8",(err,data)=>{if(err)reject(err);else resolve(binary?data.buffer:data)})})};'
 
+const fanoutTypesPath = path.join(
+  projectRoot,
+  "node_modules",
+  "@tscircuit",
+  "fanout-solver",
+  "lib",
+  "types.ts",
+)
+
+// Vercel's Bun install can flatten fanout-solver's router dependency, exposing
+// this readonly property override to Next.js's strict type check.
+const fanoutOriginalSnippet =
+  "export interface FanoutBusSpec extends SimpleRouteBus {"
+const fanoutPatchedSnippet =
+  'export interface FanoutBusSpec extends Omit<SimpleRouteBus, "allowedLayers"> {'
+
 function patchOcctImportJs() {
   if (!existsSync(occtImportJsPath)) {
     console.warn(
@@ -47,4 +63,35 @@ function patchOcctImportJs() {
   console.log("[postinstall] patched occt-import-js to preload STEP wasm")
 }
 
+function patchFanoutSolverTypes() {
+  if (!existsSync(fanoutTypesPath)) {
+    console.warn(
+      `[postinstall] Skipping @tscircuit/fanout-solver patch, file not found: ${fanoutTypesPath}`,
+    )
+    return
+  }
+
+  const source = readFileSync(fanoutTypesPath, "utf8")
+
+  if (source.includes(fanoutPatchedSnippet)) {
+    console.log("[postinstall] @tscircuit/fanout-solver already patched")
+    return
+  }
+
+  if (!source.includes(fanoutOriginalSnippet)) {
+    throw new Error(
+      "[postinstall] @tscircuit/fanout-solver patch target not found; upstream file changed",
+    )
+  }
+
+  writeFileSync(
+    fanoutTypesPath,
+    source.replace(fanoutOriginalSnippet, fanoutPatchedSnippet),
+  )
+  console.log(
+    "[postinstall] patched @tscircuit/fanout-solver allowedLayers type",
+  )
+}
+
 patchOcctImportJs()
+patchFanoutSolverTypes()
