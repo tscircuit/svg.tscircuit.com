@@ -36,6 +36,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `png_width` / `png_height`
   - `png_density`
 - `show_infinite_grid` (optional): For 3D views only. Set to `true` to display an infinite grid in the 3D render. Default: `false`
+- `show_debug_objects` (optional): For PCB views only. Set to `true` to render `pcb_debug_object` overlays such as autorouting phase bounds. Default: `false`
 - `viewbox` (optional): For PCB views, a real-coordinate crop formatted as `minX,minY,maxX,maxY`. Elements crossing the region remain rendered but are clipped to this view.
 - `simulation_experiment_id` (optional): For `sim` and `schsim`, render the experiment with this Circuit JSON id.
 - `simulation_experiment_name` (optional): For `sim` and `schsim`, render the uniquely named experiment. If neither selector is provided, the first experiment is rendered.

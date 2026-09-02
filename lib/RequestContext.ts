@@ -21,6 +21,7 @@ export interface RequestContext {
   svgType?: string
   showSolderMask?: boolean
   showCourtyards?: boolean
+  showDebugObjects?: boolean
   showInfiniteGrid?: boolean
   pcbViewBox?: PcbViewBox
   simulationExperimentId?: string
