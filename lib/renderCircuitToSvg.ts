@@ -19,6 +19,7 @@ export interface RenderOptions {
   showSolderMask?: boolean
   showCourtyards?: boolean
   show_courtyards?: boolean
+  showDebugObjects?: boolean
   pcbViewBox?: PcbViewBox
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
@@ -46,6 +47,7 @@ export async function renderCircuitToSvg(
     zoomMultiplier = 1.2,
     showSolderMask,
     showCourtyards,
+    showDebugObjects,
     pcbViewBox,
   } = options
 
@@ -63,6 +65,7 @@ export async function renderCircuitToSvg(
       showSolderMask,
       showCourtyards: resolvedShowCourtyards,
       show_courtyards: resolvedShowCourtyards,
+      showDebugObjects,
       viewport: pcbViewBox,
     }
 

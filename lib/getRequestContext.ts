@@ -90,6 +90,14 @@ export async function getRequestContext(
     }
   }
 
+  const showDebugObjectsQuery = url.searchParams.get("show_debug_objects")
+  if (showDebugObjectsQuery != null) {
+    const parsedShowDebugObjects = parseBooleanInput(showDebugObjectsQuery)
+    if (parsedShowDebugObjects !== undefined) {
+      ctx.showDebugObjects = parsedShowDebugObjects
+    }
+  }
+
   const showInfiniteGridQuery = url.searchParams.get("show_infinite_grid")
   if (showInfiniteGridQuery != null) {
     const parsedShowInfiniteGrid = parseBooleanInput(showInfiniteGridQuery)
@@ -204,6 +212,9 @@ export async function getRequestContext(
     )
     ctx.showCourtyards = parseBooleanInput(
       body.show_courtyards ?? url.searchParams.get("show_courtyards"),
+    )
+    ctx.showDebugObjects = parseBooleanInput(
+      body.show_debug_objects ?? url.searchParams.get("show_debug_objects"),
     )
     ctx.showInfiniteGrid = parseBooleanInput(
       body.show_infinite_grid ?? url.searchParams.get("show_infinite_grid"),
