@@ -8,7 +8,8 @@
     "build": "next build",
     "postinstall": "node scripts/apply-dependency-patches.mjs",
     "format": "biome format . --write",
-    "format:check": "biome format ."
+    "format:check": "biome format .",
+    "test:production": "node scripts/smoke-production.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
