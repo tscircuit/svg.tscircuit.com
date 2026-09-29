@@ -46,5 +46,8 @@
     "jscad-fiber": "^0.0.85",
     "qrcode-svg": "^1.1.0",
     "circuit-to-svg": "^0.0.436"
+  },
+  "overrides": {
+    "poppygl": "^0.0.29"
   }
 }
