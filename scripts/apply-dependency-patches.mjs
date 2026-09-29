@@ -95,3 +95,25 @@ function patchFanoutSolverTypes() {
 
 patchOcctImportJs()
 patchFanoutSolverTypes()
+
+// @tscircuit/checks 0.0.226/227 imports a source directory accepted by Bun
+// but rejected by Node ESM. Use calculate-elbow's published JS entry point.
+// Remove once the upstream checks package uses the package-root import.
+const checksPath = path.join(
+  projectRoot,
+  "node_modules/@tscircuit/checks/dist/index.js",
+)
+const checksSource = readFileSync(checksPath, "utf8")
+const checksOriginal = 'from "calculate-elbow/lib"'
+const checksPatched = 'from "calculate-elbow"'
+if (checksSource.includes(checksOriginal)) {
+  writeFileSync(
+    checksPath,
+    checksSource.replaceAll(checksOriginal, checksPatched),
+  )
+  console.log("[postinstall] patched @tscircuit/checks Node ESM import")
+} else if (!checksSource.includes(checksPatched)) {
+  throw new Error(
+    "[postinstall] @tscircuit/checks patch target changed; review upstream before updating",
+  )
+}
