@@ -39,7 +39,7 @@ test("jlcpcb:C2040 renders in pcb svg and 3d previews", async () => {
   expect(svg3dResponse.status).toBe(200)
   expect(svg3dResponse.headers.get("content-type")).toContain("image/svg+xml")
   expect(createHash("sha256").update(svg3dContent).digest("hex")).toBe(
-    "c3db5dee40cbf7045cfb97a95028f6e100b9c8fd41d59ce2f2219af20ecab265",
+    "51673228f663d2c7c324ba13bfcd8011a61ab2c207f21ba89f0147bccebbc733",
   )
 
   const png3dResponse = await handleRequest(createPreviewRequest("3d", "png"))

@@ -49,6 +49,9 @@ test(
       circuitJson.filter(
         (element) => element.type === "simulation_transient_voltage_graph",
       ),
+      JSON.stringify(
+        circuitJson.filter((element) => element.type.startsWith("simulation")),
+      ),
     ).toHaveLength(8)
     expect(
       circuitJson.filter(
