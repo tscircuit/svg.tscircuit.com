@@ -43,7 +43,6 @@
     "@tscircuit/props": "0.0.670",
     "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
     "biscuitboard": "^1.0.28",
-    "calculate-elbow": "0.0.13",
     "circuit-json": "^0.0.506",
     "circuit-json-to-3d-png": "^0.0.12",
     "circuit-to-svg": "0.0.436",
