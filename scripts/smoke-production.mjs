@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { randomUUID } from "node:crypto"
 import { spawn } from "node:child_process"
 import { once } from "node:events"
 import { createServer } from "node:net"
@@ -10,6 +11,7 @@ import { gzipSync } from "node:zlib"
 let server
 let logs = ""
 let baseUrl = process.env.SMOKE_BASE_URL
+const requestNonce = randomUUID()
 const code = `export default () => <board width="12mm" height="8mm">
   <resistor name="R1" resistance="1k" footprint="0402" pcbX={-3} />
   <capacitor name="C1" capacitance="10nF" footprint="0402" pcbX={3} />
@@ -17,7 +19,9 @@ const code = `export default () => <board width="12mm" height="8mm">
 </board>`
 
 async function request(path, options = {}) {
-  const response = await fetch(new URL(path, baseUrl), {
+  const url = new URL(path, baseUrl)
+  url.searchParams.set("__smoke", requestNonce)
+  const response = await fetch(url, {
     ...options,
     signal: AbortSignal.timeout(60_000),
   })
@@ -36,8 +40,9 @@ async function checkImage(path, format, options) {
     response.headers.get("content-type") ?? "",
     new RegExp(`image/${format === "svg" ? "svg\\+xml" : "png"}`),
   )
-  // Error images use a one-day CDN TTL, successful renders use one year.
-  assert.match(response.headers.get("cache-control") ?? "", /s-maxage=31536000/)
+  // Error images lack immutable. Vercel consumes s-maxage before forwarding
+  // Cache-Control to clients, so test the success marker it preserves.
+  assert.match(response.headers.get("cache-control") ?? "", /\bimmutable\b/)
   if (format === "svg") {
     assert.match(body.toString(), /<svg[ >]/)
     assert.match(body.toString(), /<(path|rect|circle|polygon|line|image)[ >]/)
