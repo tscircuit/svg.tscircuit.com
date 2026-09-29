@@ -1,0 +1,153 @@
+import assert from "node:assert/strict"
+import { spawn } from "node:child_process"
+import { once } from "node:events"
+import { createServer } from "node:net"
+import { setTimeout as delay } from "node:timers/promises"
+import { gzipSync } from "node:zlib"
+
+// Run with Node: importing the handler in Bun misses Node ESM loading failures.
+// A preview URL can be supplied to exercise the actual deployed function too.
+let server
+let logs = ""
+let baseUrl = process.env.SMOKE_BASE_URL
+const code = `export default () => <board width="12mm" height="8mm">
+  <resistor name="R1" resistance="1k" footprint="0402" pcbX={-3} />
+  <capacitor name="C1" capacitance="10nF" footprint="0402" pcbX={3} />
+  <trace from="R1.2" to="C1.1" />
+</board>`
+
+async function request(path, options = {}) {
+  const response = await fetch(new URL(path, baseUrl), {
+    ...options,
+    signal: AbortSignal.timeout(60_000),
+  })
+  const body = Buffer.from(await response.arrayBuffer())
+  assert.equal(
+    response.status,
+    200,
+    `${path}: ${body.toString().slice(0, 1000)}`,
+  )
+  return { response, body }
+}
+
+async function checkImage(path, format, options) {
+  const { response, body } = await request(path, options)
+  assert.match(
+    response.headers.get("content-type") ?? "",
+    new RegExp(`image/${format === "svg" ? "svg\\+xml" : "png"}`),
+  )
+  // Error images use a one-day CDN TTL, successful renders use one year.
+  assert.match(response.headers.get("cache-control") ?? "", /s-maxage=31536000/)
+  if (format === "svg") {
+    assert.match(body.toString(), /<svg[ >]/)
+    assert.match(body.toString(), /<(path|rect|circle|polygon|line|image)[ >]/)
+  } else {
+    assert(
+      body
+        .subarray(0, 8)
+        .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
+    )
+    assert(body.length > 100)
+  }
+  console.log(`PASS ${path.split("&code=")[0]}`)
+}
+
+try {
+  if (!baseUrl) {
+    const socket = createServer()
+    socket.listen(0, "127.0.0.1")
+    await once(socket, "listening")
+    const { port } = socket.address()
+    await new Promise((resolve) => socket.close(resolve))
+    baseUrl = `http://127.0.0.1:${port}`
+    server = spawn(
+      process.execPath,
+      [
+        "node_modules/next/dist/bin/next",
+        "start",
+        "-H",
+        "127.0.0.1",
+        "-p",
+        String(port),
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+    server.stdout.on("data", (chunk) => {
+      logs += chunk
+    })
+    server.stderr.on("data", (chunk) => {
+      logs += chunk
+    })
+    server.on("error", (error) => {
+      logs += error.stack
+    })
+    let ready = false
+    for (let attempt = 0; attempt < 100; attempt++) {
+      if (server.exitCode !== null)
+        throw new Error("Next.js exited before startup")
+      try {
+        await fetch(new URL("/404", baseUrl), {
+          signal: AbortSignal.timeout(1000),
+        })
+        ready = true
+        break
+      } catch {
+        await delay(100)
+      }
+    }
+    assert(ready, "Next.js did not become ready")
+  }
+  const { body } = await request("/health")
+  assert.deepEqual(JSON.parse(body), { ok: true })
+  console.log("PASS /health (cold API load)")
+  const fsMapBody = JSON.stringify({
+    fs_map: { "index.tsx": code },
+    main_component_path: "index.tsx",
+  })
+  const post = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: fsMapBody,
+  }
+  const circuit = JSON.parse(
+    (await request("/?format=circuit_json", post)).body,
+  )
+  assert(
+    Array.isArray(circuit) &&
+      circuit.some((element) => element.type === "pcb_trace"),
+  )
+  assert(circuit.some((element) => element.type === "pcb_component"))
+  console.log("PASS code evaluation and routing")
+  const encoded = encodeURIComponent(gzipSync(code).toString("base64"))
+  await checkImage(`/?svg_type=pcb&code=${encoded}`, "svg")
+  for (const view of ["pcb", "schematic", "assembly"]) {
+    for (const format of ["svg", "png"]) {
+      await checkImage(`/?svg_type=${view}&format=${format}`, format, {
+        ...post,
+        body: JSON.stringify({ circuit_json: circuit }),
+      })
+    }
+  }
+  await checkImage("/?svg_type=3d&format=png", "png", post)
+  await checkImage("/?svg_type=pcb", "svg", post)
+  await checkImage("/?svg_type=pcb&fixture=legacy-biscuitboard", "svg", {
+    ...post,
+    body: JSON.stringify({
+      fs_map: {
+        "index.tsx": `import { Clad40x40 } from "biscuitboard"; export default () => <Clad40x40 />`,
+      },
+    }),
+  })
+} catch (error) {
+  console.error(error)
+  if (logs) console.error(logs)
+  process.exitCode = 1
+} finally {
+  if (server && server.exitCode === null) {
+    const exited = once(server, "exit")
+    server.kill("SIGTERM")
+    const timeout = globalThis.setTimeout(() => server.kill("SIGKILL"), 5000)
+    await exited
+    clearTimeout(timeout)
+  }
+}
