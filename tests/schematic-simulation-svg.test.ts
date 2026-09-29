@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test"
-import { runTscircuitCode } from "tscircuit"
+import type { CircuitJson } from "circuit-json"
 import { getTestServer } from "./fixtures/get-test-server"
 
 const simulationCircuitCode = `
@@ -81,7 +81,19 @@ test(
   "schematic simulation svg conversion",
   async () => {
     const { serverUrl } = await getTestServer()
-    const circuitJson = await runTscircuitCode(simulationCircuitCode)
+    const circuitJsonResponse = await fetch(
+      `${serverUrl}?format=circuit_json`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fs_map: { "index.tsx": simulationCircuitCode },
+          main_component_path: "index.tsx",
+        }),
+      },
+    )
+    expect(circuitJsonResponse.status).toBe(200)
+    const circuitJson = (await circuitJsonResponse.json()) as CircuitJson
     const simulationTransientVoltageGraphs = circuitJson.filter(
       (element) => element.type === "simulation_transient_voltage_graph",
     )
