@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "bun run --bun next dev",
-    "build": "bun run --bun next build --webpack",
+    "build": "bun run check:renderer-dependencies && bun run --bun next build --webpack",
     "postinstall": "node scripts/apply-dependency-patches.mjs",
     "format": "biome format . --write",
     "format:check": "biome format .",
     "test:production": "bun scripts/smoke-production.mjs",
-    "test:production:node": "node scripts/smoke-production.mjs"
+    "test:production:node": "node scripts/smoke-production.mjs",
+    "check:renderer-dependencies": "bun test tests/poppygl-resolution.test.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
