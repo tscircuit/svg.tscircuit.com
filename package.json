@@ -44,7 +44,7 @@
     "@tscircuit/ngspice-spice-engine": "^0.0.21",
     "@tscircuit/props": "0.0.670",
     "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
-    "biscuitboard": "1.0.10",
+    "biscuitboard": "^1.0.28",
     "circuit-json": "^0.0.506",
     "circuit-json-to-3d-png": "0.0.12",
     "circuit-json-to-gltf": "0.0.134",
@@ -54,7 +54,8 @@
     "qrcode-svg": "^1.1.0"
   },
   "overrides": {
-    "@tscircuit/fanout-solver": "0.0.78"
+    "@tscircuit/fanout-solver": "0.0.78",
+    "poppygl": "0.0.29"
   },
   "engines": {
     "bun": ">=1.3.14 <1.4"

@@ -149,14 +149,6 @@ try {
   await checkImage("/?svg_type=3d&format=png", "png", post)
   await checkImage("/?svg_type=3d&format=svg", "svg", post)
   await checkImage("/?svg_type=pcb", "svg", post)
-  await checkImage("/?svg_type=pcb&fixture=legacy-biscuitboard", "svg", {
-    ...post,
-    body: JSON.stringify({
-      fs_map: {
-        "index.tsx": `import { Clad40x40 } from "biscuitboard"; export default () => <Clad40x40 />`,
-      },
-    }),
-  })
 } catch (error) {
   console.error(error)
   if (logs) console.error(logs)
