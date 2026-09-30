@@ -132,9 +132,11 @@ export async function renderCircuitToSvg(
         mode: 1,
         colorMode: 0,
         hierarchical: 0,
-        filterSpeckle: 8,
+        // Fine-pitch leads are only a few pixels wide in 3D previews.
+        // Preserve those clusters instead of filtering them as noise.
+        filterSpeckle: 1,
         colorPrecision: 8,
-        layerDifference: 8,
+        layerDifference: 4,
         maxIterations: 100,
         // Set required threshold properties with reasonable defaults
         cornerThreshold: 60,

@@ -8,4 +8,6 @@ test("GET /health", async () => {
   const data = await response.json()
 
   expect(data).toEqual({ ok: true })
+  expect(response.headers.get("x-runtime")).toBe("bun")
+  expect(response.headers.get("cache-control")).toBe("no-store")
 })
