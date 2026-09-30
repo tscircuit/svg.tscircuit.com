@@ -147,6 +147,7 @@ try {
     }
   }
   await checkImage("/?svg_type=3d&format=png", "png", post)
+  await checkImage("/?svg_type=3d&format=svg", "svg", post)
   await checkImage("/?svg_type=pcb", "svg", post)
   await checkImage("/?svg_type=pcb&fixture=legacy-biscuitboard", "svg", {
     ...post,
