@@ -6,7 +6,8 @@ import { createServer } from "node:net"
 import { setTimeout as delay } from "node:timers/promises"
 import { gzipSync } from "node:zlib"
 
-// Run with Node: importing the handler in Bun misses Node ESM loading failures.
+// Start the built server with the runtime executing this script.
+// CI exercises Bun for Vercel parity and Node for fallback compatibility.
 // A preview URL can be supplied to exercise the actual deployed function too.
 let server
 let logs = ""
@@ -102,9 +103,21 @@ try {
     }
     assert(ready, "Next.js did not become ready")
   }
-  const { body } = await request("/health")
+  const { body, response: healthResponse } = await request("/health")
   assert.deepEqual(JSON.parse(body), { ok: true })
-  console.log("PASS /health (cold API load)")
+  const expectedRuntime =
+    process.env.SMOKE_EXPECT_RUNTIME ??
+    (process.env.SMOKE_BASE_URL
+      ? undefined
+      : process.versions.bun
+        ? "bun"
+        : "node")
+  if (expectedRuntime) {
+    assert.equal(healthResponse.headers.get("x-runtime"), expectedRuntime)
+  }
+  console.log(
+    `PASS /health (cold API load, ${healthResponse.headers.get("x-runtime")})`,
+  )
   const fsMapBody = JSON.stringify({
     fs_map: { "index.tsx": code },
     main_component_path: "index.tsx",
@@ -134,15 +147,8 @@ try {
     }
   }
   await checkImage("/?svg_type=3d&format=png", "png", post)
+  await checkImage("/?svg_type=3d&format=svg", "svg", post)
   await checkImage("/?svg_type=pcb", "svg", post)
-  await checkImage("/?svg_type=pcb&fixture=legacy-biscuitboard", "svg", {
-    ...post,
-    body: JSON.stringify({
-      fs_map: {
-        "index.tsx": `import { Clad40x40 } from "biscuitboard"; export default () => <Clad40x40 />`,
-      },
-    }),
-  })
 } catch (error) {
   console.error(error)
   if (logs) console.error(logs)

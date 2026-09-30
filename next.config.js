@@ -1,10 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@tscircuit/ti-parts-engine"],
-  experimental: {
-    outputFileTracingIncludes: {
-      "/api/*": ["node_modules/@tscircuit/manifold-2d/**/*"],
-    },
+  outputFileTracingIncludes: {
+    "/api/*": ["node_modules/@tscircuit/manifold-2d/**/*"],
   },
   rewrites() {
     return {

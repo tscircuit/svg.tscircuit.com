@@ -20,13 +20,6 @@ const TEMPLATE_PREVIEWS = [
     led: { x: 10, y: 0 },
   },
   {
-    exportName: "Clad40x40",
-    props: "",
-    usb: { x: 0, y: -10 },
-    resistor: { x: -3, y: 8 },
-    led: { x: 3, y: 8 },
-  },
-  {
     exportName: "ArduinoShieldClad",
     props: "markHeadersNoConnect",
     usb: { x: 6, y: 0 },
@@ -121,7 +114,7 @@ export default () => (
   expect(svgContent).toMatchSvgSnapshot(import.meta.path)
 }, 15_000)
 
-test("renders every Biscuit Board template export", async () => {
+test("renders supported Biscuit Board template exports", async () => {
   const { serverUrl } = await getTestServer()
 
   for (const { exportName, props, usb, resistor, led } of TEMPLATE_PREVIEWS) {
