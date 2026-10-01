@@ -40,7 +40,7 @@
     "@tscircuit/alphabet": "^0.0.27",
     "@tscircuit/checks": "0.0.229",
     "@tscircuit/common": "^0.0.65",
-    "@tscircuit/core": "0.0.2026",
+    "@tscircuit/core": "https://pkg.pr.new/tscircuit/core/@tscircuit/core@ab38457",
     "@tscircuit/eval": "0.0.1491",
     "@tscircuit/ngspice-spice-engine": "^0.0.21",
     "@tscircuit/props": "0.0.672",
@@ -56,7 +56,9 @@
   },
   "overrides": {
     "@tscircuit/fanout-solver": "0.0.79",
-    "poppygl": "0.0.29"
+    "poppygl": "0.0.29",
+    "@tscircuit/core": "https://pkg.pr.new/tscircuit/core/@tscircuit/core@ab38457",
+    "circuit-json-to-connectivity-map": "https://pkg.pr.new/tscircuit/circuit-json-to-connectivity-map@e1a8c4f"
   },
   "engines": {
     "bun": ">=1.3.14 <1.4"
