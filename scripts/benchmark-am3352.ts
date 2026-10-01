@@ -40,7 +40,11 @@ for (const format of ["svg", "circuit_json"]) {
     report.traces = traces.length
     report.errors = errors.length
   }
-  report[format] = { milliseconds, bytes: body.length }
+  report[format] = {
+    milliseconds,
+    bytes: body.length,
+    serverTiming: response.headers.get("server-timing"),
+  }
   // Write before asserting so a timeout remains diagnosable.
   await Bun.write("/tmp/am3352-benchmark.json", JSON.stringify(report, null, 2))
   assert(

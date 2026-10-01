@@ -8,7 +8,10 @@ export const pcbSvgHandler = async (
   ctx: RequestContext,
 ): Promise<Response> => {
   try {
+    const started = performance.now()
+    const cpuStarted = process.cpuUsage()
     const circuitJson = await getCircuitJsonFromContext(ctx)
+    const built = performance.now()
 
     const svgContent = await renderCircuitToSvg(circuitJson, "pcb", {
       showSolderMask: ctx.showSolderMask,
@@ -17,9 +20,13 @@ export const pcbSvgHandler = async (
       pcbViewBox: ctx.pcbViewBox,
     })
 
+    const rendered = performance.now()
+    const cpu = process.cpuUsage(cpuStarted)
     return new Response(svgContent, {
       headers: {
         "Content-Type": "image/svg+xml",
+        "Server-Timing": `build;dur=${(built - started).toFixed(1)}, render;dur=${(rendered - built).toFixed(1)}, process_cpu;dur=${((cpu.user + cpu.system) / 1000).toFixed(1)}`,
+
         "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
       },
     })
