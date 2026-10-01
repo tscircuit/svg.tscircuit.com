@@ -58,7 +58,7 @@
     "@tscircuit/fanout-solver": "0.0.79",
     "poppygl": "0.0.29",
     "@tscircuit/core": "https://pkg.pr.new/tscircuit/core/@tscircuit/core@0ffb5b2",
-    "circuit-json-to-connectivity-map": "https://pkg.pr.new/tscircuit/circuit-json-to-connectivity-map@e1a8c4f"
+    "circuit-json-to-connectivity-map": "0.0.33"
   },
   "engines": {
     "bun": ">=1.3.14 <1.4"
