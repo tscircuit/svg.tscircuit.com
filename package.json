@@ -40,7 +40,7 @@
     "@tscircuit/alphabet": "^0.0.27",
     "@tscircuit/checks": "0.0.229",
     "@tscircuit/common": "^0.0.65",
-    "@tscircuit/core": "0.0.2029",
+    "@tscircuit/core": "0.0.2030",
     "@tscircuit/eval": "0.0.1505",
     "@tscircuit/ngspice-spice-engine": "^0.0.21",
     "@tscircuit/props": "0.0.672",
