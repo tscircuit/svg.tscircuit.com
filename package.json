@@ -56,7 +56,7 @@
   },
   "overrides": {
     "@tscircuit/fanout-solver": "0.0.79",
-    "poppygl": "0.0.29"
+    "poppygl": "0.0.30"
   },
   "engines": {
     "bun": ">=1.3.14 <1.4"
