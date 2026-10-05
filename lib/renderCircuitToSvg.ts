@@ -20,6 +20,7 @@ export interface RenderOptions {
   showCourtyards?: boolean
   show_courtyards?: boolean
   showDebugObjects?: boolean
+  realistic?: boolean
   pcbViewBox?: PcbViewBox
   simulationExperimentId?: string
   simulationTransientVoltageGraphIds?: string[]
@@ -122,6 +123,7 @@ export async function renderCircuitToSvg(
       width: 1024,
       height: 1024,
       zoomMultiplier: zoom,
+      realistic: options.realistic,
     })
 
     try {

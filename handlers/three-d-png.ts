@@ -23,6 +23,7 @@ export const threeDPngHandler = async (
       height: pngHeight,
       showInfiniteGrid: ctx.showInfiniteGrid,
       backgroundColor: ctx.backgroundColor,
+      realistic: ctx.realistic,
     })
 
     return new Response(pngBuffer as any, {

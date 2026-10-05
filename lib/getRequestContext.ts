@@ -106,6 +106,8 @@ export async function getRequestContext(
     }
   }
 
+  ctx.realistic = parseBooleanInput(url.searchParams.get("realistic"))
+
   // Parse background_color from query parameter
   const backgroundColorQuery = url.searchParams.get("background_color")
   if (backgroundColorQuery != null) {
@@ -218,6 +220,9 @@ export async function getRequestContext(
     )
     ctx.showInfiniteGrid = parseBooleanInput(
       body.show_infinite_grid ?? url.searchParams.get("show_infinite_grid"),
+    )
+    ctx.realistic = parseBooleanInput(
+      body.realistic ?? url.searchParams.get("realistic"),
     )
     viewBoxInput = body.viewbox ?? viewBoxInput
 
