@@ -54,12 +54,12 @@
     "fflate": "^0.8.3",
     "jscad-fiber": "^0.0.89",
     "jscad-planner": "0.0.18",
-    "poppygl": "0.0.32",
+    "poppygl": "0.0.33",
     "qrcode-svg": "^1.1.0"
   },
   "overrides": {
     "@tscircuit/fanout-solver": "0.0.79",
-    "poppygl": "0.0.32"
+    "poppygl": "0.0.33"
   },
   "engines": {
     "bun": ">=1.3.14 <1.4"
