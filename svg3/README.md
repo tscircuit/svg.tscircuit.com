@@ -65,7 +65,7 @@ Docker must be available for local container development and deployment.
 on port 8080. `/health` on the Worker is an edge liveness check; render a real image
 to verify the container, native dependencies, and KV.
 
-## First deployment
+## Deployment
 
 Authenticate with Wrangler after the build and tests pass:
 
@@ -73,17 +73,17 @@ Authenticate with Wrangler after the build and tests pass:
 cd svg3
 bunx wrangler login
 bunx wrangler whoami
-bunx wrangler queues create svg3-image-refresh
-bunx wrangler queues create svg3-image-refresh-failed
 bun run deploy
 ```
 
 Choose the Cloudflare account that owns the `tscircuit.com` zone. The account needs
 Workers Paid with Containers enabled. Wrangler builds and uploads the image,
-creates the SQLite Durable Object namespace, provisions the `IMAGES` KV binding,
-and attaches the `svg3.tscircuit.com` custom domain. Keep the returned KV namespace
-ID in `wrangler.jsonc` for explicit subsequent deployments. Queue creation is only
-needed once. Review the selected account before running the deployment.
+uses the SQLite Durable Object namespace and the committed production `IMAGES` KV
+binding, and attaches the `svg3.tscircuit.com` custom domain. The queues and KV
+namespace already exist in the tscircuit account; queue creation is only needed
+once. For a separate deployment, change the Worker/domain/queue names and remove
+the KV namespace ID so Wrangler provisions a separate cache. Review the selected
+account before running the deployment.
 
 Smoke check the same image URL twice: expect `MISS` then `HIT` with identical
 bytes. Repeat with `Pragma: no-cache`, PNG, `realistic=true`, and the full DDR docs
