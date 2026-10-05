@@ -32,6 +32,20 @@ test(
           element.type === "cad_component" && element.model_jscad,
       ),
     ).toBe(true)
+    // The six-wire bundle must clear the printed plate through its opening.
+    const frame = circuitJson.find(
+      (element: any) => element.type === "cad_component" && element.model_jscad,
+    )
+    const plateBottom = frame.position.z
+    const platePoints = cable.path.filter(
+      (point: any) => point.z >= plateBottom - 1 && point.z <= plateBottom + 5,
+    )
+    expect(platePoints.length).toBeGreaterThan(0)
+    for (const point of platePoints) {
+      expect(point.x).toBeGreaterThan(36)
+      expect(point.x).toBeLessThan(48)
+      expect(Math.abs(point.y)).toBeLessThan(3)
+    }
     const pngResponse = await fetch(
       `${serverUrl}?svg_type=3d&format=png&width=900&height=700&code=${code}`,
     )
