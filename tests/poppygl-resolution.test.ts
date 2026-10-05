@@ -10,6 +10,7 @@ test("3D rendering resolves the same poppygl release as tscircuit", () => {
   const tscircuitRequire = createRequire(import.meta.resolve("tscircuit"))
   const rendererVersion = rendererRequire("poppygl/package.json").version
 
+  expect(rendererVersion).toBe(packageJson.dependencies.poppygl)
   expect(rendererVersion).toBe(packageJson.overrides.poppygl)
   expect(rendererVersion).toBe(tscircuitRequire("poppygl/package.json").version)
 })

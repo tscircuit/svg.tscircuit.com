@@ -23,6 +23,7 @@ export interface RequestContext {
   showCourtyards?: boolean
   showDebugObjects?: boolean
   showInfiniteGrid?: boolean
+  realistic?: boolean
   pcbViewBox?: PcbViewBox
   simulationExperimentId?: string
   simulationExperimentName?: string

@@ -36,6 +36,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `png_width` / `png_height`
   - `png_density`
 - `show_infinite_grid` (optional): For 3D views only. Set to `true` to display an infinite grid in the 3D render. Default: `false`
+- `realistic` (optional): For 3D views only, in both PNG and SVG output. Set to `true` for studio lighting, soft shadows, and reflections. Default: `false`. Accepts boolean values in POST JSON or `true`/`false`, `1`/`0`, `yes`/`no`, and `on`/`off` in the URL. A POST body value overrides the URL value. Realistic rendering takes longer than regular rendering; use PNG output to retain the shading detail.
 - `show_debug_objects` (optional): For PCB views only. Set to `true` to render `pcb_debug_object` overlays such as autorouting phase bounds. Default: `false`
 - `viewbox` (optional): For PCB views, a real-coordinate crop formatted as `minX,minY,maxX,maxY`. Elements crossing the region remain rendered but are clipped to this view.
 - `simulation_experiment_id` (optional): For `sim` and `schsim`, render the experiment with this Circuit JSON id.
@@ -182,6 +183,22 @@ curl "https://svg.tscircuit.com/?svg_type=pinout&code=YOUR_ENCODED_CODE"
 **3D Visualization:**
 ```bash
 curl "https://svg.tscircuit.com/?svg_type=3d&code=YOUR_ENCODED_CODE"
+```
+
+**Realistic 3D PNG:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=3d&format=png&realistic=true&code=YOUR_ENCODED_CODE" \
+  -o realistic.png
+```
+
+For 3D SVG output, use `format=svg` with the same `realistic=true` flag. To
+render Circuit JSON from a file, POST `{"circuit_json": [...], "realistic": true}`:
+
+```bash
+curl "https://svg.tscircuit.com/?svg_type=3d&format=png" \
+  -H "Content-Type: application/json" \
+  --data-binary @request.json \
+  -o realistic.png
 ```
 
 ## Code Encoding

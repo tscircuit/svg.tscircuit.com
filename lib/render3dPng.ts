@@ -1,6 +1,6 @@
 import {
   convertCircuitJsonTo3dGlb,
-  renderCircuitJsonTo3dPng,
+  getDefaultCameraForCircuitJson,
 } from "circuit-json-to-3d-png"
 import { renderGLTFToPNGFromGLB } from "poppygl"
 
@@ -10,6 +10,7 @@ export interface Render3dPngOptions {
   zoomMultiplier?: number
   showInfiniteGrid?: boolean
   backgroundColor?: string
+  realistic?: boolean
 }
 
 export async function render3dPng(
@@ -25,31 +26,33 @@ export async function render3dPng(
       (element.type === "source_component" &&
         ["motor", "printedpart", "subassembly"].includes(element.ftype)),
   )
-  if (hasAssembly) {
-    // Fit the generated meshes, including off-board parts and cables. The
-    // board-only camera used below excludes those assembly extents.
-    const glb = await convertCircuitJsonTo3dGlb(circuitJson)
-    return renderGLTFToPNGFromGLB(glb, {
-      width: pngWidth,
-      height: pngHeight,
-      backgroundColor: options.backgroundColor ?? null,
-      supersampling: 2,
-      grid: options.showInfiniteGrid
-        ? {
-            infiniteGrid: true,
-            gridColor: [0.9, 0.9, 0.9],
-            sectionColor: [0.7, 0.7, 0.9],
-            offset: { y: 0 },
-          }
-        : false,
-    })
-  }
 
-  return renderCircuitJsonTo3dPng(circuitJson, {
+  // The wrapper's PNG renderer selects options and drops `realistic`. Reuse
+  // its model conversion/camera helpers and pass render options to PoppyGL.
+  const [glb, camera] = await Promise.all([
+    convertCircuitJsonTo3dGlb(circuitJson),
+    // Fit assembly meshes, including off-board parts and cables.
+    hasAssembly
+      ? Promise.resolve({})
+      : getDefaultCameraForCircuitJson(circuitJson),
+  ])
+
+  return renderGLTFToPNGFromGLB(glb, {
+    ...camera,
     width: pngWidth,
     height: pngHeight,
     backgroundColor: options.backgroundColor ?? null,
-    showInfiniteGrid: options.showInfiniteGrid,
     supersampling: 2,
+    realistic: options.realistic,
+    ...(options.showInfiniteGrid
+      ? {
+          grid: {
+            infiniteGrid: true,
+            gridColor: [0.9, 0.9, 0.9] as const,
+            sectionColor: [0.7, 0.7, 0.9] as const,
+            offset: { y: 0 },
+          },
+        }
+      : {}),
   })
 }

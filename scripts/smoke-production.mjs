@@ -149,6 +149,15 @@ try {
   }
   await checkImage("/?svg_type=3d&format=png", "png", post)
   await checkImage("/?svg_type=3d&format=svg", "svg", post)
+  await checkImage(
+    "/?svg_type=3d&format=png&realistic=true&png_width=192",
+    "png",
+    post,
+  )
+  await checkImage("/?svg_type=3d&format=svg", "svg", {
+    ...post,
+    body: JSON.stringify({ circuit_json: circuit, realistic: true }),
+  })
   await checkImage("/?svg_type=pcb", "svg", post)
   const assemblyFixture = await readFile(
     new URL("../tests/fixtures/cabled-motor-assembly.ts", import.meta.url),
