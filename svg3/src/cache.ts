@@ -6,6 +6,7 @@ export const MAX_REQUEST_BYTES = 1024 * 1024
 
 export interface Metadata {
   createdAt: number
+  renderer?: string
   contentType: string
   etag: string
 }
@@ -103,6 +104,8 @@ export function cachedResponse(
     Age: String(age),
     "X-Svg-Cache": state,
   })
+  if (entry.metadata.renderer)
+    headers.set("X-Svg-Renderer", entry.metadata.renderer)
   if (state.includes("STALE"))
     headers.set("Warning", '110 - "Response is stale"')
   const notModified =
@@ -188,6 +191,7 @@ export async function storeImage(
   const metadata: Metadata = {
     createdAt: Date.now(),
     contentType,
+    renderer: response.headers.get("X-Svg-Renderer") ?? undefined,
     etag: `"${await digest(bytes)}"`,
   }
   try {

@@ -156,3 +156,28 @@ test("container forwards the real public origin instead of trusting the client",
     new Request(url, { headers: { "X-Svg-Origin": "https://example.com" } }),
   )
 })
+
+test("Worker render is cached without calling the container and retains provenance", async () => {
+  const h = setup()
+  let workerRenders = 0
+  ;(h.env as any).IMAGE_RENDERER = {
+    fetch: async () => {
+      workerRenders++
+      return image()
+    },
+  }
+  backend = async () => {
+    throw new Error("Container must not start")
+  }
+  const request = new Request(
+    "https://svg3.tscircuit.com/?svg_type=pcb&circuit_json=W10=",
+  )
+  const first = await h.renderer.fetch(request.clone())
+  const repeat = await h.renderer.fetch(request.clone())
+  expect(first.headers.get("X-Svg-Renderer")).toBe("worker")
+  expect(first.headers.get("X-Svg-Cache")).toBe("MISS")
+  expect(repeat.headers.get("X-Svg-Renderer")).toBe("worker")
+  expect(repeat.headers.get("X-Svg-Cache")).toBe("HIT")
+  expect(workerRenders).toBe(1)
+  expect(h.writes()).toBe(1)
+})

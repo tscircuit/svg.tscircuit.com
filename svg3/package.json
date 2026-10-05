@@ -3,15 +3,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "wrangler dev -c wrangler.jsonc -c wrangler.images.jsonc",
+    "deploy": "wrangler deploy -c wrangler.images.jsonc && wrangler deploy",
     "check": "tsc --noEmit",
     "test": "bun test tests",
-    "dry-run": "wrangler deploy --dry-run"
+    "dry-run": "wrangler deploy --dry-run -c wrangler.images.jsonc && wrangler deploy --dry-run",
+    "test:runtime": "node tests/runtime.mjs"
   },
-  "dependencies": { "@cloudflare/containers": "0.3.7" },
+  "dependencies": {
+    "@cloudflare/containers": "0.3.7",
+    "@resvg/resvg-wasm": "2.6.2"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260402.1",
+    "@types/node": "^22",
     "typescript": "^5.9.3",
     "wrangler": "^4.73.0"
   }

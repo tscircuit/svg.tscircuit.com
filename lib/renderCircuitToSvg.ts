@@ -2,121 +2,27 @@ import { Buffer } from "node:buffer"
 import * as vectorizerMod from "@neplex/vectorizer"
 import type { CircuitJson } from "circuit-json"
 import {
-  convertCircuitJsonToAssemblySvg,
-  convertCircuitJsonToPcbSvg,
-  convertCircuitJsonToPinoutSvg,
-  convertCircuitJsonToSchematicSimulationSvg,
-  convertCircuitJsonToSimulationGraphSvg,
-  convertCircuitJsonToStackedSchematicSheetsSvg,
-} from "circuit-to-svg"
-import type { PcbViewBox } from "./parsePcbViewBox"
+  renderCircuitTo2dSvg,
+  type RenderOptions,
+  type SvgRenderType,
+} from "../shared/render-2d"
+export type { RenderOptions, SvgRenderType } from "../shared/render-2d"
 import { render3dPng } from "./render3dPng"
-
-export interface RenderOptions {
-  backgroundColor?: string
-  backgroundOpacity?: number
-  zoomMultiplier?: number
-  showSolderMask?: boolean
-  showCourtyards?: boolean
-  show_courtyards?: boolean
-  showDebugObjects?: boolean
-  realistic?: boolean
-  pcbViewBox?: PcbViewBox
-  simulationExperimentId?: string
-  simulationTransientVoltageGraphIds?: string[]
-  simulationTransientCurrentGraphIds?: string[]
-  schematicHeightRatio?: number
-}
-
-export type SvgRenderType =
-  | "pcb"
-  | "schematic"
-  | "pinout"
-  | "assembly"
-  | "3d"
-  | "schsim"
-  | "sim"
 
 export async function renderCircuitToSvg(
   circuitJson: CircuitJson,
   svgType: SvgRenderType,
   options: RenderOptions = {},
 ): Promise<string> {
+  if (svgType !== "3d")
+    return renderCircuitTo2dSvg(circuitJson, svgType, options)
   const {
     backgroundColor = "#fff",
-    backgroundOpacity = 0.0,
+    backgroundOpacity = 0,
     zoomMultiplier = 1.2,
-    showSolderMask,
-    showCourtyards,
-    showDebugObjects,
-    pcbViewBox,
   } = options
-
-  const resolvedShowCourtyards = showCourtyards ?? options.show_courtyards
-
-  const bgOpacity = Number.isFinite(backgroundOpacity) ? backgroundOpacity : 0.0
+  const bgOpacity = Number.isFinite(backgroundOpacity) ? backgroundOpacity : 0
   const zoom = Number.isFinite(zoomMultiplier) ? zoomMultiplier : 1.2
-
-  if (svgType === "assembly") {
-    return convertCircuitJsonToAssemblySvg(circuitJson)
-  }
-
-  if (svgType === "pcb") {
-    const pcbOptions = {
-      showSolderMask,
-      showCourtyards: resolvedShowCourtyards,
-      show_courtyards: resolvedShowCourtyards,
-      showDebugObjects,
-      viewport: pcbViewBox,
-    }
-
-    const pcbSvg = await convertCircuitJsonToPcbSvg(circuitJson, pcbOptions)
-
-    return pcbSvg
-  }
-
-  if (svgType === "schematic") {
-    return convertCircuitJsonToStackedSchematicSheetsSvg(circuitJson)
-  }
-
-  if (svgType === "schsim") {
-    if (!options.simulationExperimentId) {
-      throw new Error(
-        "simulation_experiment_id is required when rendering schsim SVG output",
-      )
-    }
-
-    return convertCircuitJsonToSchematicSimulationSvg({
-      circuitJson,
-      simulation_experiment_id: options.simulationExperimentId,
-      simulation_transient_current_graph_ids:
-        options.simulationTransientCurrentGraphIds,
-      simulation_transient_voltage_graph_ids:
-        options.simulationTransientVoltageGraphIds,
-      schematicHeightRatio: options.schematicHeightRatio,
-    })
-  }
-
-  if (svgType === "sim") {
-    if (!options.simulationExperimentId) {
-      throw new Error(
-        "simulation_experiment_id is required when rendering sim SVG output",
-      )
-    }
-
-    return convertCircuitJsonToSimulationGraphSvg({
-      circuitJson,
-      simulation_experiment_id: options.simulationExperimentId,
-      simulation_transient_current_graph_ids:
-        options.simulationTransientCurrentGraphIds,
-      simulation_transient_voltage_graph_ids:
-        options.simulationTransientVoltageGraphIds,
-    })
-  }
-
-  if (svgType === "pinout") {
-    return convertCircuitJsonToPinoutSvg(circuitJson)
-  }
 
   if (svgType === "3d") {
     const pngBinary = await render3dPng(circuitJson, {

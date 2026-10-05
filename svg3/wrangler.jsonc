@@ -11,6 +11,9 @@
   "kv_namespaces": [
     { "binding": "IMAGES", "id": "3affdab4aeb2447187d37bce13b65c78" }
   ],
+  "services": [
+    { "binding": "IMAGE_RENDERER", "service": "svg3-image-renderer" }
+  ],
   "containers": [
     {
       "class_name": "Renderer",

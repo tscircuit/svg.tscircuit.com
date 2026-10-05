@@ -1,3 +1,4 @@
+import { renderWorkerFirst } from "./worker-first"
 import { Container, getContainer } from "@cloudflare/containers"
 import {
   cacheKey,
@@ -12,6 +13,7 @@ import {
 import { serve, type RefreshJob } from "./service"
 
 interface Env {
+  IMAGE_RENDERER: Fetcher
   IMAGES: KVNamespace
   RENDERER: DurableObjectNamespace<Renderer>
   REFRESH_QUEUE: Queue<RefreshJob>
@@ -81,7 +83,11 @@ export class Renderer extends Container<Env> {
       // The SDK uses HTTP inside the VM. Preserve the public HTTPS origin for
       // generated URLs, overwriting any client-supplied forwarding header.
       headers.set("X-Svg-Origin", new URL(request.url).origin)
-      const response = await super.fetch(new Request(request, { headers }))
+      const response = await renderWorkerFirst(
+        new Request(request, { headers }),
+        this.env.IMAGE_RENDERER,
+        (req) => super.fetch(req),
+      )
       if (!key) return markResponse(response, "BYPASS")
       this.lastStored = undefined
       return await storeImage(
