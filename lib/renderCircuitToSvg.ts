@@ -12,7 +12,10 @@ import { render3dPng } from "./render3dPng"
 export async function renderCircuitToSvg(
   circuitJson: CircuitJson,
   svgType: SvgRenderType,
-  options: RenderOptions = {},
+  options: RenderOptions & {
+    cameraPreset?: string
+    onGlb?: (glb: Uint8Array) => void
+  } = {},
 ): Promise<string> {
   if (svgType !== "3d")
     return renderCircuitTo2dSvg(circuitJson, svgType, options)
@@ -30,6 +33,8 @@ export async function renderCircuitToSvg(
       height: 1024,
       zoomMultiplier: zoom,
       realistic: options.realistic,
+      cameraPreset: options.cameraPreset,
+      onGlb: options.onGlb,
     })
 
     try {

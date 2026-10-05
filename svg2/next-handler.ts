@@ -22,7 +22,10 @@ export default async function handler(
 
   // Handle binary data (PNG images) differently from text responses
   let body: string | Buffer
-  if (contentType.includes("image/png")) {
+  if (
+    contentType.includes("image/png") ||
+    contentType.includes("model/gltf-binary")
+  ) {
     const arrayBuffer = await response.arrayBuffer()
     body = Buffer.from(arrayBuffer)
   } else {
@@ -39,7 +42,7 @@ export default async function handler(
   // Large diagrams can exceed Vercel's 4.5 MB buffered response limit.
   // Streaming keeps their original image bytes and permits CDN caching.
   if (
-    contentType.startsWith("image/") &&
+    (contentType.startsWith("image/") || contentType.startsWith("model/")) &&
     Buffer.byteLength(body) > 1024 * 1024
   ) {
     res.removeHeader("Content-Length")

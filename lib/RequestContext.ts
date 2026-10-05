@@ -23,6 +23,8 @@ export interface RequestContext {
   showCourtyards?: boolean
   showDebugObjects?: boolean
   showInfiniteGrid?: boolean
+  cameraPreset?: string
+  onGlb?: (glb: Uint8Array) => void
   realistic?: boolean
   pcbViewBox?: PcbViewBox
   simulationExperimentId?: string

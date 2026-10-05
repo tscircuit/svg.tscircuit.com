@@ -41,6 +41,8 @@ export const threeDSvgHandler = async (
       backgroundOpacity,
       zoomMultiplier,
       realistic: ctx.realistic,
+      cameraPreset: ctx.cameraPreset,
+      onGlb: ctx.onGlb,
     })
 
     return new Response(svgContent, {

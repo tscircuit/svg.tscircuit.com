@@ -1,5 +1,4 @@
 import {
-  cacheKey,
   cachedResponse,
   FRESH_SECONDS,
   markResponse,
@@ -8,6 +7,7 @@ import {
   type ImageStore,
   MAX_REQUEST_BYTES,
 } from "./cache"
+import { assetCacheKey as cacheKey } from "./model-cache"
 
 export interface RefreshJob {
   url: string
@@ -28,6 +28,8 @@ export async function serve(
   ctx: BackgroundContext,
   render: (request: Request) => Promise<Response>,
 ): Promise<Response> {
+  if (new URL(request.url).pathname.startsWith("/__glb/"))
+    return new Response("Not found", { status: 404 })
   if (request.method === "POST" && request.body) {
     const reader = request.body.getReader()
     const chunks: Uint8Array[] = []

@@ -19,7 +19,13 @@ import { threeDPngHandler } from "../handlers/three-d-png"
 import { getDebugHtml } from "../lib/getDebugHtml"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 
-export const handleRequest = async (req: Request) => {
+import { threeDGlbHandler } from "../handlers/three-d-glb"
+import { isCameraPreset } from "../lib/cameraPreset"
+
+export const handleRequestWithOptions = async (
+  req: Request,
+  options: { onGlb?: (glb: Uint8Array) => void } = {},
+) => {
   const url = new URL(req.url.replace("/api", "/"))
 
   // Handle health check
@@ -130,6 +136,25 @@ export const handleRequest = async (req: Request) => {
     )
   }
   ctx.svgType = svgType
+  ctx.onGlb = options.onGlb
+  if (
+    outputFormat !== "glb" &&
+    ctx.cameraPreset !== undefined &&
+    !isCameraPreset(ctx.cameraPreset)
+  ) {
+    return Response.json(
+      { ok: false, error: "Invalid camera_preset" },
+      { status: 400 },
+    )
+  }
+  if (outputFormat === "glb") {
+    if (svgType !== "3d")
+      return Response.json(
+        { ok: false, error: "GLB output requires svg_type=3d" },
+        { status: 400 },
+      )
+    return threeDGlbHandler(req, ctx)
+  }
 
   // Route to appropriate handler based on SVG type and output format
   if (svgType === "schematic" && outputFormat === "svg") {
@@ -178,5 +203,7 @@ export const handleRequest = async (req: Request) => {
     { status: 400 },
   )
 }
+
+export const handleRequest = (req: Request) => handleRequestWithOptions(req)
 
 export default handleRequest
