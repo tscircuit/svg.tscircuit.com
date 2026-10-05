@@ -39,18 +39,14 @@ export async function isGlbRequest(request: Request): Promise<boolean> {
     params.get("output") ||
     params.get("response_format") ||
     bodyFormat
-  return (
-    is3dRequest(request) &&
-    typeof format === "string" &&
-    format.toLowerCase() === "glb"
-  )
+  return typeof format === "string" && format.toLowerCase() === "glb"
 }
 
 export async function modelCacheKey(
   request: Request,
   version: string,
 ): Promise<string | null> {
-  if (!is3dRequest(request)) return null
+  if (!is3dRequest(request) && !(await isGlbRequest(request))) return null
   // Apply the same private/debug/path/size exclusions before normalizing.
   if (!(await cacheKey(request, version))) return null
   const url = new URL(request.url)

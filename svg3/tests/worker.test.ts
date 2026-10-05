@@ -65,7 +65,7 @@ test("3D render stores its existing GLB and serves an immediate download despite
   expect(await png.text()).toBe("png")
   expect(h.writes()).toBe(2)
   const glb = await h.renderer.fetch(
-    new Request("https://svg3.tscircuit.com/?code=abc&svg_type=3d&format=glb"),
+    new Request("https://svg3.tscircuit.com/?code=abc&format=glb"),
   )
   expect(glb.headers.get("X-Svg-Cache")).toBe("HIT")
   expect(new Uint8Array(await glb.arrayBuffer())).toEqual(bytes)

@@ -23,7 +23,7 @@ separate operations. This configuration claims only `svg3.tscircuit.com`.
 ## Cache behavior
 
 3D PNG/SVG renders also retain their computed GLB under a separate `glb:` KV
-key. `?svg_type=3d&format=glb` reads this model directly. The key preserves the
+key. `?format=glb` (no `svg_type` required) reads this model directly. The key preserves the
 circuit input, project origin, entrypoint, method, and cache version while
 excluding image format, camera, lighting, background, zoom, and raster size.
 Different image views therefore share a downloadable model. GET and POST
