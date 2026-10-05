@@ -158,7 +158,9 @@ export default () => (
         `${exportName} preview failed (${response.status}): ${svgContent}`,
       )
     }
-    expect(response.headers.get("cache-control")).toContain("s-maxage=31536000")
+    expect(response.headers.get("cdn-cache-control")).toContain(
+      "s-maxage=43200",
+    )
     expect(svgContent).not.toContain("Cannot find module")
   }
 }, 60_000)

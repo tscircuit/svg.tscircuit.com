@@ -232,20 +232,33 @@ const apiUrl = `https://svg.tscircuit.com/?svg_type=pcb&circuit_json=${encodeURI
 
 Successful responses include:
 - `Content-Type: image/svg+xml` (SVG) or `image/png` (PNG)
-- `Cache-Control: public, max-age=86400, s-maxage=31536000, immutable`
+- `Cache-Control: public, max-age=300, stale-while-revalidate=604800, stale-if-error=604800`
+- `CDN-Cache-Control: public, s-maxage=43200, stale-while-revalidate=604800, stale-if-error=604800`
 
 ## Error Handling
 
-When errors occur, the API returns an image with error information instead of the requested circuit asset. Error responses include:
+When errors occur, the API returns an image with error information instead of the requested circuit asset. Error responses use HTTP `500` and include:
 - `Content-Type: image/svg+xml` (or `image/png` when `format=png`)
-- `Cache-Control: public, max-age=86400, s-maxage=86400`
+- `Cache-Control: no-store`
+- `CDN-Cache-Control: no-store`
 
 ## Caching
 
-The API implements aggressive caching for generated assets:
-- Browser cache: 24 hours (`max-age=86400`)
-- CDN cache: 1 year (`s-maxage=31536000`)
-- Error responses: 24 hours
+Generated images stay fresh in the CDN for 12 hours. After that, the CDN serves
+the previous image immediately while rendering an updated version in the
+background, for up to seven days. If rendering fails, the previous successful
+image can still be served during that window. Error images are never cached.
+Browsers cache images for five minutes before revalidating.
+
+To refresh a stale image synchronously (for example, in a daily cache warmer),
+GET its original URL with `Pragma: no-cache` and `Cache-Control: no-cache` request
+headers. Keep the URL unchanged: adding a cache-busting query parameter creates
+a different cache entry. Vercel returns `x-vercel-cache: REVALIDATED` when a stale
+entry has been refreshed. A fresh entry can return `HIT`.
+
+These headers apply to GET image URLs. POST requests are rendered on demand.
+CDN caching is regional and entries can be evicted; the first request for a
+missing entry still waits for rendering.
 
 ## Development
 

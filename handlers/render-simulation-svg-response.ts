@@ -1,3 +1,4 @@
+import { imageCacheHeaders } from "../lib/imageCacheHeaders"
 import type {
   CircuitJson,
   SimulationExperiment,
@@ -193,7 +194,7 @@ export const renderSimulationSvgResponse = async (
     return new Response(svgContent, {
       headers: {
         "Content-Type": "image/svg+xml",
-        "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
+        ...imageCacheHeaders,
       },
     })
   } catch (err) {

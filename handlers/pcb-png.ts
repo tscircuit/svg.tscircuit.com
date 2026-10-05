@@ -1,3 +1,4 @@
+import { imageCacheHeaders } from "../lib/imageCacheHeaders"
 import type { RequestContext } from "../lib/RequestContext"
 import { errorResponse } from "../lib/errorResponse"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
@@ -38,7 +39,7 @@ export const pcbPngHandler = async (
     return new Response(pngBuffer as ArrayBuffer, {
       headers: {
         "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
+        ...imageCacheHeaders,
       },
     })
   } catch (err) {

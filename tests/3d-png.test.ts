@@ -28,7 +28,7 @@ test("renders 3d view with cad model to png", async () => {
   expect(response.status).toBe(200)
   expect(response.headers.get("content-type")).toContain("image/png")
   expect(response.headers.get("cache-control")).toBe(
-    "public, max-age=86400, s-maxage=31536000, immutable",
+    "public, max-age=300, stale-while-revalidate=604800, stale-if-error=604800",
   )
 
   const buffer = new Uint8Array(await response.arrayBuffer())

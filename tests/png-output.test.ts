@@ -22,7 +22,7 @@ export default () => (
   expect(response.status).toBe(200)
   expect(response.headers.get("content-type")).toContain("image/png")
   expect(response.headers.get("cache-control")).toBe(
-    "public, max-age=86400, s-maxage=31536000, immutable",
+    "public, max-age=300, stale-while-revalidate=604800, stale-if-error=604800",
   )
 
   const buffer = new Uint8Array(await response.arrayBuffer())
@@ -39,7 +39,9 @@ test("returns png error image when conversion fails", async () => {
     `${serverUrl}?svg_type=pcb&format=png&code=invalid`,
   )
 
-  expect(response.status).toBe(200)
+  expect(response.status).toBe(500)
+  expect(response.headers.get("cache-control")).toBe("no-store")
+  expect(response.headers.get("cdn-cache-control")).toBe("no-store")
   expect(response.headers.get("content-type")).toContain("image/png")
 
   const buffer = new Uint8Array(await response.arrayBuffer())
