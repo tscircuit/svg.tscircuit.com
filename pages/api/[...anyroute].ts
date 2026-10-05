@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { handleRequest } from "../../handle-request"
 
+// Complex routing examples need enough time to fill or refresh the image cache.
+export const config = { maxDuration: 300 }
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
