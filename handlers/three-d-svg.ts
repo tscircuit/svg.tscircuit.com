@@ -39,6 +39,7 @@ export const threeDSvgHandler = async (
       backgroundColor,
       backgroundOpacity,
       zoomMultiplier,
+      realistic: ctx.realistic,
     })
 
     return new Response(svgContent, {
