@@ -22,7 +22,7 @@ test("a GLB produced for an image serves downloads across cameras without render
     "https://svg3.tscircuit.com/?svg_type=3d&code=design&format=png&camera_preset=top-down&realistic=true&png_width=800",
   )
   const download = new Request(
-    "https://svg3.tscircuit.com/?code=design&svg_type=3d&format=glb",
+    "https://svg3.tscircuit.com/?code=design&format=glb",
   )
   const modelKey = await modelCacheKey(png, "v1")
   assert.equal(modelKey, await assetCacheKey(download, "v1"))
@@ -52,15 +52,18 @@ test("a GLB produced for an image serves downloads across cameras without render
     null,
   )
   const post = (format: string, camera: string) =>
-    new Request("https://svg3.tscircuit.com/?svg_type=3d", {
-      method: "POST",
-      body: JSON.stringify({
-        code: "design",
-        format,
-        camera_preset: camera,
-        png_width: 200,
-      }),
-    })
+    new Request(
+      `https://svg3.tscircuit.com/${format === "glb" ? "" : "?svg_type=3d"}`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          code: "design",
+          format,
+          camera_preset: camera,
+          png_width: 200,
+        }),
+      },
+    )
   assert.equal(
     await modelCacheKey(post("png", "top-down"), "v1"),
     await assetCacheKey(post("glb", "bottom"), "v1"),

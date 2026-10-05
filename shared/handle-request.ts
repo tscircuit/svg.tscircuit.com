@@ -118,6 +118,11 @@ export const handleRequestWithOptions = async (
     }
   }
 
+  ctx.onGlb = options.onGlb
+  if (outputFormat === "glb") {
+    return threeDGlbHandler(req, ctx)
+  }
+
   // Validate SVG type
   const svgType =
     url.searchParams.get("svg_type") || url.searchParams.get("view")
@@ -136,24 +141,11 @@ export const handleRequestWithOptions = async (
     )
   }
   ctx.svgType = svgType
-  ctx.onGlb = options.onGlb
-  if (
-    outputFormat !== "glb" &&
-    ctx.cameraPreset !== undefined &&
-    !isCameraPreset(ctx.cameraPreset)
-  ) {
+  if (ctx.cameraPreset !== undefined && !isCameraPreset(ctx.cameraPreset)) {
     return Response.json(
       { ok: false, error: "Invalid camera_preset" },
       { status: 400 },
     )
-  }
-  if (outputFormat === "glb") {
-    if (svgType !== "3d")
-      return Response.json(
-        { ok: false, error: "GLB output requires svg_type=3d" },
-        { status: 400 },
-      )
-    return threeDGlbHandler(req, ctx)
   }
 
   // Route to appropriate handler based on SVG type and output format
