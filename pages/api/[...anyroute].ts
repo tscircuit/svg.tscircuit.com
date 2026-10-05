@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next"
 import { handleRequest } from "../../handle-request"
+import { streamImageBody } from "../../lib/streamImageBody"
 
 // Complex routing examples need enough time to fill or refresh the image cache.
 export const config = { maxDuration: 300 }
@@ -38,5 +39,15 @@ export default async function handler(
   Object.entries(headers).forEach(([key, value]) => {
     res.setHeader(key, value)
   })
-  res.send(body)
+  // Large diagrams can exceed Vercel's 4.5 MB buffered response limit.
+  // Streaming keeps their original image bytes and permits CDN caching.
+  if (
+    contentType.startsWith("image/") &&
+    Buffer.byteLength(body) > 1024 * 1024
+  ) {
+    res.removeHeader("Content-Length")
+    await streamImageBody(body, res)
+  } else {
+    res.send(body)
+  }
 }
