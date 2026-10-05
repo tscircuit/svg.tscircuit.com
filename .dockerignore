@@ -1,0 +1,9 @@
+.git
+node_modules
+**/node_modules
+.next
+**/.wrangler
+**/.dev.vars
+.env*
+**/.env*
+tests
