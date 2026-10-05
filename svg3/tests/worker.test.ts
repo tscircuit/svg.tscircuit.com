@@ -143,3 +143,16 @@ test("queue acknowledges a successful durable refresh", async () => {
   expect(acks).toBe(1)
   expect(h.writes()).toBe(1)
 })
+
+test("container forwards the real public origin instead of trusting the client", async () => {
+  const h = setup()
+  backend = async (request) => {
+    expect(request.headers.get("X-Svg-Origin")).toBe(
+      "https://svg3.tscircuit.com",
+    )
+    return image()
+  }
+  await h.renderer.fetch(
+    new Request(url, { headers: { "X-Svg-Origin": "https://example.com" } }),
+  )
+})

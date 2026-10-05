@@ -9,6 +9,14 @@ Bun.serve({
   async fetch(request, server) {
     server.timeout(request, 0)
     try {
+      const origin = request.headers.get("X-Svg-Origin")
+      if (origin) {
+        const url = new URL(request.url)
+        request = new Request(
+          new URL(url.pathname + url.search, origin),
+          request,
+        )
+      }
       return await handleRequest(request)
     } catch (error) {
       console.error("Render failed", error)

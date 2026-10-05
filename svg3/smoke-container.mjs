@@ -34,3 +34,9 @@ for (const [view, format] of [
   else assert.match(new TextDecoder().decode(bytes), /<svg/)
   console.log(`${view}/${format}: ${bytes.length} bytes`)
 }
+const generated = await fetch(`${base}/generate_url?code=test`, {
+  headers: { "X-Svg-Origin": "https://svg3.tscircuit.com" },
+})
+assert.equal(generated.status, 200)
+assert.match(await generated.text(), /https:\/\/svg3\.tscircuit\.com/)
+console.log("Generated URLs preserve the public HTTPS origin")

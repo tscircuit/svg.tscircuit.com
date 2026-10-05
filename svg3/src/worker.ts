@@ -78,6 +78,9 @@ export class Renderer extends Container<Env> {
       const headers = new Headers(request.headers)
       headers.delete("If-None-Match")
       headers.delete("If-Modified-Since")
+      // The SDK uses HTTP inside the VM. Preserve the public HTTPS origin for
+      // generated URLs, overwriting any client-supplied forwarding header.
+      headers.set("X-Svg-Origin", new URL(request.url).origin)
       const response = await super.fetch(new Request(request, { headers }))
       if (!key) return markResponse(response, "BYPASS")
       this.lastStored = undefined
