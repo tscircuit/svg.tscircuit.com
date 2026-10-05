@@ -47,7 +47,12 @@ Bun.serve({
           lastGlb = { token, bytes: glb, createdAt: Date.now() }
         },
       })
-      if (token) response.headers.set("X-Svg-Glb-Token", token)
+      if (token) {
+        // The 60-second handoff window starts after rasterization completes,
+        // including slow realistic renders, rather than after conversion.
+        if (lastGlb?.token === token) lastGlb.createdAt = Date.now()
+        response.headers.set("X-Svg-Glb-Token", token)
+      }
       return response
     } catch (error) {
       console.error("Render failed", error)
