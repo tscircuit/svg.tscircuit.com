@@ -53,7 +53,7 @@ From the repository root (Bun 1.3.14 and Node 22+):
 ```sh
 bun install --frozen-lockfile
 cd svg3
-bun install
+bun install --frozen-lockfile
 bun run check
 bun run test
 bun run dry-run
