@@ -20,11 +20,21 @@ export async function render3dPng(
   const pngWidth = options.width ?? 1024
   const pngHeight = options.height ?? pngWidth
 
+  const hasAssembly = circuitJson.some(
+    (element: any) =>
+      element.type === "cad_cable" ||
+      (element.type === "source_component" &&
+        ["motor", "printedpart", "subassembly"].includes(element.ftype)),
+  )
+
   // The wrapper's PNG renderer selects options and drops `realistic`. Reuse
   // its model conversion/camera helpers and pass render options to PoppyGL.
   const [glb, camera] = await Promise.all([
     convertCircuitJsonTo3dGlb(circuitJson),
-    getDefaultCameraForCircuitJson(circuitJson),
+    // Fit assembly meshes, including off-board parts and cables.
+    hasAssembly
+      ? Promise.resolve({})
+      : getDefaultCameraForCircuitJson(circuitJson),
   ])
 
   return renderGLTFToPNGFromGLB(glb, {
