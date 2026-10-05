@@ -265,3 +265,9 @@ missing entry still waits for rendering.
 ```bash
 bun run start
 ```
+
+## Deployment targets
+
+The shared renderer is used by the [Vercel adapter in svg2](svg2/README.md) and the
+[Cloudflare Worker, KV cache, and Containers service in svg3](svg3/README.md).
+The existing Vercel build commands and public domain remain unchanged.

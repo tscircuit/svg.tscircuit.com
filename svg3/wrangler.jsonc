@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "svg3-tscircuit-com",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-05",
+  "workers_dev": true,
+  "routes": [{ "pattern": "svg3.tscircuit.com", "custom_domain": true }],
+  "observability": { "enabled": true },
+  "vars": { "CACHE_VERSION": "v1" },
+  // Wrangler provisions a namespace on first deploy when no id is supplied.
+  "kv_namespaces": [{ "binding": "IMAGES" }],
+  "containers": [
+    {
+      "class_name": "Renderer",
+      "image": "./Dockerfile",
+      "image_build_context": "..",
+      "instance_type": "standard-3",
+      "max_instances": 4
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "RENDERER", "class_name": "Renderer" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Renderer"] }],
+  "queues": {
+    "producers": [
+      { "binding": "REFRESH_QUEUE", "queue": "svg3-image-refresh" }
+    ],
+    "consumers": [
+      {
+        "queue": "svg3-image-refresh",
+        "max_batch_size": 1,
+        "max_concurrency": 4,
+        "max_retries": 3,
+        "dead_letter_queue": "svg3-image-refresh-failed"
+      }
+    ]
+  }
+}
