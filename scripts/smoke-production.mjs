@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { randomUUID } from "node:crypto"
 import { spawn } from "node:child_process"
 import { once } from "node:events"
+import { readFile } from "node:fs/promises"
 import { createServer } from "node:net"
 import { setTimeout as delay } from "node:timers/promises"
 import { gzipSync } from "node:zlib"
@@ -149,6 +150,26 @@ try {
   await checkImage("/?svg_type=3d&format=png", "png", post)
   await checkImage("/?svg_type=3d&format=svg", "svg", post)
   await checkImage("/?svg_type=pcb", "svg", post)
+  const assemblyFixture = await readFile(
+    new URL("../tests/fixtures/cabled-motor-assembly.ts", import.meta.url),
+    "utf8",
+  )
+  const assemblyCode = assemblyFixture.match(/= `([\s\S]*)`/)?.[1]
+  assert(assemblyCode, "Missing complete motor assembly fixture")
+  const assemblyPost = {
+    ...post,
+    body: JSON.stringify({ fs_map: { "index.tsx": assemblyCode } }),
+  }
+  const assemblyCircuit = JSON.parse(
+    (await request("/?format=circuit_json", assemblyPost)).body,
+  )
+  assert(assemblyCircuit.some((element) => element.type === "cad_cable"))
+  await checkImage("/?svg_type=3d&format=png", "png", assemblyPost)
+  await checkImage("/?svg_type=3d&format=png", "png", {
+    ...post,
+    body: JSON.stringify({ circuit_json: assemblyCircuit }),
+  })
+  console.log("PASS cabled motor assembly from TSX and Circuit JSON")
 } catch (error) {
   console.error(error)
   if (logs) console.error(logs)
