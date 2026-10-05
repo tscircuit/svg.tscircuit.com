@@ -16,7 +16,7 @@ export interface RefreshJob {
 export interface ServiceEnv {
   IMAGES: ImageStore
   CACHE_VERSION: string
-  REFRESH_QUEUE: { send(job: RefreshJob): Promise<void> }
+  REFRESH_QUEUE: { send(job: RefreshJob): Promise<unknown> }
 }
 export interface BackgroundContext {
   waitUntil(promise: Promise<unknown>): void

@@ -18,6 +18,9 @@ jobs:
           bun-version: 1.3.14
       - run: bun install
         working-directory: svg3
+      - name: Record resolved dependencies
+        run: cat bun.lock
+        working-directory: svg3
       - run: bun run check
         working-directory: svg3
       - run: bun run test
