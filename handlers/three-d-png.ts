@@ -1,3 +1,4 @@
+import { imageCacheHeaders } from "../lib/imageCacheHeaders"
 import type { RequestContext } from "../lib/RequestContext"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { render3dPng } from "../lib/render3dPng"
@@ -29,7 +30,7 @@ export const threeDPngHandler = async (
     return new Response(pngBuffer as any, {
       headers: {
         "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
+        ...imageCacheHeaders,
       },
     })
   } catch (err) {

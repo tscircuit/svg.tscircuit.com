@@ -20,7 +20,7 @@ const code = `export default () => <board width="12mm" height="8mm">
   <trace from="R1.2" to="C1.1" />
 </board>`
 
-async function request(path, options = {}) {
+async function request(path, options = {}, expectedStatus = 200) {
   const url = new URL(path, baseUrl)
   url.searchParams.set("__smoke", requestNonce)
   const response = await fetch(url, {
@@ -30,7 +30,7 @@ async function request(path, options = {}) {
   const body = Buffer.from(await response.arrayBuffer())
   assert.equal(
     response.status,
-    200,
+    expectedStatus,
     `${path}: ${body.toString().slice(0, 1000)}`,
   )
   return { response, body }
@@ -42,9 +42,11 @@ async function checkImage(path, format, options) {
     response.headers.get("content-type") ?? "",
     new RegExp(`image/${format === "svg" ? "svg\\+xml" : "png"}`),
   )
-  // Error images lack immutable. Vercel consumes s-maxage before forwarding
-  // Cache-Control to clients, so test the success marker it preserves.
-  assert.match(response.headers.get("cache-control") ?? "", /\bimmutable\b/)
+  assert.match(response.headers.get("cache-control") ?? "", /\bpublic\b/)
+  assert.match(
+    response.headers.get("cdn-cache-control") ?? "",
+    /stale-while-revalidate=604800/,
+  )
   if (format === "svg") {
     assert.match(body.toString(), /<svg[ >]/)
     assert.match(body.toString(), /<(path|rect|circle|polygon|line|image)[ >]/)
@@ -179,6 +181,17 @@ try {
     body: JSON.stringify({ circuit_json: assemblyCircuit }),
   })
   console.log("PASS cabled motor assembly from TSX and Circuit JSON")
+  for (const format of ["svg", "png"]) {
+    const { response, body } = await request(
+      `/?svg_type=pcb&format=${format}&code=invalid`,
+      {},
+      500,
+    )
+    assert.equal(response.headers.get("cache-control"), "no-store")
+    assert.equal(response.headers.get("cdn-cache-control"), "no-store")
+    assert(body.length > 0)
+  }
+  console.log("PASS render failures return uncached HTTP 500 images")
 } catch (error) {
   console.error(error)
   if (logs) console.error(logs)

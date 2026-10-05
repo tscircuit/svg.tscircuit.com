@@ -1,3 +1,4 @@
+import { imageCacheHeaders } from "../lib/imageCacheHeaders"
 import type { RequestContext } from "../lib/RequestContext"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { renderCircuitToSvg } from "../lib/renderCircuitToSvg"
@@ -32,7 +33,7 @@ export const assemblyPngHandler = async (
     return new Response(pngBuffer as ArrayBuffer, {
       headers: {
         "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=86400, s-maxage=31536000, immutable",
+        ...imageCacheHeaders,
       },
     })
   } catch (err) {

@@ -60,7 +60,9 @@ test("GET and POST realistic PNGs agree, and POST false preserves regular output
     expect(response.status).toBe(200)
     expect(response.headers.get("content-type")).toContain("image/png")
     // Error images are also PNGs; successful renders carry this cache marker.
-    expect(response.headers.get("cache-control")).toContain("immutable")
+    expect(response.headers.get("cdn-cache-control")).toContain(
+      "stale-while-revalidate=604800",
+    )
     const bytes = Buffer.from(await response.arrayBuffer())
     expect(bytes.readUInt32BE(16)).toBe(192)
     expect(bytes.readUInt32BE(20)).toBe(128)
@@ -94,7 +96,9 @@ test("3D SVG output uses realistic lighting from a POST body", async () => {
     })
     expect(response.status).toBe(200)
     expect(response.headers.get("content-type")).toContain("image/svg+xml")
-    expect(response.headers.get("cache-control")).toContain("immutable")
+    expect(response.headers.get("cdn-cache-control")).toContain(
+      "stale-while-revalidate=604800",
+    )
     return response.text()
   }
   const regular = await render(false)
