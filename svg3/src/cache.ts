@@ -106,6 +106,10 @@ export function cachedResponse(
   })
   if (entry.metadata.renderer)
     headers.set("X-Svg-Renderer", entry.metadata.renderer)
+  if (entry.metadata.contentType === "model/gltf-binary") {
+    headers.set("Content-Disposition", 'attachment; filename="circuit.glb"')
+    headers.set("Access-Control-Allow-Origin", "*")
+  }
   if (state.includes("STALE"))
     headers.set("Warning", '110 - "Response is stale"')
   const notModified =
@@ -143,7 +147,9 @@ export async function storeImage(
   const contentType = response.headers.get("Content-Type") ?? ""
   if (
     response.status !== 200 ||
-    !/^(image\/svg\+xml|image\/png)(;|$)/i.test(contentType) ||
+    !/^(image\/svg\+xml|image\/png|model\/gltf-binary)(;|$)/i.test(
+      contentType,
+    ) ||
     response.headers.has("Set-Cookie") ||
     /no-store|private/i.test(response.headers.get("Cache-Control") ?? "") ||
     !response.body

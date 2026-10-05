@@ -39,6 +39,41 @@ function setup() {
 const image = () =>
   new Response("<svg/>", { headers: { "Content-Type": "image/svg+xml" } })
 
+test("3D render stores its existing GLB and serves an immediate download despite KV propagation lag", async () => {
+  const h = setup()
+  let conversions = 0
+  let handoffs = 0
+  const bytes = new Uint8Array([0x67, 0x6c, 0x54, 0x46, 2, 0, 0, 0])
+  backend = async (request) => {
+    if (new URL(request.url).pathname === "/__glb/token") {
+      handoffs++
+      return new Response(bytes, {
+        headers: { "Content-Type": "model/gltf-binary" },
+      })
+    }
+    conversions++
+    return new Response("png", {
+      headers: { "Content-Type": "image/png", "X-Svg-Glb-Token": "token" },
+    })
+  }
+  const png = await h.renderer.fetch(
+    new Request(
+      "https://svg3.tscircuit.com/?code=abc&svg_type=3d&format=png&camera_preset=bottom&png_width=800",
+    ),
+  )
+  expect(png.headers.has("X-Svg-Glb-Token")).toBe(false)
+  expect(await png.text()).toBe("png")
+  expect(h.writes()).toBe(2)
+  const glb = await h.renderer.fetch(
+    new Request("https://svg3.tscircuit.com/?code=abc&svg_type=3d&format=glb"),
+  )
+  expect(glb.headers.get("X-Svg-Cache")).toBe("HIT")
+  expect(new Uint8Array(await glb.arrayBuffer())).toEqual(bytes)
+  expect(conversions).toBe(1)
+  expect(handoffs).toBe(1)
+  expect(h.writes()).toBe(2)
+})
+
 test("container collapses concurrent duplicate renders despite stale KV reads", async () => {
   const h = setup()
   let renders = 0
