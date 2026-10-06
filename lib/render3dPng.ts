@@ -3,6 +3,7 @@ import {
   getDefaultCameraForCircuitJson,
 } from "circuit-json-to-3d-png"
 import { renderGLTFToPNGFromGLB } from "poppygl"
+import { presetCamera } from "./cameraPreset"
 
 export interface Render3dPngOptions {
   width?: number
@@ -10,6 +11,8 @@ export interface Render3dPngOptions {
   zoomMultiplier?: number
   showInfiniteGrid?: boolean
   backgroundColor?: string
+  cameraPreset?: string
+  onGlb?: (glb: Uint8Array) => void
   realistic?: boolean
 }
 
@@ -32,13 +35,14 @@ export async function render3dPng(
   const [glb, camera] = await Promise.all([
     convertCircuitJsonTo3dGlb(circuitJson),
     // Fit assembly meshes, including off-board parts and cables.
-    hasAssembly
+    hasAssembly && !options.cameraPreset
       ? Promise.resolve({})
       : getDefaultCameraForCircuitJson(circuitJson),
   ])
 
+  options.onGlb?.(glb)
   return renderGLTFToPNGFromGLB(glb, {
-    ...camera,
+    ...presetCamera(options.cameraPreset, camera),
     width: pngWidth,
     height: pngHeight,
     backgroundColor: options.backgroundColor ?? null,

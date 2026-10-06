@@ -22,6 +22,25 @@ separate operations. This configuration claims only `svg3.tscircuit.com`.
 
 ## Cache behavior
 
+3D PNG/SVG renders also retain their computed GLB under a separate `glb:` KV
+key. `?format=glb` (no `svg_type` required) reads this model directly. The key preserves the
+circuit input, project origin, entrypoint, method, and cache version while
+excluding image format, camera, lighting, background, zoom, and raster size.
+Different image views therefore share a downloadable model. GET and POST
+remain distinct, and private/debug requests bypass both image and model storage.
+
+The private container hands off the exact converted model through a one-use
+random token; the Durable Object stores it before completing the image request.
+Images and model downloads for the same input use the same serialized lane.
+The model also stays in that lane's memory for 60 seconds to cover KV propagation
+lag. Models use the same 12-hour freshness, 30-day retention, ETag/HEAD behavior,
+and 24 MiB cutoff as images. Oversized models download normally but cannot be
+stored in KV. Existing image-only cache entries populate the model on the next
+image refresh or first model request. Failed KV writes do not prevent delivery.
+
+`camera_preset=bottom-center-angled` shows bottom-mounted parts and stiffeners;
+all camera presets affect the image key but leave the model key unchanged.
+
 - Successful SVG/PNG responses are stored as binary KV values for **30 days**.
   They are fresh for **12 hours**. Error, HTML, debug, authenticated, cookie-bearing,
   private, and `no-store` responses bypass storage.

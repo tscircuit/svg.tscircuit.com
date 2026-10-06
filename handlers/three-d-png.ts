@@ -25,6 +25,8 @@ export const threeDPngHandler = async (
       showInfiniteGrid: ctx.showInfiniteGrid,
       backgroundColor: ctx.backgroundColor,
       realistic: ctx.realistic,
+      cameraPreset: ctx.cameraPreset,
+      onGlb: ctx.onGlb,
     })
 
     return new Response(pngBuffer as any, {

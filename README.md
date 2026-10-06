@@ -24,7 +24,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 **URL:** `GET /?svg_type={type}&code={encoded_code}` or `POST /?svg_type={type}` with circuit_json in body
 
 **Parameters:**
-- `svg_type` (required): The type of SVG to generate
+- `svg_type` (required for SVG/PNG images): The type of SVG to generate
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
   - `schsim` - Schematic simulation view with graph regions
@@ -36,6 +36,8 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `png_width` / `png_height`
   - `png_density`
 - `show_infinite_grid` (optional): For 3D views only. Set to `true` to display an infinite grid in the 3D render. Default: `false`
+- `camera_preset` (optional): For 3D PNG/SVG images, choose a named view from `circuit-json-to-3d-png` (such as `top-down`, `top-left-corner`, `top-right-corner`, `front`, or `top-center-angled`). Also supports `bottom` / `bottom-up` for the underside and `bottom-center-angled` for an angled underside view. Accepts a URL parameter or POST JSON field; POST overrides the URL. Unknown presets return HTTP 400. Omission retains the default camera.
+- `format=glb` (optional): Download the 3D model without requiring `svg_type` or `view` as `model/gltf-binary`. Uses the same code, file map, or Circuit JSON inputs as images. The response has `Content-Disposition: attachment; filename="circuit.glb"` and allows cross-origin model viewers. Camera and lighting do not change the downloaded model. The Vercel and svg3 adapters both preserve binary GLB bytes.
 - `realistic` (optional): For 3D views only, in both PNG and SVG output. Set to `true` for studio lighting, soft shadows, and reflections. Default: `false`. Accepts boolean values in POST JSON or `true`/`false`, `1`/`0`, `yes`/`no`, and `on`/`off` in the URL. A POST body value overrides the URL value. Realistic rendering takes longer than regular rendering; use PNG output to retain the shading detail.
 - `show_debug_objects` (optional): For PCB views only. Set to `true` to render `pcb_debug_object` overlays such as autorouting phase bounds. Default: `false`
 - `viewbox` (optional): For PCB views, a real-coordinate crop formatted as `minX,minY,maxX,maxY`. Elements crossing the region remain rendered but are clipped to this view.
@@ -190,6 +192,16 @@ curl "https://svg.tscircuit.com/?svg_type=3d&code=YOUR_ENCODED_CODE"
 curl "https://svg.tscircuit.com/?svg_type=3d&format=png&realistic=true&code=YOUR_ENCODED_CODE" \
   -o realistic.png
 ```
+
+**Bottom preview and rotatable model:**
+```bash
+curl "https://svg.tscircuit.com/?svg_type=3d&format=png&camera_preset=bottom-center-angled&code=YOUR_ENCODED_CODE" -o bottom.png
+curl "https://svg.tscircuit.com/?format=glb&code=YOUR_ENCODED_CODE" -o circuit.glb
+```
+
+At `svg3.tscircuit.com`, a 3D image render also saves the GLB produced during
+conversion in KV. A subsequent GLB download reuses those exact bytes without
+evaluating or converting the circuit again. See [svg3 caching](svg3/README.md).
 
 For 3D SVG output, use `format=svg` with the same `realistic=true` flag. To
 render Circuit JSON from a file, POST `{"circuit_json": [...], "realistic": true}`:
