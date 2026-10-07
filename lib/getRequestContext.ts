@@ -106,6 +106,7 @@ export async function getRequestContext(
     }
   }
 
+  ctx.cameraPreset = url.searchParams.get("camera_preset") ?? undefined
   ctx.realistic = parseBooleanInput(url.searchParams.get("realistic"))
 
   // Parse background_color from query parameter
@@ -146,6 +147,7 @@ export async function getRequestContext(
     }
 
     ctx.requestBody = body
+    if (body.camera_preset != null) ctx.cameraPreset = body.camera_preset
 
     if (body.circuit_json) {
       ctx.circuitJson = body.circuit_json
