@@ -12,7 +12,7 @@
         "@tscircuit/common": "^0.0.65",
         "@tscircuit/core": "0.0.2095",
         "@tscircuit/eval": "0.0.1552",
-        "@tscircuit/modelprinter": "0.0.8",
+        "@tscircuit/modelprinter": "0.0.18",
         "@tscircuit/ngspice-spice-engine": "^0.0.21",
         "@tscircuit/props": "0.0.689",
         "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
@@ -41,7 +41,7 @@
         "patch-package": "^8.0.1",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
-        "tscircuit": "^0.0.2767",
+        "tscircuit": "0.0.2767",
         "web-worker": "^1.3.0",
         "winterspec": "^0.0.114",
       },
@@ -427,7 +427,7 @@
 
     "@tscircuit/mm": ["@tscircuit/mm@0.0.9", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-hkvVwVEuKMsM8ac3cbDyYUHu1WWdz6LooeLg/N+CLYwFrMrY7OBbXXEPm1PWczg8ytu0MObqzkcM70/LCJhF6A=="],
 
-    "@tscircuit/modelprinter": ["@tscircuit/modelprinter@0.0.8", "", { "dependencies": { "@tscircuit/mm": "^0.0.9" }, "peerDependencies": { "zod": "^3.25.67" } }, "sha512-bAFZgs5plGgER8fhTPRQ50hQ1dmNOHoGMCNlDlHBuKK6yF/CPn7HsCfoizHYaDkOdG9GaptPF2+2aBc9FKUPVA=="],
+    "@tscircuit/modelprinter": ["@tscircuit/modelprinter@0.0.18", "", { "dependencies": { "@tscircuit/mm": "^0.0.9" }, "peerDependencies": { "zod": "^3.25.67" } }, "sha512-aoOJ0LOSGlgR3DARGjeq7mApbwHR8GVGjNhyTMOQa7c6w6Pb+kvW2D/ZbMGkBUKoVWc/wnfg5NBCrOvwEy5uhQ=="],
 
     "@tscircuit/ngspice-spice-engine": ["@tscircuit/ngspice-spice-engine@0.0.21", "", { "peerDependencies": { "@tscircuit/props": "*", "circuit-json": "*", "spicets": "*", "typescript": "^5" } }, "sha512-0ynMLAeP18ltJ6bfRv9+vuvIcRUbJDPKl/wo9m47oe0zWfHY5NFJhqXu0k/KYUCJMkra3XK9bdJWVEosOel2MA=="],
 
@@ -1288,8 +1288,6 @@
     "tscircuit/circuit-json-to-gltf/jscad-electronics/@tscircuit/mm": ["@tscircuit/mm@0.0.8", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-nl7nxE7AhARbKuobflI0LUzoir7+wJyvwfPw6bzA/O0Q3YTcH3vBkU/Of+V/fp6ht+AofiCXj7YAH9E446138Q=="],
 
     "tscircuit/circuit-json-to-gltf/jscad-electronics/@tscircuit/modelprinter": ["@tscircuit/modelprinter@0.0.14", "", { "dependencies": { "@tscircuit/mm": "^0.0.9" }, "peerDependencies": { "zod": "^3.25.67" } }, "sha512-Ea1zYwiuBoAKbyIvIiNj5rgRPrdoSiqLrLFfFD4UNfOM8LV+EjPmOHHXrcvDKhyp0bgbNrpnflJy3LFB0NjSJg=="],
-
-    "tscircuit/circuit-json-to-gltf/jscad-electronics/circuit-json": ["circuit-json@0.0.520", "", { "peerDependencies": { "format-si-unit": "*" } }, "sha512-jSKU4lZ4sr0ovdmXHzMDh1v51vA6VJGx4wwjlPs1mf0TmRV7TpCL9YqBdnLRT9YJCDhcS3Wh5kbwd0KrBhz/xQ=="],
 
     "tscircuit/circuit-to-svg/color/color-convert": ["color-convert@3.1.3", "", { "dependencies": { "color-name": "^2.0.0" } }, "sha512-fasDH2ont2GqF5HpyO4w0+BcewlhHEZOFn9c1ckZdHpJ56Qb7MHhH/IcJZbBGgvdtwdwNbLvxiBEdg336iA9Sg=="],
 
