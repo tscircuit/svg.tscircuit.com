@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev -c wrangler.jsonc -c wrangler.images.jsonc",
-    "deploy": "wrangler deploy -c wrangler.images.jsonc && wrangler deploy",
+    "deploy": "node deploy.mjs",
     "check": "tsc --noEmit",
     "test": "bun test tests",
     "dry-run": "wrangler deploy --dry-run -c wrangler.images.jsonc && wrangler deploy --dry-run",
