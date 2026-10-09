@@ -9,7 +9,7 @@
     { "pattern": "svg3.tscircuit.com", "custom_domain": true }
   ],
   "observability": { "enabled": true },
-  "vars": { "CACHE_VERSION": "v2" },
+  "vars": { "CACHE_VERSION": "v1" },
   // Shared production image cache for svg.tscircuit.com and svg3.tscircuit.com.
   "kv_namespaces": [
     { "binding": "IMAGES", "id": "3affdab4aeb2447187d37bce13b65c78" }
