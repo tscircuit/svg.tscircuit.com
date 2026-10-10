@@ -34,7 +34,6 @@ jobs:
           docker image inspect svg3-renderer --format '::notice title=Renderer image size::{{.Size}} bytes'
           docker run --rm --entrypoint sh svg3-renderer -ec '
             test ! -d node_modules/next
-            test ! -d node_modules/tscircuit
             test ! -d node_modules/@biomejs/biome
           '
       - name: Smoke test the container

@@ -18,7 +18,6 @@
     "@types/bun": "^1.4.2",
     "@types/react": "19.3.0",
     "bun-match-svg": "^0.0.17",
-    "comlink": "^4.4.2",
     "get-port": "^7.2.0",
     "looks-same": "^10.0.1",
     "next": "16.3.7",
@@ -42,6 +41,7 @@
     "@tscircuit/create-snippet-url": "^0.0.16",
     "@tscircuit/eecircuit-engine": "https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.6.tgz",
     "@tscircuit/eval": "0.0.1552",
+    "@tscircuit/krt-wasm": "0.1.9",
     "@tscircuit/modelprinter": "0.0.8",
     "@tscircuit/ngspice-spice-engine": "^0.0.21",
     "@tscircuit/props": "0.0.689",
@@ -51,11 +51,14 @@
     "circuit-json-to-3d-png": "0.0.12",
     "circuit-json-to-gltf": "0.0.152",
     "circuit-to-svg": "0.0.445",
+    "comlink": "^4.4.2",
     "fflate": "^0.8.3",
     "jscad-fiber": "^0.0.89",
     "jscad-planner": "0.0.18",
+    "kicad-to-circuit-json": "0.0.142",
     "poppygl": "0.0.33",
-    "qrcode-svg": "^1.1.0"
+    "qrcode-svg": "^1.1.0",
+    "sucrase": "3.35.1"
   },
   "overrides": {
     "@tscircuit/fanout-solver": "0.0.79",
