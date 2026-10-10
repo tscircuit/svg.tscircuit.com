@@ -29,6 +29,14 @@ jobs:
         working-directory: svg3
       - name: Build the shared renderer container
         run: docker build -f svg3/Dockerfile -t svg3-renderer .
+      - name: Check the production dependency set
+        run: |
+          docker image inspect svg3-renderer --format 'Renderer image size: {{.Size}} bytes'
+          docker run --rm --entrypoint sh svg3-renderer -ec '
+            test ! -d node_modules/next
+            test ! -d node_modules/tscircuit
+            test ! -d node_modules/@biomejs/biome
+          '
       - name: Smoke test the container
         run: |
           docker run -d --name svg3-renderer -p 8080:8080 svg3-renderer

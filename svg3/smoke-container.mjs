@@ -34,6 +34,52 @@ for (const [view, format] of [
   else assert.match(new TextDecoder().decode(bytes), /<svg/)
   console.log(`${view}/${format}: ${bytes.length} bytes`)
 }
+// These paths require the runtime packages that a production-only install must
+// retain; circuit-JSON rendering alone does not exercise the evaluator/engine.
+const evaluated = await fetch(`${base}/?svg_type=pcb`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    fs_map: {
+      "index.tsx": `export default () => (
+        <board width="10mm" height="10mm">
+          <resistor resistance="1k" footprint="0402" name="R1" />
+        </board>
+      )`,
+    },
+  }),
+})
+assert.equal(evaluated.status, 200, await evaluated.clone().text())
+assert.match(await evaluated.text(), /<svg/)
+console.log("TSX evaluation renders a PCB")
+
+const simulated = await fetch(`${base}/?format=circuit_json`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    fs_map: {
+      "index.tsx": `export default () => (
+        <board routingDisabled>
+          <voltagesource name="V1" voltage="5V" />
+          <resistor name="R1" resistance="1k" />
+          <trace from=".V1 > .pin1" to=".R1 > .pin1" />
+          <trace from=".R1 > .pin2" to=".V1 > .pin2" />
+          <voltageprobe name="PROBE" connectsTo=".V1 > .pin1" />
+          <analogsimulation duration="1ms" timePerStep="100us" spiceEngine="ngspice" />
+        </board>
+      )`,
+    },
+  }),
+})
+assert.equal(simulated.status, 200, await simulated.clone().text())
+assert(
+  (await simulated.json()).some(
+    (element) => element.type === "simulation_transient_voltage_graph",
+  ),
+  "ngspice must produce a voltage graph in the production image",
+)
+console.log("ngspice simulation produces a voltage graph")
+
 const generated = await fetch(`${base}/generate_url?code=test`, {
   headers: { "X-Svg-Origin": "https://svg3.tscircuit.com" },
 })

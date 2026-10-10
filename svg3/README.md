@@ -98,6 +98,10 @@ oversized/unsupported requests defer to containers. Unit tests cover service
 failures, interrupted bodies, original POST preservation, and cached provenance.
 
 Docker must be available for local container development and deployment.
+The container installs only production dependencies. Bun's download cache uses a
+BuildKit cache mount and is excluded from the exported image, keeping the registry
+upload smaller. The container smoke check includes TSX evaluation and ngspice
+simulation as well as SVG/PNG rendering to verify the production dependency set.
 `bun run svg3/server.ts` from the repository root starts the shared renderer alone
 on port 8080. `/health` on the Worker is an edge liveness check; render a real image
 to verify the container, native dependencies, and KV.
