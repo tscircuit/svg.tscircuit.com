@@ -31,7 +31,7 @@ jobs:
         run: docker build -f svg3/Dockerfile -t svg3-renderer .
       - name: Check the production dependency set
         run: |
-          docker image inspect svg3-renderer --format 'Renderer image size: {{.Size}} bytes'
+          docker image inspect svg3-renderer --format '::notice title=Renderer image size::{{.Size}} bytes'
           docker run --rm --entrypoint sh svg3-renderer -ec '
             test ! -d node_modules/next
             test ! -d node_modules/tscircuit
@@ -40,6 +40,7 @@ jobs:
       - name: Smoke test the container
         run: |
           docker run -d --name svg3-renderer -p 8080:8080 svg3-renderer
+          : > /tmp/svg3-smoke.log
           cleanup() {
             smoke_exit=$?
             docker logs svg3-renderer > /tmp/svg3-container.log 2>&1
