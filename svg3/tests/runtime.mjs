@@ -121,8 +121,47 @@ try {
     assert.equal(response.status, 422, q.slice(0, 70))
     await response.body.cancel()
   }
+  for (const circuitJson of [
+    fixture.filter((element) => !element.type.startsWith("schematic_")),
+    [],
+  ]) {
+    for (const format of ["svg", "png"]) {
+      for (const method of ["GET", "POST"]) {
+        const q = new URLSearchParams({ svg_type: "schematic", format })
+        if (method === "GET") {
+          q.set(
+            "circuit_json",
+            gzipSync(JSON.stringify(circuitJson)).toString("base64"),
+          )
+        }
+        const responses = await Promise.all(
+          [workerPort, nativePort].map((p) =>
+            fetch(`http://127.0.0.1:${p}/?${q}`, {
+              method,
+              ...(method === "POST"
+                ? { body: JSON.stringify({ circuit_json: circuitJson }) }
+                : {}),
+            }),
+          ),
+        )
+        for (const response of responses) {
+          assert.equal(response.status, 404)
+          assert.match(
+            response.headers.get("Content-Type"),
+            /application\/json/,
+          )
+          assert.equal(response.headers.get("Cache-Control"), "no-store")
+          assert.equal(response.headers.get("CDN-Cache-Control"), "no-store")
+          assert.equal(
+            (await response.json()).error_code,
+            "schematic_not_available",
+          )
+        }
+      }
+    }
+  }
   console.log(
-    `${checked} native/Worker byte-for-byte comparisons passed; unsupported and oversized renders defer to container`,
+    `${checked} native/Worker byte-for-byte comparisons passed; unavailable schematics return 404; unsupported and oversized renders defer to container`,
   )
 } catch (error) {
   console.error(logs.join(""))
