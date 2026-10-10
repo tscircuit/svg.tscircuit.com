@@ -37,6 +37,7 @@ for (const [view, format] of [
 // These paths require the runtime packages that a production-only install must
 // retain; circuit-JSON rendering alone does not exercise the evaluator/engine.
 const evaluated = await fetch(`${base}/?svg_type=pcb`, {
+  signal: AbortSignal.timeout(60_000),
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -54,6 +55,7 @@ assert.match(await evaluated.text(), /<svg/)
 console.log("TSX evaluation renders a PCB")
 
 const simulated = await fetch(`${base}/?format=circuit_json`, {
+  signal: AbortSignal.timeout(60_000),
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({

@@ -40,9 +40,26 @@ jobs:
       - name: Smoke test the container
         run: |
           docker run -d --name svg3-renderer -p 8080:8080 svg3-renderer
-          trap 'docker logs svg3-renderer; docker rm -f svg3-renderer' EXIT
+          cleanup() {
+            smoke_exit=$?
+            docker logs svg3-renderer > /tmp/svg3-container.log 2>&1
+            cat /tmp/svg3-container.log
+            if [ "$smoke_exit" -ne 0 ]; then
+              smoke_details=$(tail -n 12 /tmp/svg3-smoke.log /tmp/svg3-container.log 2>/dev/null | tr '\n' ' ')
+              smoke_details=${smoke_details//'%'/'%25'}
+              printf '::error title=Renderer container smoke failed::%s\n' "$smoke_details"
+            fi
+            docker rm -f svg3-renderer
+          }
+          trap cleanup EXIT
+          renderer_ready=false
           for attempt in $(seq 1 60); do
-            if curl --fail --silent http://localhost:8080/health; then break; fi
+            if curl --fail --silent http://localhost:8080/health; then
+              renderer_ready=true
+              break
+            fi
+            test "$(docker inspect -f '{{.State.Running}}' svg3-renderer)" = true
             sleep 2
           done
-          node svg3/smoke-container.mjs
+          test "$renderer_ready" = true
+          node svg3/smoke-container.mjs 2>&1 | tee /tmp/svg3-smoke.log
