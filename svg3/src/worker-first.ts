@@ -34,6 +34,20 @@ export async function renderWorkerFirst(
       // Preserve the original POST body for a possible container retry.
       const response = await worker.fetch(request.clone())
       if (
+        response.status === 404 &&
+        response.headers.get("Content-Type")?.includes("application/json")
+      ) {
+        const body: unknown = await response.clone().json()
+        if (
+          body &&
+          typeof body === "object" &&
+          "error_code" in body &&
+          body.error_code === "schematic_not_available"
+        ) {
+          return withRenderer(response, "worker")
+        }
+      }
+      if (
         response.status === 200 &&
         /^(image\/svg\+xml|image\/png)(;|$)/i.test(
           response.headers.get("Content-Type") ?? "",

@@ -7,6 +7,10 @@ import { parsePositiveInt } from "../../lib/parsePositiveInt"
 import { renderCircuitTo2dSvg } from "../../shared/render-2d"
 import { getPngFitTo } from "../../shared/png-options"
 import { canTryWorker } from "./worker-first"
+import {
+  SchematicNotAvailableError,
+  schematicNotAvailableResponse,
+} from "../../shared/schematic-not-available"
 
 let wasmReady: Promise<void> | undefined
 const MAX_PIXELS = 2048 * 2048
@@ -32,12 +36,20 @@ export default {
       view !== "pinout"
     )
       return fallback()
-    const svg = await renderCircuitTo2dSvg(ctx.circuitJson, view, {
-      showSolderMask: ctx.showSolderMask,
-      showCourtyards: ctx.showCourtyards,
-      showDebugObjects: ctx.showDebugObjects,
-      pcbViewBox: ctx.pcbViewBox,
-    })
+    let svg: string
+    try {
+      svg = await renderCircuitTo2dSvg(ctx.circuitJson, view, {
+        showSolderMask: ctx.showSolderMask,
+        showCourtyards: ctx.showCourtyards,
+        showDebugObjects: ctx.showDebugObjects,
+        pcbViewBox: ctx.pcbViewBox,
+      })
+    } catch (error) {
+      if (error instanceof SchematicNotAvailableError) {
+        return schematicNotAvailableResponse()
+      }
+      throw error
+    }
     if (format === "svg") {
       const bytes = new TextEncoder().encode(svg)
       if (bytes.byteLength > MAX_IMAGE_BYTES) return fallback()

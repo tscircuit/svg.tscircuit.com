@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import { canTryWorker, renderWorkerFirst } from "../src/worker-first"
+import { schematicNotAvailableResponse } from "../../shared/schematic-not-available"
 const url = "https://svg3.tscircuit.com/?svg_type=pcb&circuit_json=W10="
 const image = () =>
   new Response("<svg/>", { headers: { "Content-Type": "image/svg+xml" } })
@@ -14,6 +15,20 @@ test("supported Worker response never starts the container", async () => {
   )
   expect(response.headers.get("X-Svg-Renderer")).toBe("worker")
   expect(await response.text()).toBe("<svg/>")
+})
+
+test("unavailable schematics never start the container", async () => {
+  const response = await renderWorkerFirst(
+    new Request(url.replace("svg_type=pcb", "svg_type=schematic")),
+    { fetch: async () => schematicNotAvailableResponse() },
+    async () => {
+      throw new Error("Container must stay asleep")
+    },
+  )
+  expect(response.status).toBe(404)
+  expect(response.headers.get("X-Svg-Renderer")).toBe("worker")
+  expect(response.headers.get("Cache-Control")).toBe("no-store")
+  expect((await response.json()).error_code).toBe("schematic_not_available")
 })
 
 test("unsupported inputs bypass the Worker", async () => {
@@ -46,6 +61,8 @@ test("Worker failure, unsupported output and failed streams retry the original P
     },
     async () => new Response("too large", { status: 422 }),
     async () => new Response("error", { status: 500 }),
+    async () =>
+      Response.json({ error_code: "unexpected_error" }, { status: 404 }),
     async () => new Response("not an image"),
     async () =>
       new Response(

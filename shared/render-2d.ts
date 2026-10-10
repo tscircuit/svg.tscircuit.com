@@ -8,6 +8,7 @@ import {
   convertCircuitJsonToStackedSchematicSheetsSvg,
 } from "circuit-to-svg"
 import type { PcbViewBox } from "../lib/parsePcbViewBox"
+import { SchematicNotAvailableError } from "./schematic-not-available"
 
 export interface RenderOptions {
   backgroundColor?: string
@@ -61,6 +62,9 @@ export async function renderCircuitTo2dSvg(
   }
 
   if (svgType === "schematic") {
+    if (!circuitJson.some((element) => element.type.startsWith("schematic_"))) {
+      throw new SchematicNotAvailableError()
+    }
     return convertCircuitJsonToStackedSchematicSheetsSvg(circuitJson)
   }
 

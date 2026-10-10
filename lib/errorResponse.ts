@@ -1,8 +1,15 @@
 import { getErrorSvg } from "../getErrorSvg"
 import { uncachedImageHeaders } from "./imageCacheHeaders"
 import { svgToPng } from "./svgToPng"
+import {
+  SchematicNotAvailableError,
+  schematicNotAvailableResponse,
+} from "../shared/schematic-not-available"
 
 export async function errorResponse(err: Error, format: "svg" | "png") {
+  if (err instanceof SchematicNotAvailableError) {
+    return schematicNotAvailableResponse()
+  }
   const errorSvg = getErrorSvg(err.message)
 
   if (format === "png") {
