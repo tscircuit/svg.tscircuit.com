@@ -11,7 +11,9 @@
     "format:check": "biome format .",
     "test:production": "bun scripts/smoke-production.mjs",
     "test:production:node": "node scripts/smoke-production.mjs",
-    "check:renderer-dependencies": "bun test tests/poppygl-resolution.test.ts"
+    "check:renderer-dependencies": "bun test tests/poppygl-resolution.test.ts",
+    "build:cloudflare": "bun install --frozen-lockfile && bun install --frozen-lockfile --cwd svg3 && bun run --cwd svg3 check && bun run --cwd svg3 test",
+    "deploy:cloudflare": "bun run --cwd svg3 deploy"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

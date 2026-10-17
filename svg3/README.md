@@ -104,6 +104,32 @@ to verify the container, native dependencies, and KV.
 
 ## Deployment
 
+### Automatic deployments from Git
+
+Connect `tscircuit/svg.tscircuit.com` to the existing `svg3-tscircuit-com` Worker
+under **Settings → Builds**. Use these production settings:
+
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Root directory | `/` (repository root) |
+| Build command | `bun run build:cloudflare` |
+| Deploy command | `bun run deploy:cloudflare` |
+| Build variable | `BUN_VERSION=1.3.14` |
+
+Disable non-production branch deployments. The production command deploys the
+private image Worker first, then the cache Worker and container. Cloudflare's
+primary Worker name checks remain enabled for the cache Worker; the secondary
+image deployment uses its own explicit Wrangler configuration. Choose a build
+token with permissions for both Workers, Containers, KV, Queues, and Worker
+routes. Repository CI continues to validate pull requests without deploying them.
+
+After connecting, trigger a production build from the Builds tab to deploy
+current `main`; future pushes deploy automatically. Verify `format=glb` returns
+`model/gltf-binary` and that repeated downloads hit the cache.
+
+### Manual deployment
+
 Authenticate with Wrangler after the build and tests pass:
 
 ```sh
