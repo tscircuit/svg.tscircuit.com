@@ -12,7 +12,7 @@
         "@tscircuit/common": "^0.0.65",
         "@tscircuit/core": "0.0.2095",
         "@tscircuit/eval": "0.0.1552",
-        "@tscircuit/modelprinter": "0.0.8",
+        "@tscircuit/modelprinter": "0.0.10",
         "@tscircuit/ngspice-spice-engine": "^0.0.21",
         "@tscircuit/props": "0.0.689",
         "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
@@ -427,7 +427,7 @@
 
     "@tscircuit/mm": ["@tscircuit/mm@0.0.9", "", { "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-hkvVwVEuKMsM8ac3cbDyYUHu1WWdz6LooeLg/N+CLYwFrMrY7OBbXXEPm1PWczg8ytu0MObqzkcM70/LCJhF6A=="],
 
-    "@tscircuit/modelprinter": ["@tscircuit/modelprinter@0.0.8", "", { "dependencies": { "@tscircuit/mm": "^0.0.9" }, "peerDependencies": { "zod": "^3.25.67" } }, "sha512-bAFZgs5plGgER8fhTPRQ50hQ1dmNOHoGMCNlDlHBuKK6yF/CPn7HsCfoizHYaDkOdG9GaptPF2+2aBc9FKUPVA=="],
+    "@tscircuit/modelprinter": ["@tscircuit/modelprinter@0.0.10", "", { "dependencies": { "@tscircuit/mm": "^0.0.9" }, "peerDependencies": { "zod": "^3.25.67" } }, "sha512-U0qjBu1qymzBLztElUi+TNM8L4tv1ZhGmTTep4luAbBelss/p2uQoWtFcdeZJjdHZhNy8RhsaoM50djPidyhkw=="],
 
     "@tscircuit/ngspice-spice-engine": ["@tscircuit/ngspice-spice-engine@0.0.21", "", { "peerDependencies": { "@tscircuit/props": "*", "circuit-json": "*", "spicets": "*", "typescript": "^5" } }, "sha512-0ynMLAeP18ltJ6bfRv9+vuvIcRUbJDPKl/wo9m47oe0zWfHY5NFJhqXu0k/KYUCJMkra3XK9bdJWVEosOel2MA=="],
 
