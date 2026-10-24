@@ -1,12 +1,13 @@
 import "@tscircuit/ngspice-spice-engine"
-import { CircuitRunner } from "@tscircuit/eval/eval"
 import { getUncompressedSnippetString } from "@tscircuit/create-snippet-url"
-import { decodeUrlHashToFsMap } from "./fsMap"
-import type { RequestContext } from "./RequestContext"
-import type { PlatformConfig } from "@tscircuit/props"
 import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
+import { CircuitRunner } from "@tscircuit/eval/eval"
+import type { PlatformConfig } from "@tscircuit/props"
 import { withBuiltInEvalModuleResolver } from "./builtInEvalModules"
+import { decodeUrlHashToFsMap } from "./fsMap"
+import { createPrivateAddressGuardedFetch } from "./guardProjectFetch"
 import { getNgspiceSpiceEngineMap, preloadNgspice } from "./ngspice"
+import type { RequestContext } from "./RequestContext"
 
 void preloadNgspice().catch((error) => {
   console.error("Failed to preload ngspice:", error)
@@ -17,6 +18,9 @@ const createPlatformConfig = (): PlatformConfig => {
 
   return withBuiltInEvalModuleResolver({
     ...basePlatformConfig,
+    platformFetch: createPrivateAddressGuardedFetch(
+      (basePlatformConfig as any).platformFetch,
+    ),
     spiceEngineMap: {
       ...basePlatformConfig.spiceEngineMap,
       ...getNgspiceSpiceEngineMap(),

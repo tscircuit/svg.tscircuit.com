@@ -70,7 +70,7 @@ function isIpv4Literal(host: string): boolean {
   return /^\d{1,3}(\.\d{1,3}){3}$/.test(host)
 }
 
-function isPublicIpv4(ip: string): boolean {
+export function isPublicIpv4(ip: string): boolean {
   const octets = ip.split(".").map((p) => parseInt(p, 10))
   if (octets.length !== 4) return false
   const [a, b] = octets
