@@ -4,6 +4,19 @@ import { base64ToBytes } from "./base64"
 import { isFsMapRecord } from "./fsMap"
 import { parseFsMapParam } from "./parseFsMapParam"
 import { parsePcbViewBox } from "./parsePcbViewBox"
+import {
+  INVALID_PROJECT_BASE_URL_MESSAGE,
+  isPublicHttpsProjectBaseUrl,
+} from "./validateProjectBaseUrl"
+
+const projectBaseUrlValidationError = () =>
+  new Response(
+    JSON.stringify({ ok: false, error: INVALID_PROJECT_BASE_URL_MESSAGE }),
+    {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    },
+  )
 
 const TRUE_BOOLEAN_STRINGS = new Set(["1", "true", "yes", "on"])
 const FALSE_BOOLEAN_STRINGS = new Set(["0", "false", "no", "off"])
@@ -69,7 +82,14 @@ export async function getRequestContext(
     }
   }
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
-  ctx.projectBaseUrl = url.searchParams.get("project_base_url") || undefined
+  {
+    const rawProjectBaseUrl = url.searchParams.get("project_base_url")
+    if (rawProjectBaseUrl) {
+      if (!isPublicHttpsProjectBaseUrl(rawProjectBaseUrl))
+        return projectBaseUrlValidationError()
+      ctx.projectBaseUrl = rawProjectBaseUrl
+    }
+  }
   ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
   let viewBoxInput: unknown = url.searchParams.get("viewbox")
@@ -196,6 +216,8 @@ export async function getRequestContext(
       typeof body.project_base_url === "string" &&
       body.project_base_url.trim()
     ) {
+      if (!isPublicHttpsProjectBaseUrl(body.project_base_url.trim()))
+        return projectBaseUrlValidationError()
       ctx.projectBaseUrl = body.project_base_url
     }
     if (
