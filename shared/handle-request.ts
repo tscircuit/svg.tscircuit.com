@@ -10,6 +10,7 @@ import { schematicSimulationSvgHandler } from "../handlers/schematic-simulation-
 import { simulationGraphSvgHandler } from "../handlers/simulation-graph-svg"
 import { pcbSvgHandler } from "../handlers/pcb-svg"
 import { pcbPngHandler } from "../handlers/pcb-png"
+import { drawingSvgHandler } from "../handlers/drawing-svg"
 import { assemblySvgHandler } from "../handlers/assembly-svg"
 import { assemblyPngHandler } from "../handlers/assembly-png"
 import { pinoutSvgHandler } from "../handlers/pinout-svg"
@@ -128,9 +129,16 @@ export const handleRequestWithOptions = async (
     url.searchParams.get("svg_type") || url.searchParams.get("view")
   if (
     !svgType ||
-    !["pcb", "schematic", "assembly", "3d", "pinout", "schsim", "sim"].includes(
-      svgType,
-    )
+    ![
+      "pcb",
+      "schematic",
+      "assembly",
+      "drawing",
+      "3d",
+      "pinout",
+      "schsim",
+      "sim",
+    ].includes(svgType)
   ) {
     return new Response(
       JSON.stringify({
@@ -147,6 +155,9 @@ export const handleRequestWithOptions = async (
       { status: 400 },
     )
   }
+
+  if (svgType === "drawing" && outputFormat === "svg")
+    return drawingSvgHandler(req, ctx)
 
   // Route to appropriate handler based on SVG type and output format
   if (svgType === "schematic" && outputFormat === "svg") {

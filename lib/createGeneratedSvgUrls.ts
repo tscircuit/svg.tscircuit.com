@@ -19,6 +19,8 @@ export type GeneratedSvgUrls = {
   schPngUrl: string
   schSimSvgUrl: string
   simSvgUrl: string
+  drawingSvgUrl: string
+  drawingManifestUrl: string
   assemblySvgUrl: string
   assemblyPngUrl: string
   pinoutSvgUrl: string
@@ -84,8 +86,15 @@ export const createGeneratedSvgUrls = (
     )
   }
 
+  const drawingUrl = new URL(assemblyUrl())
+  drawingUrl.searchParams.set("svg_type", "drawing")
+  const drawingManifest = new URL(drawingUrl)
+  drawingManifest.searchParams.set("drawing_manifest", "true")
+
   return {
     packageUrl,
+    drawingSvgUrl: drawingUrl.toString(),
+    drawingManifestUrl: drawingManifest.toString(),
     pcbSvgUrl: svgUrl("pcb"),
     pcbPngUrl: svgUrl("pcb", { format: "png" }),
     schSvgUrl: svgUrl("schematic"),
