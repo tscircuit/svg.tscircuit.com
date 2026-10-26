@@ -18,6 +18,7 @@ test("drawing requests list pages and render a selected page by number or name",
   ).toEqual(["carrier-plan", "carrier-side"])
   const selected = await post("drawing_page=2")
   expect(selected.status).toBe(200)
+  expect(selected.headers.get("X-Drawing-Page")).toBe("2")
   expect(selected.headers.get("X-Drawing-Page-Count")).toBe("2")
   const svg = await selected.text()
   expect(svg).toContain('data-drawing-part-view-id="side-view"')
@@ -25,7 +26,10 @@ test("drawing requests list pages and render a selected page by number or name",
   expect(svg).toMatchSvgSnapshot(import.meta.path)
   const named = await post("drawing=carrier-plan.svg")
   expect(named.status).toBe(200)
+  expect(named.headers.get("X-Drawing-Page")).toBe("1")
   expect(await named.text()).toContain('data-drawing-part-view-id="plan-view"')
+  const secondNamed = await post("drawing=carrier-side")
+  expect(secondNamed.headers.get("X-Drawing-Page")).toBe("2")
   for (const query of [
     "drawing_page=0",
     "drawing_page=3",

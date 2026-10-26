@@ -4,7 +4,7 @@ import {
   getDrawingPages,
   renderDrawingPages,
   selectDrawingPages,
-} from "../lib/renderDrawingPages"
+} from "../lib/render-drawing-pages"
 import {
   imageCacheHeaders,
   uncachedImageHeaders,
@@ -71,7 +71,12 @@ export const drawingSvgHandler = async (_req: Request, ctx: RequestContext) => {
         "Content-Type": "image/svg+xml",
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Expose-Headers": "X-Drawing-Page, X-Drawing-Page-Count",
-        "X-Drawing-Page": String(pages.indexOf(selected!) + 1),
+        "X-Drawing-Page": String(
+          pages.findIndex(
+            ({ page }) =>
+              page.drawing_page_id === selected!.page.drawing_page_id,
+          ) + 1,
+        ),
         "X-Drawing-Page-Count": String(pages.length),
         ...imageCacheHeaders,
       },
