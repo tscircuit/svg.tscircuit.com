@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@tscircuit/ti-parts-engine"],
+  transpilePackages: [
+    "@tscircuit/ti-parts-engine",
+    "@tscircuit/circuit-json-to-drawing",
+    "@tscircuit/jscad",
+  ],
   outputFileTracingIncludes: {
     "/api/*": ["node_modules/@tscircuit/manifold-2d/**/*"],
   },

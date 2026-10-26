@@ -283,3 +283,13 @@ bun run start
 The shared renderer is used by the [Vercel adapter in svg2](svg2/README.md) and the
 [Cloudflare Worker, KV cache, and Containers service in svg3](svg3/README.md).
 The existing Vercel build commands and public domain remain unchanged.
+
+### Drawing sheets
+
+Use `svg_type=drawing` with the usual `code`, `fs_map`, or `circuit_json` input.
+
+- `drawing_manifest=true` returns `{ pages: [{ name, fileName, pageNumber }] }` without rendering a sheet. Page numbers start at 1.
+- `drawing_page=2` renders the second page; omit it to render the first.
+- `drawing=carrier-plan` selects by authored name, or use `drawing=carrier-plan.svg` for its generated filename. Do not combine this with `drawing_page`.
+
+Drawing images use `format=svg`. Responses include `X-Drawing-Page` and `X-Drawing-Page-Count`; the manifest permits cross-origin requests for page navigation. Invalid selections return an uncached HTTP 400 response. Requests without configured drawings return an empty manifest.

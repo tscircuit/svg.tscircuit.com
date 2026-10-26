@@ -98,6 +98,8 @@ const renderGeneratedUrlRows = (
     renderUrlRow("Schematic PNG URL", urls.schPngUrl),
     renderUrlRow("Assembly SVG URL", urls.assemblySvgUrl),
     renderUrlRow("Assembly PNG URL", urls.assemblyPngUrl),
+    renderUrlRow("Drawing SVG URL", urls.drawingSvgUrl),
+    renderUrlRow("Drawing manifest URL", urls.drawingManifestUrl),
     renderUrlRow("Pinout SVG URL", urls.pinoutSvgUrl),
     renderUrlRow("Pinout PNG URL", urls.pinoutPngUrl),
     renderUrlRow("3D SVG URL", urls.threeDSvgUrl),

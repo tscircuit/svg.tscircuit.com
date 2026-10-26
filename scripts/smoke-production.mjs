@@ -181,6 +181,26 @@ try {
     body: JSON.stringify({ circuit_json: assemblyCircuit }),
   })
   console.log("PASS cabled motor assembly from TSX and Circuit JSON")
+  const drawingCircuit = JSON.parse(
+    await readFile(
+      new URL(
+        "../tests/fixtures/drawings/carrier.circuit.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  )
+  const drawingPost = {
+    ...post,
+    body: JSON.stringify({ circuit_json: drawingCircuit }),
+  }
+  const manifest = JSON.parse(
+    (await request("/?svg_type=drawing&drawing_manifest=true", drawingPost))
+      .body,
+  )
+  assert.equal(manifest.pages.length, 2)
+  await checkImage("/?svg_type=drawing&drawing_page=2", "svg", drawingPost)
+  console.log("PASS drawing manifest and selected sheet")
   for (const format of ["svg", "png"]) {
     const { response, body } = await request(
       `/?svg_type=pcb&format=${format}&code=invalid`,
