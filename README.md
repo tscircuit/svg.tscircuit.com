@@ -293,3 +293,13 @@ Use `svg_type=drawing` with the usual `code`, `fs_map`, or `circuit_json` input.
 - `drawing=carrier-plan` selects by authored name, or use `drawing=carrier-plan.svg` for its generated filename. Do not combine this with `drawing_page`.
 
 Drawing images use `format=svg`. Responses include `X-Drawing-Page` and `X-Drawing-Page-Count`; the manifest permits cross-origin requests for page navigation. Invalid selections return an uncached HTTP 400 response. Requests without configured drawings return an empty manifest.
+
+### Schematic sheets
+
+`svg_type=schematic&format=svg` stacks every `<schematicsheet />` into one SVG.
+To page through sheets instead:
+
+- `schematic_manifest=true` returns `{ pages: [{ name, schematicSheetId, pageNumber }] }` in sheet order. Page numbers start at 1. Circuits without schematic sheets return an empty manifest.
+- `schematic_sheet=2` renders only the second sheet.
+
+Selected sheets include `X-Schematic-Sheet` and `X-Schematic-Sheet-Count`; the manifest permits cross-origin requests for page navigation. Invalid selections return an uncached HTTP 400 response.
