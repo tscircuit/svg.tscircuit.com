@@ -5,6 +5,7 @@ import {
   convertCircuitJsonToPinoutSvg,
   convertCircuitJsonToSchematicSimulationSvg,
   convertCircuitJsonToSimulationGraphSvg,
+  convertCircuitJsonToSchematicSvg,
   convertCircuitJsonToStackedSchematicSheetsSvg,
 } from "circuit-to-svg"
 import type { PcbViewBox } from "../lib/parsePcbViewBox"
@@ -24,6 +25,8 @@ export interface RenderOptions {
   simulationTransientVoltageGraphIds?: string[]
   simulationTransientCurrentGraphIds?: string[]
   schematicHeightRatio?: number
+  /** Render one schematic sheet instead of stacking every sheet. */
+  schematicSheetId?: string
 }
 
 export type SvgRenderType =
@@ -64,6 +67,11 @@ export async function renderCircuitTo2dSvg(
   if (svgType === "schematic") {
     if (!circuitJson.some((element) => element.type.startsWith("schematic_"))) {
       throw new SchematicNotAvailableError()
+    }
+    if (options.schematicSheetId) {
+      return convertCircuitJsonToSchematicSvg(circuitJson, {
+        schematicSheetId: options.schematicSheetId,
+      })
     }
     return convertCircuitJsonToStackedSchematicSheetsSvg(circuitJson)
   }
