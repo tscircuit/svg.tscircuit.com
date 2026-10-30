@@ -1,11 +1,12 @@
-import {
-  convertCircuitJsonTo3dGlb,
-  getDefaultCameraForCircuitJson,
-} from "circuit-json-to-3d-png"
+import { create3dGlb } from "./create3dGlb"
+import type { AssemblyExplosionOptions } from "circuit-json-to-gltf"
+import { getAssemblyCamera } from "./getAssemblyCamera"
+import { getDefaultCameraForCircuitJson } from "circuit-json-to-3d-png"
 import { renderGLTFToPNGFromGLB } from "poppygl"
 import { presetCamera } from "./cameraPreset"
 
 export interface Render3dPngOptions {
+  explosion?: AssemblyExplosionOptions
   width?: number
   height?: number
   zoomMultiplier?: number
@@ -23,26 +24,31 @@ export async function render3dPng(
   const pngWidth = options.width ?? 1024
   const pngHeight = options.height ?? pngWidth
 
-  const hasAssembly = circuitJson.some(
-    (element: any) =>
-      element.type === "cad_cable" ||
-      (element.type === "source_component" &&
-        ["motor", "printedpart", "subassembly"].includes(element.ftype)),
-  )
+  const hasAssembly =
+    Boolean(options.explosion) ||
+    circuitJson.some(
+      (element: any) =>
+        element.type === "cad_cable" ||
+        (element.type === "cad_component" && !element.pcb_component_id) ||
+        (element.type === "source_component" &&
+          ["motor", "printedpart", "subassembly"].includes(element.ftype)),
+    )
 
   // The wrapper's PNG renderer selects options and drops `realistic`. Reuse
   // its model conversion/camera helpers and pass render options to PoppyGL.
   const [glb, camera] = await Promise.all([
-    convertCircuitJsonTo3dGlb(circuitJson),
+    create3dGlb(circuitJson, options.explosion),
     // Fit assembly meshes, including off-board parts and cables.
-    hasAssembly && !options.cameraPreset
+    hasAssembly
       ? Promise.resolve({})
       : getDefaultCameraForCircuitJson(circuitJson),
   ])
 
   options.onGlb?.(glb)
   return renderGLTFToPNGFromGLB(glb, {
-    ...presetCamera(options.cameraPreset, camera),
+    ...(hasAssembly
+      ? getAssemblyCamera(glb, pngWidth / pngHeight, options.cameraPreset)
+      : presetCamera(options.cameraPreset, camera)),
     width: pngWidth,
     height: pngHeight,
     backgroundColor: options.backgroundColor ?? null,

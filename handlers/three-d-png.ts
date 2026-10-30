@@ -26,6 +26,7 @@ export const threeDPngHandler = async (
       backgroundColor: ctx.backgroundColor,
       realistic: ctx.realistic,
       cameraPreset: ctx.cameraPreset,
+      explosion: ctx.explosion,
       onGlb: ctx.onGlb,
     })
 

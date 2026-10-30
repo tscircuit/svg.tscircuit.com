@@ -36,7 +36,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
   - `png_width` / `png_height`
   - `png_density`
 - `show_infinite_grid` (optional): For 3D views only. Set to `true` to display an infinite grid in the 3D render. Default: `false`
-- `camera_preset` (optional): For 3D PNG/SVG images, choose a named view from `circuit-json-to-3d-png` (such as `top-down`, `top-left-corner`, `top-right-corner`, `front`, or `top-center-angled`). Also supports `bottom` / `bottom-up` for the underside and `bottom-center-angled` for an angled underside view. Accepts a URL parameter or POST JSON field; POST overrides the URL. Unknown presets return HTTP 400. Omission retains the default camera.
+- `camera_preset` (optional): For 3D PNG/SVG images, choose a named view from `circuit-json-to-3d-png` (such as `top-down`, `top-left-corner`, `top-right-corner`, `front`, or `top-center-angled`). Also supports `assembly` for an elevated assembly view fitted to every part, `bottom` / `bottom-up` for the underside and `bottom-center-angled` for an angled underside view. Accepts a URL parameter or POST JSON field; POST overrides the URL. Unknown presets return HTTP 400. Omission retains the default camera.
 - `format=glb` (optional): Download the 3D model without requiring `svg_type` or `view` as `model/gltf-binary`. Uses the same code, file map, or Circuit JSON inputs as images. The response has `Content-Disposition: attachment; filename="circuit.glb"` and allows cross-origin model viewers. Camera and lighting do not change the downloaded model. The Vercel and svg3 adapters both preserve binary GLB bytes.
 - `realistic` (optional): For 3D views only, in both PNG and SVG output. Set to `true` for studio lighting, soft shadows, and reflections. Default: `false`. Accepts boolean values in POST JSON or `true`/`false`, `1`/`0`, `yes`/`no`, and `on`/`off` in the URL. A POST body value overrides the URL value. Realistic rendering takes longer than regular rendering; use PNG output to retain the shading detail.
 - `show_debug_objects` (optional): For PCB views only. Set to `true` to render `pcb_debug_object` overlays such as autorouting phase bounds. Default: `false`
@@ -95,6 +95,8 @@ curl "https://svg.tscircuit.com/?svg_type=pcb" \
 ```
 
 ### Assembly explosion images
+
+Exploded PNG/SVG images and downloadable GLBs include dashed motion guides. Assembly images fit the full model, including off-board parts, using the `assembly` camera by default.
 
 For `svg_type=3d` (PNG or SVG) and `format=glb`, add:
 

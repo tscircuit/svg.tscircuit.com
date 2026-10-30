@@ -1,4 +1,4 @@
-import { convertCircuitJsonTo3dGlb } from "circuit-json-to-3d-png"
+import { create3dGlb } from "../lib/create3dGlb"
 import type { RequestContext } from "../lib/RequestContext"
 import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 import { imageCacheHeaders } from "../lib/imageCacheHeaders"
@@ -8,8 +8,9 @@ export async function threeDGlbHandler(
   ctx: RequestContext,
 ): Promise<Response> {
   try {
-    const glb = await convertCircuitJsonTo3dGlb(
+    const glb = await create3dGlb(
       await getCircuitJsonFromContext(ctx),
+      ctx.explosion,
     )
     ctx.onGlb?.(glb)
     return new Response(glb as BodyInit, {

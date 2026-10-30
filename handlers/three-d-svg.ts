@@ -42,6 +42,7 @@ export const threeDSvgHandler = async (
       zoomMultiplier,
       realistic: ctx.realistic,
       cameraPreset: ctx.cameraPreset,
+      explosion: ctx.explosion,
       onGlb: ctx.onGlb,
     })
 

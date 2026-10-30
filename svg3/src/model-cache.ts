@@ -1,5 +1,9 @@
 import { cacheKey } from "./cache"
 
+// Invalidate old poses without guides and the previous assembly camera while
+// retaining the existing PCB/schematic image cache.
+const THREE_D_CACHE_REVISION = "3d-v2"
+
 // These affect the rendered image, never the model geometry. Keep every other
 // query/body field (including project origin, entrypoint and unknown options).
 const IMAGE_OPTIONS = [
@@ -47,6 +51,7 @@ export async function modelCacheKey(
   version: string,
 ): Promise<string | null> {
   if (!is3dRequest(request) && !(await isGlbRequest(request))) return null
+  version = `${version}:${THREE_D_CACHE_REVISION}`
   // Apply the same private/debug/path/size exclusions before normalizing.
   if (!(await cacheKey(request, version))) return null
   const url = new URL(request.url)
@@ -82,5 +87,8 @@ export async function assetCacheKey(
 ): Promise<string | null> {
   return (await isGlbRequest(request))
     ? modelCacheKey(request, version)
-    : cacheKey(request, version)
+    : cacheKey(
+        request,
+        is3dRequest(request) ? `${version}:${THREE_D_CACHE_REVISION}` : version,
+      )
 }
