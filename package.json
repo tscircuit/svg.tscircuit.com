@@ -50,7 +50,7 @@
     "biscuitboard": "^1.0.28",
     "circuit-json": "^0.0.540",
     "circuit-json-to-3d-png": "0.0.12",
-    "circuit-json-to-gltf": "https://pkg.pr.new/tscircuit/circuit-json-to-gltf@9abff44",
+    "circuit-json-to-gltf": "https://pkg.pr.new/tscircuit/circuit-json-to-gltf@c737449",
     "circuit-to-svg": "0.0.445",
     "fflate": "^0.8.3",
     "jscad-fiber": "0.0.92",
@@ -62,7 +62,7 @@
   },
   "overrides": {
     "@tscircuit/core": "0.0.2235",
-    "circuit-json-to-gltf": "https://pkg.pr.new/tscircuit/circuit-json-to-gltf@9abff44",
+    "circuit-json-to-gltf": "https://pkg.pr.new/tscircuit/circuit-json-to-gltf@c737449",
     "@tscircuit/fanout-solver": "0.0.79",
     "poppygl": "https://pkg.pr.new/tscircuit/poppygl@17a92e1"
   },
