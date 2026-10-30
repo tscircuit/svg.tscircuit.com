@@ -1,3 +1,4 @@
+import type { AssemblyExplosionOptions } from "circuit-json-to-gltf"
 import { Buffer } from "node:buffer"
 import * as vectorizerMod from "@neplex/vectorizer"
 import type { CircuitJson } from "circuit-json"
@@ -13,6 +14,7 @@ export async function renderCircuitToSvg(
   circuitJson: CircuitJson,
   svgType: SvgRenderType,
   options: RenderOptions & {
+    explosion?: AssemblyExplosionOptions
     cameraPreset?: string
     onGlb?: (glb: Uint8Array) => void
   } = {},
@@ -34,6 +36,7 @@ export async function renderCircuitToSvg(
       zoomMultiplier: zoom,
       realistic: options.realistic,
       cameraPreset: options.cameraPreset,
+      explosion: options.explosion,
       onGlb: options.onGlb,
     })
 

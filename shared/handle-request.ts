@@ -140,12 +140,10 @@ export const handleRequestWithOptions = async (
         )
       )
         throw new Error("Circuit JSON has no explosion stages")
-      // Core samples in circuit world coordinates (+Z up, millimetres).
-      // The returned pose omits instructions so conversion cannot apply them twice.
-      ctx.circuitJson = getCircuitJsonAssemblyExplosion(
-        assembled,
-        ctx.explosion,
-      ).circuitJson
+      // Validate before rendering for a clear HTTP 400. Preserve the authored
+      // program so the exporter can render both the pose and its guide lines.
+      getCircuitJsonAssemblyExplosion(assembled, ctx.explosion)
+      ctx.circuitJson = assembled
     } catch (error) {
       return Response.json(
         { ok: false, error: (error as Error).message },

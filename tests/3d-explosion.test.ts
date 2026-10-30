@@ -48,6 +48,19 @@ test("TSX explosion stages render distinct PNG poses and matching GLB downloads"
     )
     images.push(bytes)
     expect(png.headers.get("Access-Control-Allow-Origin")).toBe("*")
+    const model = Buffer.from(imageGlb!)
+    const gltf = JSON.parse(
+      model.subarray(20, 20 + model.readUInt32LE(12)).toString(),
+    )
+    const guides = gltf.scenes[gltf.scene].extras?.poppygl?.explosionLines ?? []
+    expect(
+      gltf.nodes.some((node: { name?: string }) =>
+        node.name?.startsWith("Explosion guide:"),
+      ),
+    ).toBe(false)
+    expect(guides).toHaveLength(
+      name === "assembled" ? 0 : name === "cover-and-bolts" ? 3 : 5,
+    )
     if (name === "cover-and-bolts") {
       url.searchParams.set("format", "svg")
       let svgGlb: Uint8Array | undefined

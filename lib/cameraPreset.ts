@@ -8,7 +8,8 @@ import {
 export function isCameraPreset(value: unknown): value is string {
   return (
     typeof value === "string" &&
-    (value === "bottom" ||
+    (value === "assembly" ||
+      value === "bottom" ||
       value === "bottom-up" ||
       value === "bottom-center-angled" ||
       CAMERA_PRESET_NAMES.includes(value as CameraPreset))
@@ -23,12 +24,17 @@ export function presetCamera(
   if (!isCameraPreset(preset)) throw new Error("Invalid camera_preset")
   const fitted = camera as CameraOptions
   if (
+    preset === "assembly" ||
     preset === "bottom" ||
     preset === "bottom-up" ||
     preset === "bottom-center-angled"
   ) {
     const direction =
-      preset === "bottom-center-angled" ? [0, -1, -1] : [0.00000001, -1, -0.001]
+      preset === "assembly"
+        ? [0.7, 0.5, -0.8]
+        : preset === "bottom-center-angled"
+          ? [0, -1, -1]
+          : [0.00000001, -1, -0.001]
     const distance = Math.hypot(
       ...fitted.camPos.map((v, i) => v - fitted.lookAt[i]),
     )
