@@ -55,7 +55,6 @@ export const drawingSvgHandler = async (_req: Request, ctx: RequestContext) => {
           status: 400,
           headers: {
             ...uncachedImageHeaders,
-            "Access-Control-Allow-Origin": "*",
           },
         },
       )
@@ -69,7 +68,6 @@ export const drawingSvgHandler = async (_req: Request, ctx: RequestContext) => {
     return new Response(output!.svg, {
       headers: {
         "Content-Type": "image/svg+xml",
-        "Access-Control-Allow-Origin": "*",
         "Access-Control-Expose-Headers": "X-Drawing-Page, X-Drawing-Page-Count",
         "X-Drawing-Page": String(
           pages.findIndex(

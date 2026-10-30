@@ -57,7 +57,6 @@ export const schematicSvgHandler = async (
           status: 400,
           headers: {
             ...uncachedImageHeaders,
-            "Access-Control-Allow-Origin": "*",
           },
         },
       )
@@ -70,7 +69,6 @@ export const schematicSvgHandler = async (
     return new Response(svgContent, {
       headers: {
         "Content-Type": "image/svg+xml",
-        "Access-Control-Allow-Origin": "*",
         "Access-Control-Expose-Headers":
           "X-Schematic-Sheet, X-Schematic-Sheet-Count",
         "X-Schematic-Sheet": rawSheet,

@@ -1,6 +1,7 @@
 // A daily warmer reaches stale entries after 12 hours. Visitors can continue
 // seeing the last successful render while the CDN refreshes it in the background.
 export const imageCacheHeaders = {
+  "Access-Control-Allow-Origin": "*",
   "Cache-Control":
     "public, max-age=300, stale-while-revalidate=604800, stale-if-error=604800",
   "CDN-Cache-Control":
@@ -9,6 +10,7 @@ export const imageCacheHeaders = {
 
 // Failed refreshes must not replace a successfully cached image.
 export const uncachedImageHeaders = {
+  "Access-Control-Allow-Origin": "*",
   "Cache-Control": "no-store",
   "CDN-Cache-Control": "no-store",
 }

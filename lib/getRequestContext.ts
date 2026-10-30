@@ -1,9 +1,9 @@
-import { decompressSync } from "fflate"
 import type { RequestContext } from "./RequestContext"
-import { base64ToBytes } from "./base64"
+import { decodeCircuitJson } from "./decodeCircuitJson"
 import { isFsMapRecord } from "./fsMap"
 import { parseFsMapParam } from "./parseFsMapParam"
 import { parsePcbViewBox } from "./parsePcbViewBox"
+import { parseExplosionOptions } from "./parseExplosionOptions"
 
 const TRUE_BOOLEAN_STRINGS = new Set(["1", "true", "yes", "on"])
 const FALSE_BOOLEAN_STRINGS = new Set(["0", "false", "no", "off"])
@@ -51,13 +51,7 @@ export async function getRequestContext(
   const circuitJsonQuery = url.searchParams.get("circuit_json")
   if (circuitJsonQuery) {
     try {
-      const encodedBytes = base64ToBytes(circuitJsonQuery)
-      const circuitJsonBytes =
-        encodedBytes[0] === 0x1f && encodedBytes[1] === 0x8b
-          ? decompressSync(encodedBytes)
-          : encodedBytes
-      const decodedCircuitJson = new TextDecoder().decode(circuitJsonBytes)
-      ctx.circuitJson = JSON.parse(decodedCircuitJson)
+      ctx.circuitJson = decodeCircuitJson(circuitJsonQuery)
     } catch {
       return new Response(
         JSON.stringify({
@@ -73,6 +67,10 @@ export async function getRequestContext(
   ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
   let viewBoxInput: unknown = url.searchParams.get("viewbox")
+  let explosionStage: unknown =
+    url.searchParams.get("explosion_stage") ?? undefined
+  let explosionProgress: unknown =
+    url.searchParams.get("explosion_progress") ?? undefined
 
   const showSolderMaskQuery = url.searchParams.get("show_solder_mask")
   if (showSolderMaskQuery != null) {
@@ -147,10 +145,21 @@ export async function getRequestContext(
     }
 
     ctx.requestBody = body
+    if (body.explosion_stage !== undefined)
+      explosionStage = body.explosion_stage
+    if (body.explosion_progress !== undefined)
+      explosionProgress = body.explosion_progress
     if (body.camera_preset != null) ctx.cameraPreset = body.camera_preset
 
     if (body.circuit_json) {
-      ctx.circuitJson = body.circuit_json
+      try {
+        ctx.circuitJson = decodeCircuitJson(body.circuit_json)
+      } catch {
+        return Response.json(
+          { ok: false, error: "Invalid circuit_json in request body" },
+          { status: 400 },
+        )
+      }
     }
 
     const fsMapCandidate = body.fsMap ?? body.fs_map
@@ -295,5 +304,13 @@ export async function getRequestContext(
     ctx.pcbViewBox = pcbViewBox
   }
 
+  try {
+    ctx.explosion = parseExplosionOptions(explosionStage, explosionProgress)
+  } catch (error) {
+    return Response.json(
+      { ok: false, error: (error as Error).message },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
+    )
+  }
   return ctx
 }

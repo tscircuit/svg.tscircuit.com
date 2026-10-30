@@ -1,5 +1,6 @@
 import type { CircuitJson } from "circuit-json"
 import type { PcbViewBox } from "./parsePcbViewBox"
+import type { AssemblyExplosionOptions } from "circuit-json-to-gltf"
 
 export interface RequestContext {
   url: URL
@@ -24,6 +25,7 @@ export interface RequestContext {
   showDebugObjects?: boolean
   showInfiniteGrid?: boolean
   cameraPreset?: string
+  explosion?: AssemblyExplosionOptions
   onGlb?: (glb: Uint8Array) => void
   realistic?: boolean
   pcbViewBox?: PcbViewBox

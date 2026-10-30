@@ -11,7 +11,13 @@ export default async function handler(
   const request = new Request(url, {
     method: req.method,
     headers: new Headers(req.headers as any),
-    body: req.body ? JSON.stringify(req.body) : undefined,
+    // Next parses application/json but leaves text/plain JSON as a string.
+    // Preserve the latter for simple cross-origin compressed-circuit POSTs.
+    body: req.body
+      ? typeof req.body === "string"
+        ? req.body
+        : JSON.stringify(req.body)
+      : undefined,
   })
 
   // Call the shared request handler.

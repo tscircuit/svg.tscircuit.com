@@ -181,6 +181,51 @@ try {
     body: JSON.stringify({ circuit_json: assemblyCircuit }),
   })
   console.log("PASS cabled motor assembly from TSX and Circuit JSON")
+  const explosionCode = `import { assembly } from "@tscircuit/core"
+export default () => <group subcircuit><assembly.device name="case">
+  <board width={12} height={8} />
+  <assembly.part name="cover" cadModel={{jscad:{type:"cuboid",size:[10,6,2]},positionOffset:{x:0,y:0,z:4}}} />
+  <assembly.explosion.stage name="lift">
+    <assembly.explosion.move targetRef="cover" offZ={10} />
+  </assembly.explosion.stage>
+</assembly.device></group>`
+  const explosionCircuit = JSON.parse(
+    (
+      await request("/?format=circuit_json", {
+        ...post,
+        body: JSON.stringify({ fs_map: { "index.tsx": explosionCode } }),
+      })
+    ).body,
+  )
+  assert(
+    explosionCircuit.some((element) => element.type === "cad_explosion_stage"),
+  )
+  const compressedPost = {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+    body: JSON.stringify({
+      circuit_json: gzipSync(JSON.stringify(explosionCircuit)).toString(
+        "base64",
+      ),
+    }),
+  }
+  await checkImage(
+    "/?svg_type=3d&format=png&explosion_stage=case.lift&explosion_progress=0.5&png_width=192",
+    "png",
+    compressedPost,
+  )
+  const explodedModel = await request(
+    "/?format=glb&explosion_stage=case.lift&explosion_progress=0.5",
+    compressedPost,
+  )
+  assert.equal(explodedModel.body.subarray(0, 4).toString(), "glTF")
+  assert.equal(
+    explodedModel.response.headers.get("Access-Control-Allow-Origin"),
+    "*",
+  )
+  console.log(
+    "PASS TSX explosion images and models from compressed text/plain POSTs",
+  )
   const drawingCircuit = JSON.parse(
     await readFile(
       new URL(

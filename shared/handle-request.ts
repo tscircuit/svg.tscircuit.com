@@ -22,6 +22,7 @@ import { getCircuitJsonFromContext } from "../lib/getCircuitJson"
 
 import { threeDGlbHandler } from "../handlers/three-d-glb"
 import { isCameraPreset } from "../lib/cameraPreset"
+import { getCircuitJsonAssemblyExplosion } from "@tscircuit/core"
 
 export const handleRequestWithOptions = async (
   req: Request,
@@ -120,6 +121,38 @@ export const handleRequestWithOptions = async (
   }
 
   ctx.onGlb = options.onGlb
+  if (ctx.explosion) {
+    const view =
+      url.searchParams.get("svg_type") || url.searchParams.get("view")
+    if (outputFormat !== "glb" && view !== "3d")
+      return Response.json(
+        {
+          ok: false,
+          error: "Explosion options require a 3D image or GLB output",
+        },
+        { status: 400, headers: { "Cache-Control": "no-store" } },
+      )
+    try {
+      const assembled = await getCircuitJsonFromContext(ctx)
+      if (
+        !assembled.some(
+          (record: { type: string }) => record.type === "cad_explosion_stage",
+        )
+      )
+        throw new Error("Circuit JSON has no explosion stages")
+      // Core samples in circuit world coordinates (+Z up, millimetres).
+      // The returned pose omits instructions so conversion cannot apply them twice.
+      ctx.circuitJson = getCircuitJsonAssemblyExplosion(
+        assembled,
+        ctx.explosion,
+      ).circuitJson
+    } catch (error) {
+      return Response.json(
+        { ok: false, error: (error as Error).message },
+        { status: 400, headers: { "Cache-Control": "no-store" } },
+      )
+    }
+  }
   if (outputFormat === "glb") {
     return threeDGlbHandler(req, ctx)
   }
