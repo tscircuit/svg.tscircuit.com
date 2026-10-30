@@ -50,21 +50,21 @@
     "biscuitboard": "^1.0.28",
     "circuit-json": "^0.0.540",
     "circuit-json-to-3d-png": "0.0.12",
-    "circuit-json-to-gltf": "https://pkg.pr.new/tscircuit/circuit-json-to-gltf@c737449",
+    "circuit-json-to-gltf": "0.0.160",
     "circuit-to-svg": "0.0.445",
     "fflate": "^0.8.3",
     "jscad-fiber": "0.0.92",
     "jscad-planner": "0.0.21",
-    "poppygl": "https://pkg.pr.new/tscircuit/poppygl@17a92e1",
+    "poppygl": "0.0.38",
     "qrcode-svg": "^1.1.0",
     "@tscircuit/circuit-json-to-drawing": "https://jscdn.tscircuit.com/@tscircuit/circuit-json-to-drawing/0.0.3.tgz",
     "@tscircuit/circuit-json-util": "^0.0.128"
   },
   "overrides": {
     "@tscircuit/core": "0.0.2235",
-    "circuit-json-to-gltf": "https://pkg.pr.new/tscircuit/circuit-json-to-gltf@c737449",
+    "circuit-json-to-gltf": "0.0.160",
     "@tscircuit/fanout-solver": "0.0.79",
-    "poppygl": "https://pkg.pr.new/tscircuit/poppygl@17a92e1"
+    "poppygl": "0.0.38"
   },
   "engines": {
     "bun": ">=1.3.14 <1.4"
