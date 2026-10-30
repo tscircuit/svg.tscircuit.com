@@ -182,13 +182,13 @@ try {
   })
   console.log("PASS cabled motor assembly from TSX and Circuit JSON")
   const explosionCode = `import { assembly } from "@tscircuit/core"
-export default () => <assembly.device name="case">
+export default () => <group subcircuit><assembly.device name="case">
   <board width={12} height={8} />
-  <assembly.part name="cover" cadModel={{jscad:{type:"cuboid",size:[10,6,2]},positionOffset:{z:4}}} />
+  <assembly.part name="cover" cadModel={{jscad:{type:"cuboid",size:[10,6,2]},positionOffset:{x:0,y:0,z:4}}} />
   <assembly.explosion.stage name="lift">
     <assembly.explosion.move targetRef="cover" offZ={10} />
   </assembly.explosion.stage>
-</assembly.device>`
+</assembly.device></group>`
   const explosionCircuit = JSON.parse(
     (
       await request("/?format=circuit_json", {

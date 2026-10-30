@@ -13,12 +13,11 @@ export default async function handler(
     headers: new Headers(req.headers as any),
     // Next parses application/json but leaves text/plain JSON as a string.
     // Preserve the latter for simple cross-origin compressed-circuit POSTs.
-    body:
-      typeof req.body === "string"
+    body: req.body
+      ? typeof req.body === "string"
         ? req.body
-        : req.body
-          ? JSON.stringify(req.body)
-          : undefined,
+        : JSON.stringify(req.body)
+      : undefined,
   })
 
   // Call the shared request handler.
