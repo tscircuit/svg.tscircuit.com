@@ -96,7 +96,7 @@ curl "https://svg.tscircuit.com/?svg_type=pcb" \
 
 ### Assembly explosion images
 
-Exploded PNG/SVG images and downloadable GLBs include dashed motion guides. Assembly images fit the full model, including off-board parts, using the `assembly` camera by default.
+Exploded PNG/SVG images show dashed motion guides. Downloadable GLBs store their paths in `scene.extras.poppygl.explosionLines`; PoppyGL renders them as overlays, while generic glTF viewers may ignore them. Assembly images fit the full model, including off-board parts, using the `assembly` camera by default.
 
 For `svg_type=3d` (PNG or SVG) and `format=glb`, add:
 

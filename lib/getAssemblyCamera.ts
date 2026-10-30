@@ -21,6 +21,14 @@ export function getAssemblyCamera(
     images: [],
   })
   const bounds = computeWorldAABB(scene.drawCalls)
+  // Guides live in scene extras rather than mesh buffers. Include their world
+  // endpoints in the camera fit, as PoppyGL's automatic camera does.
+  for (const line of scene.explosionLines ?? [])
+    for (const point of line.points)
+      for (let axis = 0; axis < 3; axis++) {
+        bounds.min[axis] = Math.min(bounds.min[axis], point[axis])
+        bounds.max[axis] = Math.max(bounds.max[axis], point[axis])
+      }
   const lookAt = bounds.min.map((v, i) => (v + bounds.max[i]) / 2) as [
     number,
     number,

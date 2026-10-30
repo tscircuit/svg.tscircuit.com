@@ -6,7 +6,7 @@ import {
 } from "circuit-json-to-gltf"
 
 /** Keep the authored explosion program until GLTF conversion so the downloaded
- * model includes the same motion guides as the image renderer. */
+ * model carries the motion paths in scene extras for PoppyGL to overlay. */
 export async function create3dGlb(
   circuitJson: CircuitJson,
   explosion?: AssemblyExplosionOptions,

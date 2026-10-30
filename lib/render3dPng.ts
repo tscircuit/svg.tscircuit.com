@@ -53,6 +53,7 @@ export async function render3dPng(
     height: pngHeight,
     backgroundColor: options.backgroundColor ?? null,
     supersampling: 2,
+    ...(options.explosion ? { lineWidth: 2 } : {}),
     realistic: options.realistic,
     ...(options.showInfiniteGrid
       ? {
