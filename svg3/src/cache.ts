@@ -95,6 +95,7 @@ export function cachedResponse(
     Math.floor((Date.now() - entry.metadata.createdAt) / 1000),
   )
   const headers = new Headers({
+    "Access-Control-Allow-Origin": "*",
     "Content-Type": entry.metadata.contentType,
     "Cache-Control":
       request.method === "POST" ? "no-store" : "public, max-age=300",

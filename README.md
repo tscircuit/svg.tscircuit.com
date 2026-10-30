@@ -46,7 +46,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 
 **Input Methods:**
 - `code` (GET/POST query parameter): Base64-encoded and compressed TSCircuit code
-- `circuit_json` (GET query parameter or POST body): For GET, pass base64-encoded Circuit JSON (optionally gzip-compressed). For POST, pass raw Circuit JSON as `{"circuit_json": {...}}`.
+- `circuit_json` (GET query parameter or POST body): For GET, pass base64-encoded Circuit JSON (optionally gzip-compressed). For POST, pass an array as `{"circuit_json": [...]}` or the same base64-encoded (optionally gzip-compressed) string as GET. Compressed POST bodies let large assemblies fit within svg3's 1 MiB request limit.
 - `fs_map` (GET query parameter or POST body): Map of filenames to file contents. For GET requests, provide the map as a gzip-compressed, base64-encoded JSON string (e.g. using `encodeFsMapToHash` from `lib/fsMap`) or as a JSON stringified object. For POST requests, send `{ "fs_map": { "index.tsx": "export default () => ..." } }`. Optionally include an `entrypoint` value to specify which file should be executed (defaults to `index.tsx`).
 
 Either `code`, `fs_map`, or `circuit_json` must be provided.
@@ -93,6 +93,32 @@ curl "https://svg.tscircuit.com/?svg_type=pcb" \
     "main_component_path": "index.circuit.tsx"
   }'
 ```
+
+### Assembly explosion images
+
+For `svg_type=3d` (PNG or SVG) and `format=glb`, add:
+
+- `explosion_stage`: a stage name, qualified path (for example `case.remove-bolts`), or `cad_explosion_stage_id`.
+- `explosion_progress`: a number from `0` to `1`, default `1`. Earlier stages are complete; this selects progress through the requested stage's sequential moves.
+
+Both accept query parameters or POST JSON fields (POST takes precedence). Omit both for the assembled pose. Progress without a stage selects the final stage. Unknown stages, invalid progress, and documents without explosion stages return HTTP 400 with `Cache-Control: no-store`.
+
+The input can be TSX, a file map, or Circuit JSON containing `cad_explosion_stage` and `cad_explosion_move`. Referencing a whole stage moves all of its targeted parts together. Sampling starts from the original positions on every request. PNG, SVG, and GLB use the same sampled geometry; svg3 caches each stage and progress separately.
+
+```ts
+const response = await fetch(
+  "https://svg3.tscircuit.com/?svg_type=3d&format=png&explosion_stage=case.remove-bolts&explosion_progress=0.5",
+  {
+    method: "POST",
+    // A simple cross-origin request; the body is still JSON.
+    headers: { "Content-Type": "text/plain;charset=UTF-8" },
+    body: JSON.stringify({ circuit_json: compressedBase64CircuitJson }),
+  },
+)
+const image = await response.blob()
+```
+
+Use `format=glb` with the same input and explosion parameters for a rotatable model of that pose. The `assembly` view remains a 2D assembly overlay; use `svg_type=3d` for exploded geometry. `format=circuit_json` returns the original document including its explosion program.
 
 ### 2. Health Check
 
