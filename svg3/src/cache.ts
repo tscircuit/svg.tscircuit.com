@@ -9,6 +9,8 @@ export interface Metadata {
   renderer?: string
   contentType: string
   etag: string
+  systemPage?: string
+  systemPageCount?: string
 }
 
 export interface ImageStore {
@@ -107,6 +109,14 @@ export function cachedResponse(
   })
   if (entry.metadata.renderer)
     headers.set("X-Svg-Renderer", entry.metadata.renderer)
+  if (entry.metadata.systemPage && entry.metadata.systemPageCount) {
+    headers.set("X-System-Page", entry.metadata.systemPage)
+    headers.set("X-System-Page-Count", entry.metadata.systemPageCount)
+    headers.set(
+      "Access-Control-Expose-Headers",
+      "X-System-Page, X-System-Page-Count",
+    )
+  }
   if (entry.metadata.contentType === "model/gltf-binary") {
     headers.set("Content-Disposition", 'attachment; filename="circuit.glb"')
     headers.set("Access-Control-Allow-Origin", "*")
@@ -200,6 +210,8 @@ export async function storeImage(
     contentType,
     renderer: response.headers.get("X-Svg-Renderer") ?? undefined,
     etag: `"${await digest(bytes)}"`,
+    systemPage: response.headers.get("X-System-Page") ?? undefined,
+    systemPageCount: response.headers.get("X-System-Page-Count") ?? undefined,
   }
   try {
     await store.put(key, bytes.buffer, {

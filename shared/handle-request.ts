@@ -11,6 +11,7 @@ import { simulationGraphSvgHandler } from "../handlers/simulation-graph-svg"
 import { pcbSvgHandler } from "../handlers/pcb-svg"
 import { pcbPngHandler } from "../handlers/pcb-png"
 import { drawingSvgHandler } from "../handlers/drawing-svg"
+import { systemImageHandler } from "../handlers/system-image"
 import { assemblySvgHandler } from "../handlers/assembly-svg"
 import { assemblyPngHandler } from "../handlers/assembly-png"
 import { pinoutSvgHandler } from "../handlers/pinout-svg"
@@ -165,6 +166,7 @@ export const handleRequestWithOptions = async (
       "schematic",
       "assembly",
       "drawing",
+      "system",
       "3d",
       "pinout",
       "schsim",
@@ -189,6 +191,12 @@ export const handleRequestWithOptions = async (
 
   if (svgType === "drawing" && outputFormat === "svg")
     return drawingSvgHandler(req, ctx)
+
+  if (
+    svgType === "system" &&
+    (outputFormat === "svg" || outputFormat === "png")
+  )
+    return systemImageHandler(req, ctx)
 
   // Route to appropriate handler based on SVG type and output format
   if (svgType === "schematic" && outputFormat === "svg") {

@@ -79,6 +79,33 @@ function harness() {
   return { store, jobs, background, env, run, age, renders: () => renders }
 }
 
+test("system page headers survive cache misses and hits without mixing pages", async () => {
+  const h = harness()
+  for (const page of ["1", "2"]) {
+    const request = new Request(
+      `https://svg3.tscircuit.com/?svg_type=system&code=abc&system_page=${page}`,
+    )
+    const first = await h.run(request, async (req) => {
+      const response = image(`<svg>Page ${page}</svg>`)
+      response.headers.set("X-System-Page", page)
+      response.headers.set("X-System-Page-Count", "2")
+      return storeImage(h.store, (await cacheKey(req, "v1"))!, response)
+    })
+    const cached = await h.run(request, async () => {
+      throw new Error("Expected cache hit")
+    })
+    expect(cached.headers.get("X-Svg-Cache")).toBe("HIT")
+    for (const response of [first, cached]) {
+      expect(response.headers.get("X-System-Page")).toBe(page)
+      expect(response.headers.get("X-System-Page-Count")).toBe("2")
+      expect(response.headers.get("Access-Control-Expose-Headers")).toContain(
+        "X-System-Page",
+      )
+      expect(await response.text()).toBe(`<svg>Page ${page}</svg>`)
+    }
+  }
+})
+
 describe("KV render keys", () => {
   test("normalizes query order, host, API alias, and HEAD", async () => {
     const key = await cacheKey(new Request(url), "v1")
