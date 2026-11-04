@@ -7,6 +7,7 @@ import {
   convertCircuitJsonToSimulationGraphSvg,
   convertCircuitJsonToSchematicSvg,
   convertCircuitJsonToStackedSchematicSheetsSvg,
+  convertCircuitJsonToSystemSvg,
 } from "circuit-to-svg"
 import type { PcbViewBox } from "../lib/parsePcbViewBox"
 import { SchematicNotAvailableError } from "./schematic-not-available"
@@ -27,6 +28,7 @@ export interface RenderOptions {
   schematicHeightRatio?: number
   /** Render one schematic sheet instead of stacking every sheet. */
   schematicSheetId?: string
+  systemBlockPageId?: string
 }
 
 export type SvgRenderType =
@@ -37,6 +39,7 @@ export type SvgRenderType =
   | "3d"
   | "schsim"
   | "sim"
+  | "system"
 
 export async function renderCircuitTo2dSvg(
   circuitJson: CircuitJson,
@@ -44,6 +47,11 @@ export async function renderCircuitTo2dSvg(
   options: RenderOptions = {},
 ): Promise<string> {
   const { showSolderMask, showDebugObjects, pcbViewBox } = options
+  if (svgType === "system") {
+    return convertCircuitJsonToSystemSvg(circuitJson, {
+      systemBlockPageId: options.systemBlockPageId,
+    })
+  }
   const resolvedShowCourtyards =
     options.showCourtyards ?? options.show_courtyards
   if (svgType === "assembly") {

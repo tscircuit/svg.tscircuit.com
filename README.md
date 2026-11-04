@@ -27,6 +27,7 @@ This service converts TSCircuit code or pre-generated circuit JSON into various 
 - `svg_type` (required for SVG/PNG images): The type of SVG to generate
   - `pcb` - PCB layout view
   - `schematic` - Circuit schematic view
+  - `system` - System block diagram (SVG or PNG)
   - `schsim` - Schematic simulation view with graph regions
   - `sim` - Simulation graph view
   - `assembly` - Assembly overlay view with components and labels
@@ -331,3 +332,30 @@ To page through sheets instead:
 - `schematic_sheet=2` renders only the second sheet.
 
 Selected sheets include `X-Schematic-Sheet` and `X-Schematic-Sheet-Count`; the manifest permits cross-origin requests for page navigation. Invalid selections return an uncached HTTP 400 response.
+
+### System block diagrams
+
+Use `svg_type=system` (or `view=system`) with the usual `code`, `fs_map`, or
+`circuit_json` input. TSX can import `systemblock` from `tscircuit` or
+`@tscircuit/core`; the service resolves layout before rendering.
+
+- `system_page=2` selects the second `system_block_page` in Circuit JSON order;
+  omit it to render the first page.
+- `system_manifest=true` returns `{ pages: [{ name, systemBlockPageId, pageNumber }] }`.
+  Names use the display name, authored name, or `Page N`. Page numbers start at 1;
+  circuits without system pages return an empty manifest.
+- `format=png` supports the existing `png_width`, `png_height`, and `png_density`
+  options. SVG is the default.
+
+Image responses expose `X-System-Page` and `X-System-Page-Count`. Both images and
+manifests allow cross-origin requests. Invalid page selections and image requests
+without system pages return uncached HTTP 400 responses. The generated URL page
+includes System SVG, PNG, and manifest links. On svg3 these requests use the
+shared container renderer, including the same page selection and error behavior.
+
+```sh
+curl 'https://svg.tscircuit.com/?svg_type=system&system_page=1' \
+  -H 'Content-Type: application/json' \
+  -d '{"fs_map":{"index.tsx":"import { systemblock } from \"tscircuit\"; export default () => <systemblock.page name=\"overview\"><systemblock.component name=\"controller\" description=\"Runs the control loop\" /></systemblock.page>"}}' \
+  -o system.svg
+```

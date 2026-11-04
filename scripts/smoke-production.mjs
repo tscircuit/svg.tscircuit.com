@@ -139,6 +139,32 @@ try {
   )
   assert(circuit.some((element) => element.type === "pcb_component"))
   console.log("PASS code evaluation and routing")
+  const systemCode = await readFile(
+    new URL("../tests/fixtures/system-blocks.circuit.tsx", import.meta.url),
+    "utf8",
+  )
+  const systemPost = {
+    ...post,
+    body: JSON.stringify({ fs_map: { "index.tsx": systemCode } }),
+  }
+  const systemManifest = JSON.parse(
+    (await request("/?svg_type=system&system_manifest=true", systemPost)).body,
+  )
+  assert.equal(systemManifest.pages[0].name, "Wireless sensor node")
+  await checkImage(
+    `/?svg_type=system&code=${encodeURIComponent(gzipSync(systemCode).toString("base64"))}`,
+    "svg",
+  )
+  await checkImage("/?view=system&format=png&png_width=320", "png", systemPost)
+  const invalidSystemPage = await request(
+    "/?svg_type=system&system_page=2",
+    systemPost,
+    400,
+  )
+  assert.equal(
+    invalidSystemPage.response.headers.get("cache-control"),
+    "no-store",
+  )
   const encoded = encodeURIComponent(gzipSync(code).toString("base64"))
   await checkImage(`/?svg_type=pcb&code=${encoded}`, "svg")
   for (const view of ["pcb", "schematic", "assembly"]) {

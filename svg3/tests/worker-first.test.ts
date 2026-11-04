@@ -35,6 +35,8 @@ test("unsupported inputs bypass the Worker", async () => {
   for (const path of [
     "/?svg_type=pcb&code=x",
     "/?svg_type=3d&circuit_json=W10=",
+    "/?svg_type=system&circuit_json=W10=&system_page=2",
+    "/?svg_type=system&circuit_json=W10=&system_manifest=true",
     "/?svg_type=schsim&circuit_json=W10=",
     "/generate_url?svg_type=pcb&circuit_json=W10=",
     "/?svg_type=pcb&circuit_json=W10=&debug=1",
