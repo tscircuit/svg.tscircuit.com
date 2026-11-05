@@ -43,7 +43,7 @@
     "@tscircuit/core": "0.0.2274",
     "@tscircuit/footprinter": "0.0.450",
     "@tscircuit/eval": "0.0.1661",
-    "@tscircuit/modelprinter": "0.0.18",
+    "@tscircuit/modelprinter": "0.0.37",
     "@tscircuit/ngspice-spice-engine": "^0.0.21",
     "@tscircuit/props": "0.0.717",
     "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
