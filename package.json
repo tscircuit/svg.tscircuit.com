@@ -40,7 +40,7 @@
     "@tscircuit/alphabet": "^0.0.27",
     "@tscircuit/checks": "0.0.229",
     "@tscircuit/common": "^0.0.65",
-    "@tscircuit/core": "0.0.2261",
+    "@tscircuit/core": "0.0.2274",
     "@tscircuit/footprinter": "0.0.450",
     "@tscircuit/eval": "0.0.1661",
     "@tscircuit/modelprinter": "0.0.18",
@@ -48,10 +48,10 @@
     "@tscircuit/props": "0.0.717",
     "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
     "biscuitboard": "^1.0.28",
-    "circuit-json": "^0.0.543",
+    "circuit-json": "^0.0.544",
     "circuit-json-to-3d-png": "0.0.12",
     "circuit-json-to-gltf": "0.0.160",
-    "circuit-to-svg": "0.0.455",
+    "circuit-to-svg": "0.0.456",
     "fflate": "^0.8.3",
     "jscad-fiber": "0.0.92",
     "jscad-planner": "0.0.21",
@@ -61,7 +61,7 @@
     "@tscircuit/circuit-json-util": "^0.0.128"
   },
   "overrides": {
-    "@tscircuit/core": "0.0.2261",
+    "@tscircuit/core": "0.0.2274",
     "circuit-json-to-gltf": "0.0.160",
     "@tscircuit/fanout-solver": "0.0.79",
     "poppygl": "0.0.38"
