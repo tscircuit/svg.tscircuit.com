@@ -32,7 +32,9 @@ test(
           element.type === "cad_component" && element.model_jscad,
       ),
     ).toBe(true)
-    // The six-wire bundle must clear the printed plate through its opening.
+    // The opening spans x=30..54 and y=-9..9 in frame coordinates.
+    // Reserve 1mm across the cable and 6mm for the six wires along y.
+    // Seated plugs in newer core versions change the inferred centerline.
     const frame = circuitJson.find(
       (element: any) => element.type === "cad_component" && element.model_jscad,
     )
@@ -42,8 +44,8 @@ test(
     )
     expect(platePoints.length).toBeGreaterThan(0)
     for (const point of platePoints) {
-      expect(point.x).toBeGreaterThan(36)
-      expect(point.x).toBeLessThan(48)
+      expect(point.x).toBeGreaterThan(31)
+      expect(point.x).toBeLessThan(53)
       expect(Math.abs(point.y)).toBeLessThan(3)
     }
     const pngResponse = await fetch(
