@@ -1,3 +1,5 @@
+import { lookup } from "node:dns/promises"
+import net from "node:net"
 import type { RequestContext } from "./RequestContext"
 import { decodeCircuitJson } from "./decodeCircuitJson"
 import { isFsMapRecord } from "./fsMap"
@@ -33,6 +35,66 @@ const parseBooleanInput = (value: unknown): boolean | undefined => {
  * Parses the request and builds a RequestContext object.
  * Returns either a RequestContext or an error Response if parsing fails.
  */
+const isPrivateOrReservedIp = (ip: string): boolean => {
+  const normalized = ip.replace(/^::ffff:/i, "")
+  if (net.isIPv4(normalized)) {
+    const [a, b] = normalized.split(".").map(Number)
+    return (
+      a === 0 ||
+      a === 10 ||
+      a === 127 ||
+      (a === 100 && b !== undefined && b >= 64 && b <= 127) ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b !== undefined && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a !== undefined && a >= 224)
+    )
+  }
+  if (net.isIPv6(normalized)) {
+    const lower = normalized.toLowerCase()
+    return (
+      lower === "::1" ||
+      lower === "::" ||
+      lower.startsWith("fc") ||
+      lower.startsWith("fd") ||
+      lower.startsWith("fe80:")
+    )
+  }
+  return true
+}
+
+export async function validateSafeProjectBaseUrl(rawUrl: string): Promise<string> {
+  let parsed: URL
+  try {
+    parsed = new URL(rawUrl)
+  } catch {
+    throw new Error("Invalid project_base_url: malformed URL")
+  }
+  if (parsed.protocol !== "https:") {
+    throw new Error("Invalid project_base_url: only https URLs are permitted")
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error("Invalid project_base_url: credentials in URL are not permitted")
+  }
+  const hostname = parsed.hostname.replace(/^\[|\]$/g, "").toLowerCase()
+  if (
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".internal")
+  ) {
+    throw new Error("Invalid project_base_url: internal hostnames are not permitted")
+  }
+  if (net.isIP(hostname) && isPrivateOrReservedIp(hostname)) {
+    throw new Error("Invalid project_base_url: private or loopback IP addresses are not permitted")
+  }
+  const records = await lookup(hostname, { all: true })
+  if (records.length === 0 || records.some((r) => isPrivateOrReservedIp(r.address))) {
+    throw new Error("Invalid project_base_url: resolved address is not permitted")
+  }
+  return parsed.origin + parsed.pathname.replace(/\/+$/, "")
+}
+
 export async function getRequestContext(
   req: Request,
 ): Promise<RequestContext | Response> {
@@ -311,6 +373,16 @@ export async function getRequestContext(
       { ok: false, error: (error as Error).message },
       { status: 400, headers: { "Cache-Control": "no-store" } },
     )
+  }
+  if (ctx.projectBaseUrl) {
+    try {
+      ctx.projectBaseUrl = await validateSafeProjectBaseUrl(ctx.projectBaseUrl)
+    } catch (error) {
+      return Response.json(
+        { ok: false, error: (error as Error).message },
+        { status: 400, headers: { "Cache-Control": "no-store" } },
+      )
+    }
   }
   return ctx
 }
