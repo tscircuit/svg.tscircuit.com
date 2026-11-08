@@ -63,7 +63,9 @@ const isPrivateOrReservedIp = (ip: string): boolean => {
   return true
 }
 
-export async function validateSafeProjectBaseUrl(rawUrl: string): Promise<string> {
+export async function validateSafeProjectBaseUrl(
+  rawUrl: string,
+): Promise<string> {
   let parsed: URL
   try {
     parsed = new URL(rawUrl)
@@ -74,7 +76,9 @@ export async function validateSafeProjectBaseUrl(rawUrl: string): Promise<string
     throw new Error("Invalid project_base_url: only https URLs are permitted")
   }
   if (parsed.username || parsed.password) {
-    throw new Error("Invalid project_base_url: credentials in URL are not permitted")
+    throw new Error(
+      "Invalid project_base_url: credentials in URL are not permitted",
+    )
   }
   const hostname = parsed.hostname.replace(/^\[|\]$/g, "").toLowerCase()
   if (
@@ -83,14 +87,23 @@ export async function validateSafeProjectBaseUrl(rawUrl: string): Promise<string
     hostname.endsWith(".local") ||
     hostname.endsWith(".internal")
   ) {
-    throw new Error("Invalid project_base_url: internal hostnames are not permitted")
+    throw new Error(
+      "Invalid project_base_url: internal hostnames are not permitted",
+    )
   }
   if (net.isIP(hostname) && isPrivateOrReservedIp(hostname)) {
-    throw new Error("Invalid project_base_url: private or loopback IP addresses are not permitted")
+    throw new Error(
+      "Invalid project_base_url: private or loopback IP addresses are not permitted",
+    )
   }
   const records = await lookup(hostname, { all: true })
-  if (records.length === 0 || records.some((r) => isPrivateOrReservedIp(r.address))) {
-    throw new Error("Invalid project_base_url: resolved address is not permitted")
+  if (
+    records.length === 0 ||
+    records.some((r) => isPrivateOrReservedIp(r.address))
+  ) {
+    throw new Error(
+      "Invalid project_base_url: resolved address is not permitted",
+    )
   }
   return parsed.origin + parsed.pathname.replace(/\/+$/, "")
 }
