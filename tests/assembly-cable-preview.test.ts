@@ -41,9 +41,13 @@ test(
       (point: any) => point.z >= plateBottom - 1 && point.z <= plateBottom + 5,
     )
     expect(platePoints.length).toBeGreaterThan(0)
+    // Six PH wires span 5 * 2 mm plus a 1.2 mm wire diameter. Check the
+    // complete bundle against the actual 24 mm opening centered at x=42.
+    // Updated modelprinter contact offsets move the inferred centerline.
+    const bundleHalfWidth = (5 * 2 + 1.2) / 2
     for (const point of platePoints) {
-      expect(point.x).toBeGreaterThan(36)
-      expect(point.x).toBeLessThan(48)
+      expect(point.x - bundleHalfWidth).toBeGreaterThan(30)
+      expect(point.x + bundleHalfWidth).toBeLessThan(54)
       expect(Math.abs(point.y)).toBeLessThan(3)
     }
     const pngResponse = await fetch(
