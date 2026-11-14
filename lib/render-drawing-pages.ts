@@ -1,5 +1,7 @@
 import { buildSubtree } from "@tscircuit/circuit-json-util"
 import type { AnyCircuitElement, DrawingPage } from "circuit-json"
+import type { DrawingScenePart } from "@tscircuit/circuit-json-to-drawing"
+import { mat4 } from "gl-matrix"
 
 export const getDrawingPages = (circuitJson: AnyCircuitElement[]) => {
   const pages = circuitJson.filter(
@@ -63,10 +65,71 @@ export const renderDrawingPages = async (
   )
   const geometry = circuitJson.filter((e) => !e.type.startsWith("drawing_"))
   const scenes = new Map<string, ReturnType<typeof createSceneFromGLTF>>()
+  // Keep assembled identities across pages. The renderer clones these draw calls
+  // before applying each view's resolved explosion, so poses cannot accumulate.
+  let sceneParts: Promise<DrawingScenePart[]> | undefined
+  const resolveSceneParts = () =>
+    (sceneParts ??= (async () => {
+      const parts: DrawingScenePart[] = []
+      const sourceIds = new Set(
+        geometry.flatMap((e) =>
+          e.type === "cad_component" ? [e.source_component_id] : [],
+        ),
+      )
+      const boards = geometry.filter((e) => e.type === "pcb_board")
+      const selections = [
+        ...[...sourceIds].map((source_component_id) => ({
+          identity: { source_component_id },
+          elements: geometry.filter(
+            (e) =>
+              (e.type === "cad_component" || e.type === "source_component") &&
+              e.source_component_id === source_component_id,
+          ),
+        })),
+        ...boards.map((board) => ({
+          identity: { pcb_board_id: board.pcb_board_id },
+          // Keep substrate, copper and drills, including component-owned drills.
+          // CAD models are separate identities and must not be duplicated here.
+          elements: geometry.filter(
+            (e) =>
+              e.type.startsWith("pcb_") &&
+              e.type !== "pcb_component" &&
+              ("pcb_board_id" in e && e.pcb_board_id
+                ? e.pcb_board_id === board.pcb_board_id
+                : "subcircuit_id" in e &&
+                  e.subcircuit_id === board.subcircuit_id),
+          ),
+        })),
+      ]
+      // circuit-json-to-gltf exports (-x,z,y). Assembly drawings require
+      // canonical CAD-to-scene (x,z,-y), including the placed translations.
+      const canonicalFrame = mat4.fromYRotation(mat4.create(), Math.PI)
+      for (const { identity, elements } of selections) {
+        const glb = await convertCircuitJsonToGltf(elements, {
+          format: "glb",
+          projectBaseUrl,
+          includeModels: true,
+          showBoundingBoxes: false,
+        })
+        const { gltf, resources } = await loadGLTFWithResourcesFromURL(
+          `data:model/gltf-binary;base64,${Buffer.from(glb as ArrayBuffer).toString("base64")}`,
+        )
+        const scene = createSceneFromGLTF(gltf, resources)
+        parts.push({
+          ...identity,
+          drawCalls: scene.drawCalls.map((call) => ({
+            ...call,
+            model: mat4.multiply(mat4.create(), canonicalFrame, call.model),
+          })),
+        })
+      }
+      return parts
+    })())
   const rendered = []
   for (const { page, fileName } of pages) {
     const outputs = await convertCircuitJsonToDrawingPages(circuitJson, {
       drawingPageId: page.drawing_page_id,
+      resolveSceneParts,
       resolveScene: async (view) => {
         const key = JSON.stringify([
           view.source_group_id,

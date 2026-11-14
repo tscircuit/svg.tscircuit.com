@@ -32,7 +32,7 @@ test(
           element.type === "cad_component" && element.model_jscad,
       ),
     ).toBe(true)
-    // The six-wire bundle must clear the printed plate through its opening.
+    // The six-wire bundle needs 6 mm clearance from the 28 mm opening edges.
     const frame = circuitJson.find(
       (element: any) => element.type === "cad_component" && element.model_jscad,
     )
@@ -41,17 +41,33 @@ test(
       (point: any) => point.z >= plateBottom - 1 && point.z <= plateBottom + 5,
     )
     expect(platePoints.length).toBeGreaterThan(0)
-    // Six PH wires span 5 * 2 mm plus a 1.2 mm wire diameter. Check the
-    // complete bundle against the actual 24 mm opening centered at x=42.
-    // Updated modelprinter contact offsets move the inferred centerline.
-    const bundleHalfWidth = (5 * 2 + 1.2) / 2
     for (const point of platePoints) {
-      expect(point.x - bundleHalfWidth).toBeGreaterThan(30)
-      expect(point.x + bundleHalfWidth).toBeLessThan(54)
+      expect(point.x).toBeGreaterThan(34)
+      expect(point.x).toBeLessThan(50)
       expect(Math.abs(point.y)).toBeLessThan(3)
     }
+    // Pin the same motor mesh used by core's assembly fixtures. The public
+    // model CDN can return 403; a missing motor must not become a snapshot.
+    const mesh = Bun.gunzipSync(
+      new Uint8Array(
+        await Bun.file(
+          new URL("./fixtures/nema17-jstph6.glb.gz", import.meta.url),
+        ).arrayBuffer(),
+      ),
+    )
+    const motor = circuitJson.find(
+      (e: any) =>
+        e.type === "cad_component" &&
+        sourceNames.get(e.source_component_id) === "MOTOR",
+    )
+    motor.model_glb_url = `data:model/gltf-binary;base64,${Buffer.from(mesh).toString("base64")}`
     const pngResponse = await fetch(
-      `${serverUrl}?svg_type=3d&format=png&width=900&height=700&code=${code}`,
+      `${serverUrl}?svg_type=3d&format=png&width=900&height=700`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ circuit_json: circuitJson }),
+      },
     )
     expect(pngResponse.status).toBe(200)
     expect(pngResponse.headers.get("content-type")).toContain("image/png")

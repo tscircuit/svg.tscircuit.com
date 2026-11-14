@@ -6,7 +6,7 @@ const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
 
 const cadModelBoardSnippet = `
 export default () => (
-  <board>
+  <board thickness={1.4}>
     <chip
       name="U1"
       footprint="soic8"

@@ -10,7 +10,7 @@ import { SmdUsbC } from "@tsci/seveibar.smd-usb-c"
 
 export default () => {
 return (
-  <board width="12mm" height="30mm">
+  <board thickness={1.4} width="12mm" height="30mm">
     <SmdUsbC
       name="J1"
       connections={{

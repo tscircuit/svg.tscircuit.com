@@ -5,7 +5,7 @@ import testCircuitJson from "./fixtures/test-circuit.json"
 
 const testCircuitCode = `
 export default () => (
-  <board width="10mm" height="10mm">
+  <board thickness={1.4} width="10mm" height="10mm">
     <chip footprint="soic8" name="U1"/>
   </board>
 )
