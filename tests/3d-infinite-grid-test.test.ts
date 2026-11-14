@@ -6,7 +6,7 @@ const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
 
 const simpleGridSnippet = `
 export default () => (
-  <board width="10mm" height="10mm" />
+  <board thickness={1.4} width="10mm" height="10mm" />
 )
 `
 

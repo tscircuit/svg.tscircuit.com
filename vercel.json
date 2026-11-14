@@ -1,5 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "bunVersion": "1.x",
+  "functions": {
+    "pages/api/[...anyroute].ts": {
+      "memory": 3008
+    }
+  },
   "installCommand": "rm -rf node_modules && bun install --frozen-lockfile"
 }

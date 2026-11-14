@@ -1,21 +1,22 @@
 import { expect, test } from "bun:test"
-import { getCompressedBase64SnippetString } from "@tscircuit/create-snippet-url"
 import { getTestServer } from "./fixtures/get-test-server"
+
+import { readFileSync } from "node:fs"
 
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10]
 
 const cadModelBoardSnippet = `
+import stepUrl from "./soic8.step"
 export default () => (
-  <board width="10mm" height="10mm">
+  <board thickness={1.4} width="10mm" height="10mm">
       <chip
         name="U1"
         footprint="soic8"
         cadModel={
           <cadassembly>
             <cadmodel
-              modelUrl="https://modelcdn.tscircuit.com/jscad_models/soic8.step"
-              rotationOffset={{ x: 0, y: 180, z: 180 }}
-              showAsTranslucentModel
+              modelUrl={stepUrl}
+                  showAsTranslucentModel
             />
           </cadassembly>
         }
@@ -28,12 +29,23 @@ test(
   "renders 3d view with translucent cadmodel",
   async () => {
     const { serverUrl } = await getTestServer()
-    const encodedSnippet = encodeURIComponent(
-      getCompressedBase64SnippetString(cadModelBoardSnippet),
-    )
+    const payload = {
+      fs_map: {
+        "index.tsx": cadModelBoardSnippet,
+        "soic8.step": readFileSync(
+          new URL("./fixtures/soic8.step", import.meta.url),
+          "utf8",
+        ),
+      },
+    }
 
     const response = await fetch(
-      `${serverUrl}?svg_type=3d&format=png&background_color=%23ffffff&code=${encodedSnippet}`,
+      `${serverUrl}?svg_type=3d&format=png&background_color=%23ffffff`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
     )
 
     expect(response.status).toBe(200)

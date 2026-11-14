@@ -8,7 +8,7 @@ test("Pill-shaped hole should render correctly in 3D SVG", async () => {
   const encoded = encodeURIComponent(
     getCompressedBase64SnippetString(`
 export default () => (
-  <board width="20mm" height="20mm">
+  <board thickness={1.4} width="20mm" height="20mm">
     <hole
       shape="pill"
       x={0}
