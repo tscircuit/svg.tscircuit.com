@@ -272,6 +272,28 @@ export default () => <group subcircuit><assembly.device name="case">
   assert.equal(manifest.pages.length, 2)
   await checkImage("/?svg_type=drawing&drawing_page=2", "svg", drawingPost)
   console.log("PASS drawing manifest and selected sheet")
+  const drawingExplosionFixture = await readFile(
+    new URL("../tests/fixtures/drawing-explosion.ts", import.meta.url),
+    "utf8",
+  )
+  const drawingExplosionCode =
+    drawingExplosionFixture.match(/= `([\s\S]*)`/)?.[1]
+  assert(drawingExplosionCode, "Missing explosion drawing fixture")
+  const drawingExplosionPost = {
+    ...post,
+    body: JSON.stringify({ fs_map: { "index.tsx": drawingExplosionCode } }),
+  }
+  await checkImage(
+    "/?svg_type=drawing&drawing=explosion",
+    "svg",
+    drawingExplosionPost,
+  )
+  await checkImage(
+    "/?svg_type=drawing&drawing=assembled-pose",
+    "svg",
+    drawingExplosionPost,
+  )
+  console.log("PASS inherited explosion drawings from TSX")
   for (const format of ["svg", "png"]) {
     const { response, body } = await request(
       `/?svg_type=pcb&format=${format}&code=invalid`,

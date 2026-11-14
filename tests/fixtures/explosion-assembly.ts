@@ -2,7 +2,7 @@ export const explosionAssemblyCode = `
 import { assembly } from "@tscircuit/core"
 export default () => (
   <assembly.device name="case">
-    <board width={30} height={24} />
+    <board thickness={1.4} width={30} height={24} />
     <assembly.part name="cover" cadModel={{
       jscad: { type: "cuboid", size: [28, 22, 2] },
       positionOffset: { x: 0, y: 0, z: 6 },

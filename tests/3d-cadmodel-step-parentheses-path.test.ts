@@ -14,7 +14,7 @@ const fsMap = {
 import stepUrl from "./fixtures/soic12(1).step"
 
 export default () => (
-  <board>
+  <board thickness={1.4}>
     <chip
       name="U1"
       footprint="soic8"
