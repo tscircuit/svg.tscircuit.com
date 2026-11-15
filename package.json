@@ -51,7 +51,7 @@
     "circuit-json": "^0.0.550",
     "circuit-json-to-3d-png": "0.0.12",
     "circuit-json-to-gltf": "0.0.160",
-    "circuit-to-svg": "0.0.455",
+    "circuit-to-svg": "0.0.460",
     "fflate": "^0.8.3",
     "jscad-fiber": "0.0.92",
     "jscad-planner": "0.0.21",
