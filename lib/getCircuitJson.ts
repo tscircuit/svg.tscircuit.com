@@ -6,6 +6,7 @@ import type { RequestContext } from "./RequestContext"
 import type { PlatformConfig } from "@tscircuit/props"
 import { getPlatformConfig as getPlatformConfigFromEval } from "@tscircuit/eval"
 import { withBuiltInEvalModuleResolver } from "./builtInEvalModules"
+import { createPrivateAddressGuardedFetch } from "./guardProjectFetch"
 import { getNgspiceSpiceEngineMap, preloadNgspice } from "./ngspice"
 
 void preloadNgspice().catch((error) => {
@@ -17,6 +18,9 @@ const createPlatformConfig = (): PlatformConfig => {
 
   return withBuiltInEvalModuleResolver({
     ...basePlatformConfig,
+    platformFetch: createPrivateAddressGuardedFetch({
+      fetchImpl: basePlatformConfig.platformFetch ?? globalThis.fetch,
+    }),
     spiceEngineMap: {
       ...basePlatformConfig.spiceEngineMap,
       ...getNgspiceSpiceEngineMap(),
