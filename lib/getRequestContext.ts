@@ -4,6 +4,10 @@ import { isFsMapRecord } from "./fsMap"
 import { parseFsMapParam } from "./parseFsMapParam"
 import { parsePcbViewBox } from "./parsePcbViewBox"
 import { parseExplosionOptions } from "./parseExplosionOptions"
+import {
+  INVALID_PROJECT_BASE_URL_ERROR,
+  validateProjectBaseUrl,
+} from "./validateProjectBaseUrl"
 
 const TRUE_BOOLEAN_STRINGS = new Set(["1", "true", "yes", "on"])
 const FALSE_BOOLEAN_STRINGS = new Set(["0", "false", "no", "off"])
@@ -63,7 +67,17 @@ export async function getRequestContext(
     }
   }
   ctx.entrypoint = url.searchParams.get("entrypoint") || undefined
-  ctx.projectBaseUrl = url.searchParams.get("project_base_url") || undefined
+  const projectBaseUrlQuery = url.searchParams.get("project_base_url")
+  if (projectBaseUrlQuery != null && projectBaseUrlQuery.trim() !== "") {
+    const validated = validateProjectBaseUrl(projectBaseUrlQuery)
+    if (!validated.ok) {
+      return Response.json(
+        { ok: false, error: validated.error },
+        { status: 400, headers: { "Cache-Control": "no-store" } },
+      )
+    }
+    ctx.projectBaseUrl = validated.url
+  }
   ctx.mainComponentPath =
     url.searchParams.get("main_component_path") || undefined
   let viewBoxInput: unknown = url.searchParams.get("viewbox")
@@ -201,11 +215,23 @@ export async function getRequestContext(
     }
 
     // Extract project configuration parameters from POST body
-    if (
-      typeof body.project_base_url === "string" &&
-      body.project_base_url.trim()
-    ) {
-      ctx.projectBaseUrl = body.project_base_url
+    if (body.project_base_url !== undefined && body.project_base_url !== null) {
+      if (typeof body.project_base_url !== "string") {
+        return Response.json(
+          { ok: false, error: INVALID_PROJECT_BASE_URL_ERROR },
+          { status: 400, headers: { "Cache-Control": "no-store" } },
+        )
+      }
+      if (body.project_base_url.trim() !== "") {
+        const validated = validateProjectBaseUrl(body.project_base_url)
+        if (!validated.ok) {
+          return Response.json(
+            { ok: false, error: validated.error },
+            { status: 400, headers: { "Cache-Control": "no-store" } },
+          )
+        }
+        ctx.projectBaseUrl = validated.url
+      }
     }
     if (
       typeof body.main_component_path === "string" &&
