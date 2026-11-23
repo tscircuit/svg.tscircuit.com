@@ -63,7 +63,9 @@ export async function cacheKey(
     method === "POST" ? await request.clone().arrayBuffer() : new ArrayBuffer(0)
   if (body.byteLength > MAX_REQUEST_BYTES) return null
   const input = JSON.stringify([
-    version,
+    url.searchParams.get("svg_type") === "drawing"
+      ? version + ":drawing-0.0.8"
+      : version,
     method,
     url.searchParams.toString(),
     await digest(body),

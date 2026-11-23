@@ -57,7 +57,7 @@
     "jscad-planner": "0.0.21",
     "poppygl": "0.0.38",
     "qrcode-svg": "^1.1.0",
-    "@tscircuit/circuit-json-to-drawing": "https://jscdn.tscircuit.com/@tscircuit/circuit-json-to-drawing/0.0.6.tgz",
+    "@tscircuit/circuit-json-to-drawing": "https://jscdn.tscircuit.com/@tscircuit/circuit-json-to-drawing/0.0.8.tgz",
     "@tscircuit/circuit-json-util": "^0.0.128",
     "gl-matrix": "^3.4.4"
   },
