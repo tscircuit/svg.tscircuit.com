@@ -8,7 +8,19 @@ test("drawing requests list pages and render a selected page by number or name",
     fetch(`${serverUrl}?svg_type=drawing&${query}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ circuit_json: circuitJson }),
+      body: JSON.stringify({
+        circuit_json: [
+          ...circuitJson,
+          {
+            type: "drawing_dimension_line",
+            drawing_dimension_line_id: "height",
+            drawing_part_view_id: "plan-view",
+            start: { x: 33, y: -10 },
+            end: { x: 33, y: 10 },
+            text: "20 mm",
+          },
+        ],
+      }),
     })
   const manifest = await post("drawing_manifest=true")
   expect(manifest.status).toBe(200)
@@ -27,7 +39,9 @@ test("drawing requests list pages and render a selected page by number or name",
   const named = await post("drawing=carrier-plan.svg")
   expect(named.status).toBe(200)
   expect(named.headers.get("X-Drawing-Page")).toBe("1")
-  expect(await named.text()).toContain('data-drawing-part-view-id="plan-view"')
+  const plan = await named.text()
+  expect(plan).toContain("translate(73 30) rotate(-90)")
+  expect(plan).toContain('data-drawing-part-view-id="plan-view"')
   const secondNamed = await post("drawing=carrier-side")
   expect(secondNamed.headers.get("X-Drawing-Page")).toBe("2")
   for (const query of [
