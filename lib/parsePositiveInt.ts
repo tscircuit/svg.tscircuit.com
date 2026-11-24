@@ -5,7 +5,9 @@ export function parsePositiveInt(value: unknown) {
   }
 
   if (typeof value === "string" && value.trim().length > 0) {
-    const parsed = Number.parseInt(value, 10)
+    const trimmed = value.trim()
+    if (!/^\+?\d+$/.test(trimmed)) return undefined
+    const parsed = Number(trimmed)
     if (Number.isFinite(parsed) && parsed > 0) {
       return parsed
     }
