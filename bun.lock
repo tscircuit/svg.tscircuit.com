@@ -16,7 +16,7 @@
         "@tscircuit/eval": "0.0.1661",
         "@tscircuit/footprinter": "0.0.450",
         "@tscircuit/modelprinter": "0.0.37",
-        "@tscircuit/ngspice-spice-engine": "^0.0.21",
+        "@tscircuit/ngspice-spice-engine": "^0.0.26",
         "@tscircuit/props": "0.0.746",
         "@tscircuit/ti-parts-engine": "github:tscircuit/ti-parts-engine",
         "biscuitboard": "^1.0.28",
@@ -443,7 +443,7 @@
 
     "@tscircuit/modelprinter": ["@tscircuit/modelprinter@0.0.37", "", { "dependencies": { "@tscircuit/mm": "^0.0.9" }, "peerDependencies": { "zod": "^3.25.67" } }, "sha512-YEe/fgWIFeAANAfMDaqAuy4gkEWbH8CqMQo/B9BvbshQti2hYJOcgX2LhJCVowK4/vXJhJMzMHeGHI3fT9jLqQ=="],
 
-    "@tscircuit/ngspice-spice-engine": ["@tscircuit/ngspice-spice-engine@0.0.21", "", { "peerDependencies": { "@tscircuit/props": "*", "circuit-json": "*", "spicets": "*", "typescript": "^5" } }, "sha512-0ynMLAeP18ltJ6bfRv9+vuvIcRUbJDPKl/wo9m47oe0zWfHY5NFJhqXu0k/KYUCJMkra3XK9bdJWVEosOel2MA=="],
+    "@tscircuit/ngspice-spice-engine": ["@tscircuit/ngspice-spice-engine@0.0.26", "", { "peerDependencies": { "@tscircuit/props": "*", "circuit-json": "*", "spicets": "*", "typescript": "^5" } }, "sha512-kgcYoPLe6m6fE5Q/4WHjTVr8PZdpaZpzDtWzlDB67MrvH87gQd0pR8y063ZC8HkKILlBx/b5kfT0cGG8ETRDoA=="],
 
     "@tscircuit/props": ["@tscircuit/props@0.0.746", "", { "peerDependencies": { "circuit-json": "*", "react": "*", "zod": "*" } }, "sha512-1Sc/Yr4deuWyJEs4i/ZAXdGtvJj+ppKmLpw5JjaGRUb+70VJF8TyIAGh6KQv+/TULo/oY6UQ+9a4oMSnGcU8zw=="],
 
