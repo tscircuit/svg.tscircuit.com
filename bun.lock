@@ -34,7 +34,7 @@
       "devDependencies": {
         "@biomejs/biome": "^2.5.14",
         "@tscircuit/create-snippet-url": "^0.0.16",
-        "@tscircuit/eecircuit-engine": "https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.7.tgz",
+        "@tscircuit/eecircuit-engine": "https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.9.tgz",
         "@types/bun": "^1.4.2",
         "@types/react": "19.3.0",
         "bun-match-svg": "^0.0.17",
@@ -411,7 +411,7 @@
 
     "@tscircuit/create-snippet-url": ["@tscircuit/create-snippet-url@0.0.16", "", { "dependencies": { "fflate": "^0.8.2" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-1YYNl6tw6z26tk12VXa9g/aXkr3DGE7vT3eNroAIIDLxcghg/mYunraTWEPjXrNbNGguW9vUgoMIHWjAQEUmig=="],
 
-    "@tscircuit/eecircuit-engine": ["@tscircuit/eecircuit-engine@https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.7.tgz", {}, "sha512-0BQNvc+qSUeelB48ZMNFvcx96RsfrqugHHt0c9r95zqfeWJy8HWK/vvwnsgReDGl4b05RHIPmq80J60D1WmJ9w=="],
+    "@tscircuit/eecircuit-engine": ["@tscircuit/eecircuit-engine@https://jscdn.tscircuit.com/@tscircuit/eecircuit-engine/1.7.9.tgz", {}, "sha512-dV+SJt+TZk2XQY4pLTjdi0Pptl7mJoVodrZeTz/Q5WNnDQsm7zvJ60oQDST5Hw191MDS4JYdKWf+mET1csRyfQ=="],
 
     "@tscircuit/eval": ["@tscircuit/eval@0.0.1661", "", { "peerDependencies": { "@tscircuit/core": ">=0.0.1906", "circuit-json": "*", "typescript": "^5.0.0", "zod": "3" } }, "sha512-DwbMgjh0ImDc0qrKfXDEG5gypuXddC9Z8Y4xQhZlfCbGsuEezviUKbiY69ZkpqS+R5RnTyMLGFHCG8FZWQRbBA=="],
 
